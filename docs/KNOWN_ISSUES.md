@@ -59,7 +59,7 @@ Medições das fichas preservadas: cam01/cam02/cam03 **7,005 / 9,016 / 32,265 px
 
 - Calibração de arte ENV_1 ainda pendente. T01–T07 concluídas no escopo técnico com os estudos autorais.
 - Pausa, recuperação e diagnóstico: T08 concluída no escopo técnico; foco real de janela e teclado físico ainda dependem de teste humano.
-- Regressões automatizadas de gameplay e inspeção do percurso: T09.
+- Regressões automatizadas e inspeção do percurso: T09 concluída (`tests/run_all.gd`, 20 probes, e `docs/TEST_REPORT.md`). O executor foi validado no Linux; no Windows, usar `executar-testes.cmd` e conferir `summary.txt` na primeira execução.
 - Desempenho 1080p/60 FPS, exploração de dez minutos e piloto executável: T10.
 - Cor do oclusor validada nos estudos; sombras de contato e coerência dos ambientes reais permanecem pendentes.
 - Assets finais, conteúdo canônico, combate e quatro espécies estão fora da T00.

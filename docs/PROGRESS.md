@@ -347,6 +347,18 @@ Em 11/10/2026, o usuário autorizou explicitamente avançar a partir de T01 até
 - Revisão técnica do diff: sem gerenciador global; menu não conhece o nível (sinal); overlay e menu `PROCESS_MODE_ALWAYS`, demais nós pausáveis; teleporte de recuperação/reinício não deixa corte residual porque o candidato obsoleto de um tick é descartado na atualização seguinte das sobreposições (confirmado pela lista de cortes). Temporizador de aviso trocado de `SceneTreeTimer` com lambda para nó `Timer` filho, eliminando chamada pendente após liberar a cena.
 - Não verificado: troca real de foco no Windows (simulada pela notificação do engine), teclado físico humano, mouse físico nos botões, desempenho; FPS das capturas é de renderização por software. ENV_1 inalterado.
 
+### T09 — Regressões automatizadas e relatório visual concluídos
+
+- Dependência: T08 concluída/revisada (registro acima). Estado: **concluída**.
+- Implementado: `tests/run_all.gd`, executor GDScript sem plugin. Cada probe roda em processo filho do mesmo executável (`OS.execute_with_pipe` não bloqueante, tempo-limite de 30 min por probe) e passa só com saída 0, linha-resumo esperada e nenhuma linha `ERROR:`/`SCRIPT ERROR:`/`USER ERROR:`/`Parse Error`. Opções `--headless-only` e `--only=a,b`; logs por probe e `summary.txt` em `.local/tests/`. `executar-testes.cmd` chama o executor no Windows e mantém a janela aberta.
+- Novos casos: `tests/check_units.gd` (normalização de entrada; `MovementReference` — diagonal unitária e horizontal, magnitude analógica, trava ignorando troca de câmera, liberação, câmera nova, eixos do mundo sem câmera; contrato de `PlayerConfig`; ações de entrada e Esc/F3; `CameraDirector` — ativação inicial, `reset_to` atômico e sem sinal duplicado; `RouteProgress` — bordas e altura dos pads, conclusão, relógio congelado, checkpoints, reset; `PauseMenu` — abrir/fechar, foco, reinício, desativação; formato de tempo) e `tests/check_scenes.gd` (as 16 cenas de `environments/`, `actors/` e `ui/` carregam, instanciam e rodam 5 quadros; erros capturados em processo por `Logger`). Ambos usam as classes/cenas reais.
+- Relatório manual: `docs/TEST_REPORT.md`, com capturas de `tests/capture_visual_report.gd` (gráfico): colisão em caixote, parede, rampa, mureta, passagem de 1,6 m e marca dourada; oclusão atrás do caixote e da estante, com e sem oclusores; três vistas × três resoluções; último/primeiro quadro de cada corte da ida e volta. Folhas de contato inspecionadas e versionadas em `docs/evidence/t09/`.
+- Comandos: `$G --headless --path . --script res://tests/run_all.gd -- --headless-only` → 12 executados/0 falhas. Completo sob Xvfb (`xvfb-run … $G --headless --path . --script res://tests/run_all.gd`) → **20 executados, 0 falhas, saída 0**, log `.local/t09-runner-full.out`. `capture_visual_report.gd` gráfico → 0, `.local/t09-visual-report.log`, 29 capturas.
+- Sensibilidade comprovada: velocidade padrão alterada temporariamente para 2,6 m/s → `unidades` e `locomocao` falham, executor sai com 1; cena temporária com script ausente → `check_scenes.gd` falha com 3 erros capturados. Ambas revertidas antes do commit.
+- Verificado visualmente: todas as capturas `t09-*` (via folhas de contato) — sem interpenetração nos contatos, oclusão por profundidade coerente nas duas vistas testadas, enquadramento idêntico e barras corretas nas resoluções, troca atômica e posição mundial contínua nos cortes. Observação registrada: no corte 2→1 da volta o ator fica pequeno e parcialmente atrás da quina do caixote na vista larga (comportamento correto do enquadramento).
+- Fora do executor por decisão: gate de aceite ENV_1 (falha esperada, pendência de arte) e medições de desempenho em tempo real (T10).
+- Não verificado: execução do executor no Windows (o modo não bloqueante de pipes foi exercitado apenas no Linux), entrada física humana, desempenho.
+
 ## Próximas tarefas
 
 ### Autorização de continuidade até T07
@@ -363,7 +375,7 @@ Em 11/10/2026 o usuário pediu prosseguir até T07, escolheu fundos de estudo co
 | T06 — Calibração | T05 revisada | concluída/revisada nos estudos autorais; ENV_1 pendente de arte |
 | T07 — Percurso | T06 revisada | concluída |
 | T08 — Operação e diagnóstico | T07 revisada | concluída |
-| T09 — Regressões | T08 revisada | pendente |
+| T09 — Regressões | T08 revisada | concluída |
 | T10 — Build do percurso | T09 revisada | pendente |
 
 Estados permitidos: pendente, em execução, bloqueada, pronta para revisão, concluída. Registrar arquivos, decisões, comandos, resultados, evidência visual e pendências por tarefa; não declarar verificações que não foram realizadas.

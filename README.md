@@ -63,7 +63,16 @@ Os estudos têm oito referências distribuídas por vista e erros máximos abaix
 
 O primeiro/segundo fazem ida e volta com o controlador real e sem teleporte no percurso, conferem limites, chão/rampa, enquadramento, cortes e desafios de colisão. O terceiro exige renderizador gráfico: verifica oclusão e ausência de emendas nas três vistas em 1920×1080, 1280×720 e janela 1280×960 com barras. Os probes retornam código diferente de zero ao falhar. Headless não comprova renderização. `check_operation.gd` (T08) usa eventos reais de teclado para Esc/F3/setas/Enter: pausa congelando física, candidato de corte e relógio; F3 durante a pausa; reinício pelo menu restaurando personagem/câmera/entrada; perda de foco; duas recuperações de queda; marca dourada e conclusão. Sem `--headless`, salva capturas `t08-*.png`.
 
-Regressões anteriores:
+Todas as regressões de uma vez (T09), com resumo e código de saída agregado — no Windows, **`executar-testes.cmd`**:
+
+```powershell
+& $GodotExe --headless --path $PWD --script res://tests/run_all.gd                    # headless + gráficos
+& $GodotExe --headless --path $PWD --script res://tests/run_all.gd -- --headless-only  # só headless
+```
+
+Cada probe roda em um processo separado; os gráficos abrem e fecham janelas sozinhos. Logs e `summary.txt` em `.local/tests/`. Relatório manual de colisão, oclusão, resolução e continuidade em `docs/TEST_REPORT.md` (capturas por `tests/capture_visual_report.gd`).
+
+Regressões anteriores (já incluídas no executor):
 
 ```powershell
 & $GodotExe --path $PWD --script res://tests/check_composition.gd
@@ -90,6 +99,8 @@ O preset seleciona T07, fonte espacial, cenas base e dependências. A antiga pas
 - `docs/ARCHITECTURE.md`: contratos dos componentes.
 - `docs/PROGRESS.md`: estado real, ambiente e evidências.
 - `docs/KNOWN_ISSUES.md`: limitações e pendências.
+- `docs/TEST_REPORT.md`: regressões automatizadas e inspeção visual manual (T09).
+- `docs/evidence/`: capturas inspecionadas na sessão em nuvem.
 - `docs/calibration/ROUTE_STUDY.md`: origem, medidas e reprodução dos estudos.
 - `assets/models/README.md`: inventário dos modelos fornecidos, preservados.
 

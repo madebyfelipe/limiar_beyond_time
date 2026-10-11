@@ -66,6 +66,12 @@ Retomada de arte ENV_1: `env1_road_probe.tscn` é um ensaio isolado sobre o PNG 
 - Extensões mínimas de contratos existentes: `PlayerController.reset_to(transform)` (reset_to_start passa a usá-lo) e reset da referência em `NOTIFICATION_PAUSED` — pausar interrompe a entrada, e a próxima direção usa a câmera atual; `CameraDirector.reset_to(shot)` ativa imediatamente e descarta candidato. Sem autoload ou gerenciador global.
 - `tests/check_operation.gd` exercita a cena real com eventos de teclado reais (`push_input`) para Esc/F3/setas/Enter e ações de Input para locomoção.
 
+## T09 — Regressões
+
+- `tests/run_all.gd`: executor sem plugin; cada probe em processo filho do mesmo executável. Aprovação = saída 0 + linha-resumo + ausência de linhas de erro do engine. Probes gráficos abrem janela própria; `--headless-only` os pula. Logs em `.local/tests/`.
+- `tests/check_units.gd` e `tests/check_scenes.gd` cobrem unidades das classes reais e carregamento de todas as cenas; `check_scenes.gd` usa a classe `Logger` do engine para falhar sozinho em erros.
+- `tests/capture_visual_report.gd` gera as capturas do relatório manual (`docs/TEST_REPORT.md`); não substitui a inspeção humana.
+
 Não há combate ou animais implementados. As demais interfaces abaixo continuam contratos para as tarefas correspondentes.
 
 ## Decisões e motivos
