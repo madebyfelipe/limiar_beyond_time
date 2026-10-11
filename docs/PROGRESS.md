@@ -1,5 +1,13 @@
 # Progresso — LIMIAR Recon
 
+## Estudo de interior da guarita — 11/10/2026
+
+- Solicitado pelo usuário: geometria primeiro, câmera fixa, circulação, captura 3D e geração de arte; câmera aproximada em seguida para eliminar a vista externa do ambiente.
+- Implementados `save_room_source.tscn`, `save_room.tscn`, autor de geometria/captura, ficha de câmera, teste com controlador real e `executar-sala.cmd`.
+- Cena isolada com geometria 6 × 5 m e comparação B entre 3D e arte candidata. C abre visão técnica ampla. Caminho da porta ao terminal cobre a câmera próxima; demais regiões exigem novos enquadramentos para produção.
+- Testes headless/gráfico de piso, circulação, paredes, móveis, reinício e comparação; capturas inspecionadas. Detalhes, comandos e limitações em `calibration/SAVE_ROOM_GEOMETRY.md`.
+- Arte gerada com image_gen a partir da captura autorada; alinhamento geral inspecionado, gate de calibração final ainda não medido. Sem persistência de salvamento ou ligação ao exterior. A cena principal do percurso permanece T07/T10.
+
 Data: 11/10/2026 (America/Sao_Paulo).
 
 ## T00 — Preparar projeto e registro de decisões

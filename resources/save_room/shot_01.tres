@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShotDefinition" format=3]
+
+[ext_resource type="Script" path="res://systems/camera/shot_definition.gd" id="1_6hyq5"]
+
+[resource]
+script = ExtResource("1_6hyq5")
+shot_id = &"save_room_01"
+camera_position = Vector3(2.8, 2.9, 2.35)
+camera_rotation_degrees = Vector3(-23.992737, 47.254574, 0)
+fov = 45.0

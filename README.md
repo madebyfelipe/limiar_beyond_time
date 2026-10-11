@@ -1,5 +1,7 @@
 # LIMIAR Recon
 
+**Estudo da sala de salvamento da guarita:** abra `executar-sala.cmd` (ou F6 em `environments/save_room.tscn`). Geometria foi criada antes da arte, com câmera próxima de interior. WASD/setas movem, Shift corre, B compara arte/geometria, C abre visão técnica ampla, R reinicia e Esc sai. Arte ainda em revisão de alinhamento. Ficha e limites em `docs/calibration/SAVE_ROOM_GEOMETRY.md`.
+
 Protótipo 2.5D para Windows: ator 3D sobre fundos pré-renderizados e câmeras fixas. **T01–T09 concluídas com estudos técnicos provisórios; T10 pronta para revisão** — build Windows x64 exportada e validada nesta sessão em nuvem (Linux), faltando abrir o `.exe` no Windows e medir o desempenho na máquina de referência (veja [Build Windows](#build-windows-t10)). O percurso T07, com a operação T08 (pausa, reinício, diagnóstico F3, conclusão e recuperação), é a cena principal. Os renders de floresta/guarita ENV_1 continuam preservados para refinamento; sua geometria comum ainda não foi aprovada.
 
 Repositório: [madebyfelipe/limiar_beyond_time](https://github.com/madebyfelipe/limiar_beyond_time). O Git inclui código, cenas, recursos, documentação, modelos, texturas e fundos. Engine local, cache de importação, logs/capturas de teste e builds geradas ficam nas pastas ignoradas.
