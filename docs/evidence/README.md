@@ -4,4 +4,5 @@ Capturas reais geradas pelos probes durante a sessão em nuvem de 11/10/2026 (co
 
 - Renderizador: Godot 4.7.2 oficial para Linux (mesmo commit `ed1daf0bf` do executável Windows), Forward+/Vulkan sobre Mesa **llvmpipe** (CPU) em Xvfb 1920×1080.
 - Renderização por software não mede desempenho. FPS/tempo de quadro visíveis no overlay F3 dessas imagens refletem o llvmpipe e `--fixed-fps 60`, não a RTX 5060 de referência.
+- `t10/benchmark-*.txt` são os relatórios do modo `-- --benchmark` na build de release (llvmpipe); servem como formato de referência, não como medida do gate.
 - Cada imagem foi inspecionada antes de ser registrada; a descrição e o comando de origem estão em `docs/PROGRESS.md`.

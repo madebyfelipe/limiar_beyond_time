@@ -359,11 +359,36 @@ Em 11/10/2026, o usuário autorizou explicitamente avançar a partir de T01 até
 - Fora do executor por decisão: gate de aceite ENV_1 (falha esperada, pendência de arte) e medições de desempenho em tempo real (T10).
 - Não verificado: execução do executor no Windows (o modo não bloqueante de pipes foi exercitado apenas no Linux), entrada física humana, desempenho.
 
+### T10 — Build Windows x64 e fechamento do marco: pronta para revisão
+
+- Dependência: T09 concluída/revisada (registro acima). Estado: **pronta para revisão**. Não marcada como concluída porque dois itens do aceite exigem a máquina de referência Windows: abrir o `.exe` exportado e medir o desempenho na RTX 5060.
+- Implementado: preset `Windows Desktop` exporta **release** em `builds/windows-t10` (`LIMIAR-Recon.exe`, `LIMIAR-Recon.pck`, `LIMIAR-Recon.console.exe`; wrapper de console agora sempre gerado). `environments/route_benchmark.gd` (`RouteBenchmark`): piloto automático opcional `-- --benchmark` dentro da cena principal — necessário porque templates de release recusam `--script`, `--scene` e `--main-pack` (reproduzido: `--scene`/`--main-pack` abortam com "compiled without support for path overrides"; `--script` é ignorado e a cena principal roda até o tempo-limite). Mede o gate do plano (VSync desligado, tela cheia ou janela 1920×1080, 30 s + 120 s, p95 ≤ 16,7 ms), conta voltas/conclusões e captura erros por `Logger`; grava `user://benchmark.txt`/CSV. `tests/check_soak.gd`: dez minutos de jogo com pausas, F3, reinícios no meio da volta, recuperações e checagem de crescimento de nós/objetos/memória. Atalhos `exportar-build.cmd` e `medir-desempenho.cmd`. Executor T09 ganhou `robustez-10min` e `benchmark-funcional` (22 probes).
+- Templates: `Godot_v4.7.2-stable_export_templates.tpz` oficial; instalados Windows x86_64 (debug/release/console) e Linux x86_64 release, `version.txt` = `4.7.2.stable`.
+- Exportação final: `$G --headless --path . --export-release "Windows Desktop" builds/windows-t10/LIMIAR-Recon.exe` → 0, sem ERROR/WARNING, log `.local/t10-export-final.log`. 62 arquivos no pacote: cenas da rota/composição/jogador/fonte espacial, UI T08, scripts compilados, shader, três fundos de estudo e textura base; sem modelos, ENV_1, testes ou ferramentas. SHA-256: exe `d34d36f3…0b4562`, console `52bdcae9…8600df`, pck `eeb19ca6…905690` (completos em `.local/t10-build-sha256.txt`). Executável não versionado (~105 MB).
+- Validação do pacote exportado, fora da pasta do projeto (sem acesso aos fontes):
+  - Template Linux de **release** (mesmo commit da engine) com o `.pck` ao lado: `--headless --quit-after 120` → 0 sem erros; `-- --benchmark --warmup=0 --duration=60` headless → 2 voltas, 2 conclusões, 0 erros (execução funcional); **gráfico 600 s** (`-- --benchmark --warmup=0 --duration=600`, build anterior idêntica exceto modo de processo do benchmark) → **22 voltas, 22 conclusões, 0 erros**, janela 1920×1080.
+  - Runtime do editor com `--main-pack` do `.pck` final: `check_technical_route.gd` (86,156 m, cortes 2→3→2→1), `check_operation.gd` e `check_soak.gd` (10 min, 27 voltas, 22 conclusões, 5 recuperações, 27 reinícios, 2107 m) → todos 0, zero linhas ERROR.
+- Robustez (10 minutos de jogo) no projeto: `check_soak.gd` headless → 0; 605,6 s, 27 voltas, 22 conclusões, 5 recuperações, 27 reinícios, 98 cortes, 2107 m; nós 405 e objetos ~2190 constantes, memória estática estável. O mesmo probe gráfico sob Xvfb/llvmpipe (`--fixed-fps 60`, ~40 min reais) → 0, com os mesmos 605,6 s, 27 voltas, 22 conclusões, 5 recuperações, 27 reinícios, 98 cortes e nós 405 constantes; log `.local/t10-soak-graphical.log`.
+- Desempenho medido apenas por renderização em CPU (não representa a referência): build de release, llvmpipe, Xvfb 1920×1080, 30 s + 120 s → p50 38,78 ms, **p95 48,19 ms**, p99 63,61 ms, máximo 104,61 ms, 25,3 FPS médios, 3032 quadros, 5 voltas/5 conclusões, 0 erros, janela 1920×1080 (`docs/evidence/t10/benchmark-llvmpipe-150s.txt`). A execução de 600 s registrou p95 98,57 ms por concorrer com o soak gráfico (`benchmark-llvmpipe-600s.txt`). Gate reprovado nesse ambiente, como esperado; **o gate da Fase 1 continua sem medição na RTX 5060**.
+- Wine 9.0 (Ubuntu, `wine64`): o `.exe` Windows falha antes de qualquer código do projeto, com acesso nulo dentro do `kernelbase.dll` do próprio Wine logo após carregar `dinput8.dll` (`WINEDEBUG=+loaddll,+seh`), com e sem Xvfb. Tratado como limitação do ambiente; a execução do `.exe` precisa ser confirmada no Windows.
+- Revisão técnica: benchmark é opt-in e não altera o jogo sem o argumento; processa durante pausa para não gerar amostra gigante se alguém pressionar Esc; desativa a pausa por foco durante a medição. Seleção explícita do script no preset (mesma causa documentada na T07: classes instanciadas só por código não são descobertas). Probes de outras tarefas não instanciam o benchmark.
+- Clone limpo do branch publicado (`git clone --branch claude/godot-3d-game-dev-c9wrsl` em diretório temporário): importação headless 0 e executor `--headless-only` com 14 executados/0 falhas, confirmando que todos os arquivos necessários estão no Git. Executor headless final no projeto: 14/0 (`.local/t10-runner-headless.out`).
+- Não verificado: `.exe` no Windows, gate de desempenho na máquina de referência, sessão humana de 10 minutos, atalhos `.cmd` novos executados no Windows.
+
 ## Próximas tarefas
 
-### Autorização de continuidade até T07
+### Estado após a sessão em nuvem (T08 → T10)
 
-Em 11/10/2026 o usuário pediu prosseguir até T07, escolheu fundos de estudo com perspectiva consistente e autorizou um subagente para reproduzir/revisar a T06. A autorização supera o limite de uma tarefa por solicitação para este trabalho; os critérios de aceite permanecem. ENV_1 fica preservado para refinamento, sem aprovação implícita. Os estudos foram aprovados pela revisão independente e T07 foi concluída conforme os registros acima. O trabalho encerra neste limite; T08 aguarda nova solicitação.
+T08 e T09 concluídas; T10 **pronta para revisão**. A Fase 1 só termina depois de duas verificações que exigem a máquina de referência Windows:
+
+1. `exportar-build.cmd` e dois cliques em `builds\windows-t10\LIMIAR-Recon.exe`: jogar ida e volta, Esc/Reiniciar, F3.
+2. `medir-desempenho.cmd`: registrar aqui o conteúdo de `%APPDATA%\Godot\app_userdata\LIMIAR Recon\benchmark.txt` (gate p95 ≤ 16,7 ms).
+
+Opcional: `executar-testes.cmd` para repetir as 22 regressões no Windows. Não iniciar combate, animais ou backlog pós-Fase 1 sem nova solicitação; ENV_1 continua pendente de arte.
+
+### Autorização de continuidade até T07 (histórico)
+
+Em 11/10/2026 o usuário pediu prosseguir até T07, escolheu fundos de estudo com perspectiva consistente e autorizou um subagente para reproduzir/revisar a T06. A autorização supera o limite de uma tarefa por solicitação para este trabalho; os critérios de aceite permanecem. ENV_1 fica preservado para refinamento, sem aprovação implícita. Os estudos foram aprovados pela revisão independente e T07 foi concluída conforme os registros acima. Aquele trabalho encerrou neste limite; a continuação T08–T10 foi autorizada depois (seção da sessão em nuvem).
 
 | Tarefa | Dependência | Estado |
 | --- | --- | --- |
@@ -376,6 +401,6 @@ Em 11/10/2026 o usuário pediu prosseguir até T07, escolheu fundos de estudo co
 | T07 — Percurso | T06 revisada | concluída |
 | T08 — Operação e diagnóstico | T07 revisada | concluída |
 | T09 — Regressões | T08 revisada | concluída |
-| T10 — Build do percurso | T09 revisada | pendente |
+| T10 — Build do percurso | T09 revisada | pronta para revisão (falta `.exe` no Windows e gate de desempenho na RTX 5060) |
 
 Estados permitidos: pendente, em execução, bloqueada, pronta para revisão, concluída. Registrar arquivos, decisões, comandos, resultados, evidência visual e pendências por tarefa; não declarar verificações que não foram realizadas.

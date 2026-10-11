@@ -1,6 +1,6 @@
 # LIMIAR Recon
 
-Protótipo 2.5D para Windows: ator 3D sobre fundos pré-renderizados e câmeras fixas. **T01–T08 concluídas com estudos técnicos provisórios.** O percurso T07, com a operação T08 (pausa, reinício, diagnóstico F3, conclusão e recuperação), é a cena principal. Os renders de floresta/guarita ENV_1 continuam preservados para refinamento; sua geometria comum ainda não foi aprovada.
+Protótipo 2.5D para Windows: ator 3D sobre fundos pré-renderizados e câmeras fixas. **T01–T09 concluídas com estudos técnicos provisórios; T10 pronta para revisão** — build Windows x64 exportada e validada nesta sessão em nuvem (Linux), faltando abrir o `.exe` no Windows e medir o desempenho na máquina de referência (veja [Build Windows](#build-windows-t10)). O percurso T07, com a operação T08 (pausa, reinício, diagnóstico F3, conclusão e recuperação), é a cena principal. Os renders de floresta/guarita ENV_1 continuam preservados para refinamento; sua geometria comum ainda não foi aprovada.
 
 Repositório: [madebyfelipe/limiar_beyond_time](https://github.com/madebyfelipe/limiar_beyond_time). O Git inclui código, cenas, recursos, documentação, modelos, texturas e fundos. Engine local, cache de importação, logs/capturas de teste e builds geradas ficam nas pastas ignoradas.
 
@@ -84,14 +84,28 @@ Regressões anteriores (já incluídas no executor):
 
 Probes `SceneTree` usam `--script`, não F6. Capturas ficam em `%APPDATA%/Godot/app_userdata/LIMIAR Recon`; logs em `.local/`. Comandos, resultados e limites em `docs/PROGRESS.md`.
 
-## Exportação diagnóstica
+## Build Windows (T10)
+
+Builds não vão para o Git (o executável tem ~105 MB). Gere a sua com dois cliques em **`exportar-build.cmd`**, ou:
 
 ```powershell
-New-Item -ItemType Directory -Path 'builds\windows-t07' -Force | Out-Null
-& $GodotExe --headless --path $PWD --export-debug 'Windows Desktop' 'builds/windows-t07/LIMIAR-Recon.exe'
+New-Item -ItemType Directory -Path 'builds\windows-t10' -Force | Out-Null
+& $GodotExe --headless --path $PWD --export-release 'Windows Desktop' 'builds/windows-t10/LIMIAR-Recon.exe'
 ```
 
-O preset seleciona T07, fonte espacial, cenas base e dependências. A antiga pasta `builds/windows` é T05. A exportação diagnóstica T07 não conclui T10: desempenho, exploração prolongada e operação T08 ainda estão pendentes. Modelos do usuário, ENV_1 e ferramentas de autoria não fazem parte do percurso exportado.
+Requer os templates oficiais `4.7.2.stable` em `%APPDATA%\Godot\export_templates\4.7.2.stable` (já instalados na máquina de referência). Saída em `builds\windows-t10`:
+
+| Arquivo | Uso |
+| --- | --- |
+| `LIMIAR-Recon.exe` | o jogo; dois cliques para jogar, offline |
+| `LIMIAR-Recon.pck` | conteúdo; precisa ficar ao lado do `.exe` |
+| `LIMIAR-Recon.console.exe` | mesmo jogo com console de log (diagnóstico e benchmark) |
+
+Para levar a outro computador, copie os três arquivos juntos. Controles iguais aos do percurso acima (WASD/setas, Shift, Esc, F3). A build contém só o percurso técnico: cenas, scripts, shader, os três fundos de estudo e a UI — sem modelos do usuário, ENV_1, testes ou ferramentas.
+
+**Desempenho (gate da Fase 1):** dois cliques em **`medir-desempenho.cmd`**. Ele roda a build (ou o projeto, se a build não existir) em tela cheia, VSync desligado, 30 s de aquecimento e 120 s de percurso automático com o controlador real, e grava `%APPDATA%\Godot\app_userdata\LIMIAR Recon\benchmark.txt` com média, p50, p95, p99, máximo e o veredito (p95 ≤ 16,7 ms). Equivale a `LIMIAR-Recon.console.exe -- --benchmark`; opções `--warmup=S`, `--duration=S`. Não use o computador durante a medição.
+
+Nesta sessão (Linux, renderização por CPU), o mesmo `.pck` foi validado fora da pasta do projeto: no template de release Linux (mesmo commit da engine) carregou sem erros e completou 22 voltas automáticas em 10 minutos renderizando; pelo runtime do editor com `--main-pack` passou no percurso completo, nos testes T08 e no soak de 10 minutos. O `.exe` Windows não abriu no Wine 9.0 (falha interna do Wine) e precisa ser confirmado no Windows. O desempenho medido em CPU (p95 ≈ 50 ms) **não** representa a RTX 5060. A antiga pasta `builds/windows` é T05 e `builds/windows-t07` é a diagnóstica T07.
 
 ## Documentação
 

@@ -1,10 +1,17 @@
 # Limitações e pendências
 
-## Estado atual — T08
+## Estado atual — T10 pronta para revisão
 
-- F5 e `executar-percurso.cmd` abrem T07; a build diagnóstica atual está em `builds/windows-t07`. A antiga pasta `builds/windows` continua T05.
+- **Falta executar no Windows**: a build `builds/windows-t10` foi exportada nesta sessão Linux, mas o `.exe` não pôde ser aberto aqui. O Wine 9.0 do Ubuntu falha dentro do próprio `kernelbase.dll` (acesso nulo logo após carregar `dinput8.dll`) ao iniciar o template Windows 4.7.2, antes de qualquer código do projeto. Evidência equivalente obtida: o mesmo `.pck` rodou no template Linux de release (mesmo commit da engine) e no runtime do editor via `--main-pack`, fora da pasta do projeto, com percurso completo, testes T08 e voltas automáticas sem erro. Confirmar com dois cliques em `LIMIAR-Recon.exe` após `exportar-build.cmd`.
+- **Falta o desempenho na máquina de referência**: o gate (1080p, VSync desligado, 30 s + 120 s, p95 ≤ 16,7 ms) só foi medido com renderização por CPU (llvmpipe), que reprova com p95 ≈ 50 ms e não representa a RTX 5060. Executar `medir-desempenho.cmd` e registrar `benchmark.txt` em `PROGRESS.md`.
+- A exploração de dez minutos foi coberta por pilotos automáticos (probe `check_soak.gd` e benchmark de 600 s na build); não substitui uma sessão humana.
+- O executor T09 e os atalhos `.cmd` novos (`executar-testes`, `exportar-build`, `medir-desempenho`) foram escritos para Windows, mas só executados no Linux (equivalentes de linha de comando).
+
+## Estado anterior — T08
+
+- F5 e `executar-percurso.cmd` abrem o percurso T07 com a operação T08. A build atual da T10 é gerada em `builds/windows-t10`; `builds/windows-t07` (diagnóstica T07) e `builds/windows` (T05) são antigas.
 - T06 concluída com estudos autorais escolhidos pelo usuário e reprodução independente. T07 validada por ida/volta, desafios de colisão, oclusão e capturas; ENV_1 continua pendente de arte, preservado.
-- O percurso é técnico e curto: ida caminhando/volta correndo do probe durou 36,12 s simulados. Não satisfaz por si só a expectativa de exploração de 3–5 min, os dez minutos de robustez ou o orçamento 1080p/60 FPS do fechamento da Fase 1.
+- O percurso é técnico e curto: ida caminhando/volta correndo do probe durou 36,12 s simulados. A meta de 3–5 min de exploração da Fase 1 não é atingida pelo conteúdo atual; os dez minutos de robustez foram cobertos por repetição automática de voltas (T10).
 - T08 implementada: Esc/menu, reinício, F3, conclusão, recuperação abaixo do cenário e pausa por perda de foco. Teclas e botões foram exercitados por eventos de entrada injetados na janela do jogo; a perda de foco foi simulada pela notificação do engine, não por troca real de janela no Windows. Usabilidade com teclado físico e exploração humana prolongada não foram verificadas.
 - Pausar interrompe a referência de movimento: ao retomar segurando uma direção, ela é recapturada pela câmera atual (decisão T08). A continuidade de direção através de cortes sem pausa continua como na T05.
 - A recuperação é rede de segurança: no percurso fechado atual a queda só foi provocada no teste, posicionando o ator fora dos limites. O checkpoint é o último pad (azul na ida, dourado na volta); não existe sistema geral de checkpoints.
@@ -60,6 +67,6 @@ Medições das fichas preservadas: cam01/cam02/cam03 **7,005 / 9,016 / 32,265 px
 - Calibração de arte ENV_1 ainda pendente. T01–T07 concluídas no escopo técnico com os estudos autorais.
 - Pausa, recuperação e diagnóstico: T08 concluída no escopo técnico; foco real de janela e teclado físico ainda dependem de teste humano.
 - Regressões automatizadas e inspeção do percurso: T09 concluída (`tests/run_all.gd`, 20 probes, e `docs/TEST_REPORT.md`). O executor foi validado no Linux; no Windows, usar `executar-testes.cmd` e conferir `summary.txt` na primeira execução.
-- Desempenho 1080p/60 FPS, exploração de dez minutos e piloto executável: T10.
+- Desempenho 1080p/60 FPS na máquina de referência e abertura do `.exe` no Windows: pendências da revisão T10 (ver topo).
 - Cor do oclusor validada nos estudos; sombras de contato e coerência dos ambientes reais permanecem pendentes.
 - Assets finais, conteúdo canônico, combate e quatro espécies estão fora da T00.

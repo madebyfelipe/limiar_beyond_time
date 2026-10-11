@@ -55,7 +55,7 @@ Retomada de arte ENV_1: `env1_road_probe.tscn` é um ensaio isolado sobre o PNG 
 - PlayerController, MovementReference, CameraDirector, CameraZone, ShotRig e PresentationController são reutilizados sem alteração. Zonas têm prioridades 0/1/2 e permanência de 0,2 s. Cortes não movem corpo nem colisores.
 - Duas áreas de 12×12 m, corredor de 3 m, rampa de 1,2 m em 4 m, caixote contornável, passagem de 1,6 m na área elevada e ponto final dourado. `Endpoint` é Marker3D espacial; desde a T08 sua posição vem de `RouteProgress.end_pad`, que detecta a conclusão.
 - `check_technical_route.gd` dirige o controlador por Input real, sem teleporte na ida/volta; verifica colisão, limites, contato com chão, enquadramento e cortes. `check_route_rendering.gd` verifica oclusão e emendas em três vistas × três resoluções. Capturas reais foram inspecionadas.
-- Preset inclui explicitamente classes de câmera e shader usados na montagem, além de cenas/base/fundos. Exportação por seleção não os descobriu automaticamente, mesmo terminando com código 0. Build diagnóstica corrigida em `builds/windows-t07`; T10 permanece pendente.
+- Preset inclui explicitamente classes de câmera e shader usados na montagem, além de cenas/base/fundos. Exportação por seleção não os descobriu automaticamente, mesmo terminando com código 0. Build diagnóstica corrigida em `builds/windows-t07`; a build de release da T10 fica em `builds/windows-t10`.
 
 ## T08 — Operação básica e diagnóstico
 
@@ -71,6 +71,13 @@ Retomada de arte ENV_1: `env1_road_probe.tscn` é um ensaio isolado sobre o PNG 
 - `tests/run_all.gd`: executor sem plugin; cada probe em processo filho do mesmo executável. Aprovação = saída 0 + linha-resumo + ausência de linhas de erro do engine. Probes gráficos abrem janela própria; `--headless-only` os pula. Logs em `.local/tests/`.
 - `tests/check_units.gd` e `tests/check_scenes.gd` cobrem unidades das classes reais e carregamento de todas as cenas; `check_scenes.gd` usa a classe `Logger` do engine para falhar sozinho em erros.
 - `tests/capture_visual_report.gd` gera as capturas do relatório manual (`docs/TEST_REPORT.md`); não substitui a inspeção humana.
+
+## T10 — Build e medição
+
+- Preset `Windows Desktop`: exportação release em `builds/windows-t10`, console wrapper sempre gerado (`debug/export_console_wrapper=2`) para leitura de log/benchmark. Seleção explícita ganhou `environments/route_benchmark.gd`, instanciado só por script (mesma razão das classes de câmera na T07). UI e `RouteProgress` entram como dependências da cena principal.
+- Templates de release não aceitam `--script`, `--scene` nem `--main-pack` (sem *path overrides*). Por isso a medição do gate roda dentro da cena principal: `technical_route.gd` cria `RouteBenchmark` apenas quando os argumentos de usuário contêm `--benchmark` (após `--`). O piloto automático usa ações de Input no controlador real, reinicia após cada volta, desliga VSync, pede tela cheia (ou janela 1920×1080 se recusada), amostra o tempo de parede entre quadros após o aquecimento e captura erros do engine por `Logger`. Grava `user://benchmark.txt` e `user://benchmark-frametimes.csv` e sai com 0 apenas se p95 ≤ 16,7 ms, sem erros e com ao menos uma volta concluída. Em `--headless` nada é renderizado: só a parte funcional é julgada.
+- `tests/check_soak.gd`: dez minutos de jogo no percurso real (ida/volta caminhando e correndo, pausas, F3, reinícios no meio da volta, recuperações), falhando em erro do engine, volta que não termina ou crescimento de nós/objetos/memória estática.
+- Fora do jogo exportado: modelos, ENV_1, testes, ferramentas de autoria e calibração.
 
 Não há combate ou animais implementados. As demais interfaces abaixo continuam contratos para as tarefas correspondentes.
 

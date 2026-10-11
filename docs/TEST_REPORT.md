@@ -105,9 +105,26 @@ Três vistas em 1920×1080, 1280×720 e janela 1280×960. Mesmo enquadramento, a
 
 Menu de pausa com foco visível (1080p e 4:3), overlay F3 legível e sem cobrir o menu, aviso de recuperação, aviso da marca dourada e conclusão com tempo. **Aprovado.**
 
+## Build exportada e robustez (T10)
+
+| Verificação | Ambiente | Resultado |
+| --- | --- | --- |
+| Exportação release `Windows Desktop` | editor 4.7.2 headless | saída 0, sem ERROR/WARNING; 62 arquivos, sem modelos/ENV_1/testes |
+| Abertura do `.pck` no template de **release** Linux (mesmo commit) | headless, fora do projeto | saída 0, sem erros |
+| Benchmark funcional no template de release | headless, 60 s | 2 voltas, 2 conclusões, 0 erros |
+| Benchmark de 600 s no template de release | gráfico (llvmpipe) | 22 voltas, 22 conclusões, 0 erros |
+| `check_technical_route` / `check_operation` / `check_soak` contra o `.pck` (`--main-pack`) | headless, fora do projeto | todos saída 0, zero ERROR |
+| `check_soak.gd` no projeto | headless | 605,6 s de jogo, 27 voltas, 22 conclusões, 5 recuperações, 27 reinícios; nós/objetos/memória estáveis |
+| `check_soak.gd` no projeto | gráfico (llvmpipe) | 605,6 s de jogo, mesmos números do headless, zero falhas |
+| Gate de desempenho (p95 ≤ 16,7 ms) | build release, llvmpipe | p95 48,19 ms, 25,3 FPS (30 s + 120 s, 5 voltas, 0 erros) — reprovado em CPU; **não medido na RTX 5060** |
+| `.exe` Windows | Wine 9.0 | não iniciou: falha interna do Wine (`kernelbase.dll`) antes do código do projeto |
+
+O piloto automático (`-- --benchmark`) e o soak exercitam o jogo de forma repetível, mas não substituem a sessão humana de dez minutos prevista no plano.
+
 ## Não verificado
 
-- Desempenho (p95 do tempo de quadro em 1080p na máquina de referência) — pertence à T10 e requer a RTX 5060.
+- Desempenho (p95 do tempo de quadro em 1080p na máquina de referência): requer a RTX 5060 — `medir-desempenho.cmd`.
+- Execução do `.exe` exportado no Windows.
 - Teclado e mouse físicos operados por pessoa; troca real de foco de janela no Windows (simulada pela notificação do engine).
 - Exploração humana prolongada; percepção de conforto dos cortes.
 - Arte final: os fundos são estudos geométricos autorais. ENV_1 continua com geometria comum não aprovada.

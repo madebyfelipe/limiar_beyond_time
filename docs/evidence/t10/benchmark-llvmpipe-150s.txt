@@ -1,0 +1,5 @@
+LIMIAR benchmark 0.0.8-t08 · Godot 4.7.2-stable (official) · exportado
+adaptador="llvmpipe (LLVM 20.1.2, 256 bits)" driver=vulkan janela=(1920, 1080) vsync=0 3D=1920x1080
+aquecimento_s=30 medido_s=120.1 quadros=3032 voltas=5 conclusoes=5 erros=0
+media_ms=39.60 p50_ms=38.78 p95_ms=48.19 p99_ms=63.61 max_ms=104.61 fps_medio=25.3 acima_do_orcamento=100.0%
+gate=REPROVADO (p95 48.19 ms; orçamento 16.7 ms; erros 0; conclusões 5)
