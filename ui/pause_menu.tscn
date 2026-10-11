@@ -20,7 +20,7 @@ corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxEmpty" id="Spacer"]
 
-[node name="PauseMenu" type="Control" node_paths=PackedStringArray("resume_button", "restart_button", "quit_button")]
+[node name="PauseMenu" type="Control" node_paths=PackedStringArray("resume_button", "restart_button", "scheme_button", "quit_button")]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -31,6 +31,7 @@ grow_vertical = 2
 script = ExtResource("1_menu")
 resume_button = NodePath("Center/Panel/Box/Resume")
 restart_button = NodePath("Center/Panel/Box/Restart")
+scheme_button = NodePath("Center/Panel/Box/Scheme")
 quit_button = NodePath("Center/Panel/Box/Quit")
 
 [node name="Dim" type="ColorRect" parent="."]
@@ -90,6 +91,12 @@ custom_minimum_size = Vector2(460, 66)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "Reiniciar percurso"
+
+[node name="Scheme" type="Button" parent="Center/Panel/Box"]
+custom_minimum_size = Vector2(460, 66)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Controles: câmera"
 
 [node name="Quit" type="Button" parent="Center/Panel/Box"]
 custom_minimum_size = Vector2(460, 66)

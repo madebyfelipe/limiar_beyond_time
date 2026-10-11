@@ -64,6 +64,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			player.reset_to_start()
 		elif event.physical_keycode == KEY_C:
 			set_overview(not overview)
+		elif event.physical_keycode == KEY_T:
+			ControlScheme.toggle()
+			_update_label()
 		elif event.physical_keycode == KEY_ESCAPE:
 			get_tree().quit()
 
@@ -85,7 +88,9 @@ func set_art_mode(enabled: bool) -> void:
 	_update_label()
 
 func _update_label() -> void:
-	label.text = "SALA — %s\nWASD/setas mover · E abrir porta · B arte/geometria · C visão técnica/interior · F4 filtro · R reiniciar · Esc sair" % ("ARTE CANDIDATA — alinhamento em revisão" if art_mode else ("GEOMETRIA · visão técnica" if overview else "GEOMETRIA · interior"))
+	var movement: String = "setas giram e andam" if ControlScheme.is_tank() else "WASD/setas mover"
+	label.text = "SALA — %s
+%s · E abrir porta · B arte/geometria · C visão técnica/interior · F4 filtro · T controles (%s) · R reiniciar · Esc sair" % [("ARTE CANDIDATA — alinhamento em revisão" if art_mode else ("GEOMETRIA · visão técnica" if overview else "GEOMETRIA · interior")),movement,ControlScheme.label()]
 
 func set_overview(enabled: bool) -> void:
 	if enabled and art_mode:

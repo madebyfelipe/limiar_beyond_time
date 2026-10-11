@@ -7,6 +7,7 @@ signal restart_requested
 
 @export var resume_button: Button
 @export var restart_button: Button
+@export var scheme_button: Button
 @export var quit_button: Button
 ## Probes that are not exercising focus loss may disable it.
 @export var pause_on_focus_loss: bool = true
@@ -16,6 +17,19 @@ func _ready() -> void:
 	resume_button.pressed.connect(close)
 	restart_button.pressed.connect(_on_restart_pressed)
 	quit_button.pressed.connect(func() -> void: get_tree().quit())
+	if scheme_button:
+		ControlScheme.ensure_loaded()
+		scheme_button.pressed.connect(_on_scheme_pressed)
+		_update_scheme_button()
+
+## Switches between camera-relative and traditional tank steering. The choice
+## is stored by ControlScheme, so it survives scene changes and sessions.
+func _on_scheme_pressed() -> void:
+	ControlScheme.toggle()
+	_update_scheme_button()
+
+func _update_scheme_button() -> void:
+	scheme_button.text = "Controles: %s" % ControlScheme.label()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):

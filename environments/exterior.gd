@@ -116,6 +116,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_B:
 			set_art_mode(not presentation.art_mode)
+		elif event.physical_keycode == KEY_T:
+			ControlScheme.toggle()
+			_update_label()
 		elif event.physical_keycode == KEY_R:
 			player.reset_to_start()
 			director.reset_to(shots[0])
@@ -130,4 +133,7 @@ func set_art_mode(enabled: bool) -> void:
 
 func _update_label() -> void:
 	var shot_name: String = String(presentation.current_shot.definition.shot_id) if presentation.current_shot else ""
-	instructions.text = "EXTERIOR · %s · %s\nWASD/setas mover · Shift correr · E abrir porta · B arte/geometria · F4 filtro · R reiniciar · Esc sair\nSiga a estrada, passe a cancela e suba até a porta da guarita." % [shot_name,"ARTE CANDIDATA — alinhamento em revisão" if presentation.art_mode else "GEOMETRIA 3D"]
+	var movement: String = "setas giram e andam" if ControlScheme.is_tank() else "WASD/setas mover"
+	instructions.text = "EXTERIOR · %s · %s
+%s · Shift correr · E abrir porta · B arte/geometria · F4 filtro · T controles (%s) · R reiniciar · Esc sair
+Siga a estrada, passe a cancela e suba até a porta da guarita." % [shot_name,"ARTE CANDIDATA — alinhamento em revisão" if presentation.art_mode else "GEOMETRIA 3D",movement,ControlScheme.label()]

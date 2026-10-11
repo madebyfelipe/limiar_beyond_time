@@ -4,9 +4,9 @@
 
 **Dylan animado e passagem pela porta:** abra `executar-exterior.cmd`, siga até a porta da guarita e pressione **E** quando aparecer o aviso. Dylan faz o gesto; a maçaneta gira, a porta abre em close sobre fundo preto e a câmera atravessa antes de revelar a sala. E junto à porta interna faz o retorno. Repouso, caminhada e corrida usam clipes originais gerados no rig. A guarita usa Dylan de 1,8 m, compatível com sua geometria; os ensaios dos renders originais mantêm a escala de 2,4 m. Detalhes em `docs/DYLAN_ANIMATION.md`.
 
-**Novo exterior criado a partir de geometria 3D:** abra `executar-exterior.cmd` (ou F6 em `environments/exterior.tscn`). Estrada → cancela aberta → escada/porta da guarita, com três câmeras fixas e novos fundos nevados. Começa com arte; B compara geometria, R reinicia, Esc sai. WASD/setas e Shift. Ficha, prompts e validação em `docs/calibration/exterior/EXTERIOR_GEOMETRY.md`.
+**Novo exterior criado a partir de geometria 3D:** abra `executar-exterior.cmd` (ou F6 em `environments/exterior.tscn`). Estrada → cancela aberta → escada/porta da guarita, com três câmeras fixas e novos fundos nevados. Começa com arte; B compara geometria, T alterna câmera/tanque, R reinicia, Esc sai. WASD/setas e Shift. Ficha, prompts e validação em `docs/calibration/exterior/EXTERIOR_GEOMETRY.md`.
 
-**Estudo da sala de salvamento da guarita:** abra `executar-sala.cmd` (ou F6 em `environments/save_room.tscn`). Geometria foi criada antes da arte, com câmera próxima de interior. WASD/setas movem, Shift corre, B compara arte/geometria, C abre visão técnica ampla, R reinicia e Esc sai. Arte ainda em revisão de alinhamento. Ficha e limites em `docs/calibration/SAVE_ROOM_GEOMETRY.md`.
+**Estudo da sala de salvamento da guarita:** abra `executar-sala.cmd` (ou F6 em `environments/save_room.tscn`). Geometria foi criada antes da arte, com câmera próxima de interior. WASD/setas movem, Shift corre, B compara arte/geometria, C abre visão técnica ampla, T alterna câmera/tanque, R reinicia e Esc sai. Arte ainda em revisão de alinhamento. Ficha e limites em `docs/calibration/SAVE_ROOM_GEOMETRY.md`.
 
 Protótipo 2.5D para Windows: ator 3D sobre fundos pré-renderizados e câmeras fixas. **T01–T09 concluídas com estudos técnicos provisórios; T10 pronta para revisão** — build Windows x64 exportada e validada nesta sessão em nuvem (Linux), faltando abrir o `.exe` no Windows e medir o desempenho na máquina de referência (veja [Build Windows](#build-windows-t10)). O percurso T07, com a operação T08 (pausa, reinício, diagnóstico F3, conclusão e recuperação), é a cena principal. Os renders de floresta/guarita ENV_1 continuam preservados para refinamento; sua geometria comum ainda não foi aprovada.
 
@@ -20,6 +20,7 @@ Dê dois cliques em **`executar-percurso.cmd`**. No Godot, **F5** executa o mesm
 
 - WASD/setas: mover em relação à tela. Shift: correr.
 - Segurar uma direção durante o corte conserva a direção mundial; soltar todas e pressionar novamente usa a câmera atual.
+- **Controles de tanque**, à moda dos survival horrors clássicos: esquerda/direita giram Dylan no lugar e cima/baixo o levam para frente e para trás, sem relação com a câmera. Trocar pelo botão **Controles** na pausa, ou por **T** no exterior e na sala. A escolha vale para todas as cenas e fica guardada em `user://settings.cfg`.
 - Duas áreas, três enquadramentos, obstáculo contornável, rampa e passagem de 1,6 m.
 - **Esc**: pausa com Continuar, Reiniciar percurso e Sair do jogo (mouse ou setas + Enter). Esc de novo retoma. Perder o foco da janela também pausa; voltar à janela não retoma sozinho.
 - **F3**: diagnóstico com FPS, tempo de quadro, posição, velocidade, enquadramento ativo/candidato, referência de movimento, etapa/tempo do percurso e estado da simulação. Funciona também com o jogo pausado.

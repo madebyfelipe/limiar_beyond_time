@@ -44,9 +44,10 @@ func run_test() -> void:
 	var walk: float = await speed(["move_up"])
 	var diagonal: float = await speed(["move_up","move_right"])
 	var sprint: float = await speed(["move_up","run"])
-	check(absf(walk - 2.5) < 0.01, "Walk speed incorrect")
+	# The configured values are guarded by check_units; here the body must reach them.
+	check(absf(walk - player.config.walk_speed) < 0.01, "Walk speed incorrect")
 	check(absf(diagonal - walk) < 0.01, "Diagonal speed gain")
-	check(absf(sprint - 5.0) < 0.01, "Run speed incorrect")
+	check(absf(sprint - player.config.run_speed) < 0.01, "Run speed incorrect")
 	await place(Vector3(-4,0.05,0))
 	Input.action_press("move_left")
 	await ticks(90)
@@ -68,8 +69,15 @@ func run_test() -> void:
 		check(coordinate < case.limit if case.limit > 0 else coordinate > case.limit, "Wall crossed: " + case.action)
 	await place(Vector3(1.5,0.05,2.4))
 	Input.action_press("move_up")
-	await ticks(90)
-	check(player.global_position.y > 0.7, "Ramp not walkable")
+	# Climb until the ramp is cleared, so the budget follows the configured
+	# walking speed instead of assuming one.
+	var climbed: bool = false
+	for frame: int in range(300):
+		await ticks(1)
+		if player.global_position.y > 0.7:
+			climbed = true
+			break
+	check(climbed, "Ramp not walkable")
 	check(player.is_on_floor(), "Lost floor on ramp")
 	print("T03 ramp=", player.global_position)
 	release()
