@@ -394,6 +394,12 @@ Em 11/10/2026, o usuário autorizou explicitamente avançar a partir de T01 até
 - Clone limpo do branch publicado (`git clone --branch claude/godot-3d-game-dev-c9wrsl` em diretório temporário): importação headless 0 e executor `--headless-only` com 14 executados/0 falhas, confirmando que todos os arquivos necessários estão no Git. Executor completo final, após as correções da revisão, sob Xvfb: **22 executados, 0 falhas, saída 0** (`.local/final-runner-full.out`).
 - Não verificado: `.exe` no Windows, gate de desempenho na máquina de referência, sessão humana de 10 minutos, atalhos `.cmd` novos executados no Windows.
 
+### Exterior — verificação independente de alinhamento (sessão em nuvem)
+
+- Data: 11/10/2026. Pedido do usuário: verificar o exterior feito a partir de geometria. Sem alteração de arte, geometria, cenas ou fichas.
+- `check_exterior.gd` reproduzido no Linux: headless 3488 ticks / 99,41 m, gráfico 3498 ticks / 99,47 m, 0 falhas, iguais ao Windows.
+- Sobreposição geometria × arte e leitura manual ampliada: guarita, porta, janelas, escada, corrimãos, plataforma, caixas, cancela e guard rails dentro de ~5–10 px nas três vistas. O poste de luz diverge: ≈ 75 px na vista 1 e 26–50 px no fuste, ≈ 45 px na base, na vista 2. A IA o desenhou quase vertical, sem a convergência da câmera. O gate de ≤ 8 px não passa como conjunto. Correção sugerida: editar só o poste das artes 1 e 2. Detalhes, tabela e evidências em `calibration/exterior/EXTERIOR_GEOMETRY.md` e `evidence/exterior/`; ferramenta em `tools/calibration/exterior_alignment_overlay.py`.
+
 ## Próximas tarefas
 
 ### Estado após a sessão em nuvem (T08 → T10)

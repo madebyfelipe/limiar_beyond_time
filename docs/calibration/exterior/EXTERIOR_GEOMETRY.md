@@ -59,3 +59,27 @@ Capturas reais em `.local/exterior-{geometry,art}-{road,out-2,out-5,out-8,return
 Verificação final após a correção v02 e abertura padrão com arte: seleção de oito probes (`cenas,percurso,operacao,calibracao-estudos,sala-geometria,exterior-geometria,sala-grafica,exterior-grafico`) passou com zero falhas. O carregamento percorreu as 20 cenas; os resultados do exterior permaneceram iguais. Esta foi uma seleção pertinente ao conteúdo novo, não uma reexecução da suíte completa da T10.
 
 A arte mantém a composição geral e o percurso pôde ser conferido visualmente, mas está identificada como candidata. Ainda falta um gate independente de correspondências para declarar erro máximo ≤8 px nos novos fundos. Ramos de pinheiros, neve, molduras e detalhes adicionados pela IA não são malhas físicas; a oclusão atual usa os volumes autorados. A janela frontal recebeu tratamento diferente entre vistas e merece continuidade de materiais. Não há sombras dinâmicas de contato, exploração humana prolongada ou medição de desempenho deste novo cenário. Não foi feita exportação do exterior.
+
+## Verificação independente de alinhamento arte × geometria — sessão em nuvem, 11/10/2026
+
+Pedido do usuário: verificar o exterior gerado a partir da geometria. Nenhum asset, cena ou ficha foi alterado nesta verificação.
+
+**Método.** Cada arte ativa (1672×941) foi escalada para 1920×1080, como o `TextureRect` e o shader de oclusão a apresentam, e as bordas de silhueta da captura `geometry_camNN.png` correspondente foram sobrepostas (`tools/calibration/exterior_alignment_overlay.py`). Em seguida, recortes ampliados (2–3×) com grade de 10 px foram lidos à mão por estrutura. Os cantos 3D foram projetados pelas fichas `shot_*.tres` com `Camera3D.unproject_position`; o centro da porta reproduziu exatamente o `cameras.json` (1161,151; 135,337). Uma correlação automática de gradientes foi testada e descartada: a textura da IA gerou picos falsos (confiança 0,15–0,50), então a leitura final é visual, com precisão aproximada de ±3 px. A anisotropia da escala 1672×941 → 1920×1080 é de 0,05% (≤ 0,3 px).
+
+| Estrutura | Vista 1 (estrada) | Vista 2 (cancela) | Vista 3 (guarita) |
+| --- | --- | --- | --- |
+| Paredes, quinas e telhado da guarita | ≤ 5 px | ≤ 5 px | ≤ 10 px (a arte engrossa o telhado com neve) |
+| Porta, visor e janelas | ≤ 5 px | ≤ 5 px | ≤ 5 px |
+| Escada, plataforma e corrimãos | ≤ 5 px | ≤ 5 px | 2–5 px |
+| Caixas | ≤ 5 px | ≤ 5 px | 2–5 px |
+| Braço da cancela | ≤ 5 px | 5–10 px | — |
+| Guard rails e postes da estrada | 2–5 px, todos os postes | ≈ 5 px | — |
+| Base/plinto e marcas de pneu | ≈ 10 px | ≈ 10 px | 5–10 px |
+| **Poste de luz** | **≈ 75 px** (coluna à esquerda; luminária ≈ 20 px) | **15 px no topo, 26–50 px no fuste e ≈ 45 px na base** | fora do quadro |
+| Pinheiros | decorativos, formas diferentes; na vista 1 a árvore próxima da direita cobre muro e poste que a arte mostra | decorativos | decorativos |
+
+**Leitura.** Tudo o que o jogador toca no trajeto (estrada, guard rails, cancela, escada, corrimãos, plataforma, porta e caixas) coincide com a geometria dentro de ~10 px, e na maior parte dentro de 5 px. A exceção é o poste de luz: a geometria projeta um poste vertical com a convergência de uma câmera que olha para baixo (inclinado na imagem), enquanto a IA o desenhou quase vertical e mais grosso. Na vista 2, o fuste medido na arte (coluna mais escura por linha) fica de 26 a 50 px à direita do eixo projetado, cerca de 1 m no chão perto da base. Consequência no jogo: o colisor e o oclusor do poste ficam deslocados do poste pintado. O jogador pode bater num poste invisível ou ser recortado por um "poste" que mostra neve, mas só ao andar no canto sudeste do pátio, fora do trajeto estrada → cancela → escada. A diferença dos pinheiros na vista 1 não atinge a estrada: o raio câmera → estrada passa à esquerda dos cones.
+
+**Veredito.** O gate de ≤ 8 px por vista **não passa como conjunto** por causa do poste de luz (vistas 1 e 2) e da tolerância um pouco maior do telhado e do plinto. As estruturas jogáveis do trajeto estão alinhadas. Correção recomendada: editar ou regenerar o poste nas artes 1 e 2 seguindo a inclinação projetada da captura de geometria, sem mexer no resto da imagem. Mover o poste 3D não resolve, porque um poste desenhado vertical na imagem não corresponde a nenhuma posição 3D nas duas vistas ao mesmo tempo.
+
+**Reprodução e testes desta sessão (Linux, Godot 4.7.2 oficial, Mesa llvmpipe).** `check_exterior.gd` headless: 3488 ticks, 99,41 m, 0 falhas; gráfico: 3498 ticks, 99,47 m, 0 falhas, cortes 1→2→3→2→1 em geometria e arte. Os números são idênticos aos do Windows. Capturas de jogo em modo arte inspecionadas: ator sobre a estrada, junto à cancela, na base da escada e na porta, mais barras 4:3. Sobreposições versionadas em `docs/evidence/exterior/overlay-cam0{1,2,3}.jpg` e comparação do poste em `docs/evidence/exterior/light-pole-geometry-vs-art.jpg`.
