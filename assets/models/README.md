@@ -29,3 +29,9 @@ O Godot criou metadados `.import` e texturas extraídas durante a importação. 
 - Fonte tem altura 0,99608624 e frente +X. Adaptador gira +90° em Y e aplica escala uniforme 2,4/0,99608624. Altura inicial 1,8 foi aumentada 33% após ajuste pedido pelo usuário. Colisão herdada recebe altura 2,4 e centro 1,2; CharacterBody permanece unitário.
 - Pés e cabeça conferidos visualmente; medição da malha deformada da primeira instalação confirmou base y≈0 e altura 1,8. Ampliação mantém a mesma origem. Animações de caminhada/corrida permanecem pendentes; o modelo se desloca com pose fixa.
 - SHA-256 do GLB conferido e igual ao inventário. Não exportado nesta integração.
+
+## Animação e guarita — 11/10/2026
+
+- O GLB continua sem clipes embutidos e seu hash permanece idêntico. `dylan_visual.gd` agora cria clipes originais idle/walk/run/door_interact no AnimationPlayer, com blends e velocidade conforme o movimento físico. A informação anterior sobre pose fixa é histórica.
+- Modelo instalado no exterior e na sala, com altura visual/colisão de 1,8 m para a geometria autorada. Os ensaios originais mantêm a ampliação de 2,4 m. Não foi alterada a escala do asset-fonte.
+- Animações são procedurais de protótipo: sem captura de movimento, IK de pés ou mão presa à maçaneta. Detalhes/testes em `docs/DYLAN_ANIMATION.md`.

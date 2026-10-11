@@ -1,0 +1,18 @@
+OK    unidades                    0.4 s  saída 0 · T09 units failures=0
+OK    cenas                       1.2 s  saída 0 · T09 scenes=20 failures=0
+OK    locomocao                   0.4 s  saída 0 · T03 walk=2.5 diagonal=2.5 run=5.0 stopped=(-4.598063, -0.000018, 0.0) failures=0
+OK    cameras                     0.9 s  saída 0 · T04 traversals=20 per direction failures=0 total_changes=41
+OK    referencia                  0.4 s  saída 0 · T05 failures=0
+OK    calibracao-estudos          0.5 s  saída 0 · T06 mode=acceptance failures=0
+OK    percurso                    0.9 s  saída 0 · T07 failures=0
+OK    operacao                    2.2 s  saída 0 · T08 failures=0
+OK    env1-estrada                0.6 s  saída 0 · ENV1 road experiment ticks=1748 failures=0; calibration acceptance remains a separate gate
+OK    env1-continuidade           0.8 s  saída 0 · ENV1 Dylan/near-end cut ticks=1551 distance=50.547483629256 failures=0
+OK    sala-geometria              0.7 s  saída 0 · SAVE_ROOM ticks=2205 distance_m=41.9986347096565 failures=0
+OK    exterior-geometria          1.1 s  saída 0 · EXTERIOR ticks=3488 distance_m=99.4078407199122 colliders=56 failures=0
+OK    dylan-portas                0.9 s  saída 0 · DYLAN doors round_trips=1 animated_legs=true ticks=962 failures=0
+OK    renderizacao                6.0 s  saída 0 · T07 rendering failures=0
+OK    sala-grafica               17.4 s  saída 0 · SAVE_ROOM ticks=2205 distance_m=41.9986347096565 failures=0
+OK    exterior-grafico           26.2 s  saída 0 · EXTERIOR ticks=3498 distance_m=99.4669292629696 colliders=56 failures=0
+OK    dylan-portas-grafico       12.3 s  saída 0 · DYLAN doors round_trips=1 animated_legs=true ticks=962 failures=0
+T09 runner executed=17 failed=0

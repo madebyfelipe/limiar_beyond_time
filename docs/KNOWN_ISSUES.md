@@ -1,5 +1,18 @@
 # Limitações e pendências
 
+## Atualização — filtro PSX/CRT, 11/10/2026
+
+- F4 alterna Original/PSX/PSX + CRT; padrão PSX, compartilhado com a porta e mantido durante a sessão. Detalhes em `RETRO_FILTER.md`.
+- É pós-processamento da composição 16:9: não é emulação do hardware, não introduz jitter/warping de geometria e não reduz o custo da renderização 3D. Textos ficam nítidos. Para calibração visual fina, selecionar Original.
+- Sete regressões aprovadas no Windows/RTX 4050 Laptop GPU. Sem nova build ou benchmark de desempenho nesta integração.
+
+## Atualização — Dylan e portas, 11/10/2026
+
+- Exterior e sala estão conectados por E; Dylan possui clipes de repouso, caminhada, corrida e interação. As menções históricas a pose fixa/ausência de passagem foram superadas nesta integração. A sala ainda não salva progresso.
+- Animações são procedurais de protótipo, sem IK de pés ou alinhamento exato da mão com a maçaneta. A transição mostra uma porta 3D própria em close; a folha pintada no background continua estática durante o gesto inicial.
+- A guarita usa escala visual/colisão de 1,8 m; o ensaio dos renders originais preserva 2,4 m. Sem nova exportação, medição de desempenho ou fechamento T10 nesta integração. F5/preset continuam no percurso técnico; jogar o novo fluxo por `executar-exterior.cmd`.
+- Godot 4.7.2 oficial instalado localmente em `.tools/godot-4.7.2`; importação e regressões agora executadas no Windows/NVIDIA RTX 4050 Laptop GPU. Resultados desta sessão em `DYLAN_ANIMATION.md`/`TEST_REPORT.md`; não representam a RTX 5060 de referência.
+
 ## Estado atual — T10 pronta para revisão
 
 - **Falta executar no Windows**: a build `builds/windows-t10` foi exportada nesta sessão Linux, mas o `.exe` não pôde ser aberto aqui. O Wine 9.0 do Ubuntu falha dentro do próprio `kernelbase.dll` (acesso nulo logo após carregar `dinput8.dll`) ao iniciar o template Windows 4.7.2, antes de qualquer código do projeto. Evidência equivalente obtida: o mesmo `.pck` rodou no template Linux de release (mesmo commit da engine) e no runtime do editor via `--main-pack`, fora da pasta do projeto, com percurso completo, testes T08 e voltas automáticas sem erro. Confirmar com dois cliques em `LIMIAR-Recon.exe` após `exportar-build.cmd`.

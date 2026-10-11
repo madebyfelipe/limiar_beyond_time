@@ -1,5 +1,21 @@
 # Relatório de testes — percurso técnico (T09)
 
+## PSX/CRT — Windows, 11/10/2026
+
+Godot 4.7.2/Forward+/Vulkan, NVIDIA RTX 4050 Laptop GPU. **7 probes, zero falhas, saída 0**: composição, oclusão, renderização, operação, portas headless/gráficas e filtro retrô. Resumo em `docs/evidence/retro/regression-summary.txt`.
+
+`check_retro_filter.gd` verifica eventos F4/repetição, diferenças visíveis entre os modos, restauração exata da imagem original e seleção mantida ao recriar o ambiente. Pixels virtuais sem variação interna em 1280×720, 1920×1080 e 1280×960; barras pretas intactas. Teste de portas agora verifica CRT tanto no close quanto nas duas chegadas. Regressões de composição/oclusão mantêm zero emendas. Imagens dos três modos e da porta inspecionadas; detalhes em `RETRO_FILTER.md`. Não é benchmark ou teste de nova build.
+
+## Dylan animado e porta — Windows, 11/10/2026
+
+Godot `4.7.2.stable.official.ed1daf0bf`, Forward+/Vulkan, NVIDIA RTX 4050 Laptop GPU. Seleção final do executor: **17 probes, 0 falhas, saída 0**, sem linhas de erro do engine. Resumo preservado em `docs/evidence/dylan/regression-summary.txt`.
+
+Seleção: unidades, cenas, locomocao, cameras, referencia, calibracao-estudos, percurso, operacao, env1-estrada, env1-continuidade, sala-geometria, exterior-geometria, dylan-portas, renderizacao, sala-grafica, exterior-grafico e dylan-portas-grafico. Carregamento das 20 cenas aprovado. Esta seleção cobre o conteúdo afetado; não é uma reexecução do benchmark ou do soak de dez minutos.
+
+`check_dylan_doors.gd`: **962 ticks, zero falhas** em headless e gráfico. Controlador/entrada reais na aproximação da porta; ossos animados, walk/run conforme velocidade, idle após desaceleração, rejeição de E distante/echo, bloqueio de movimento e R durante gesto, ausência de transições duplicadas, oito etapas da sequência, troca sob preto, ida/volta, posição de chegada, câmera e reinício após retorno. Novo probe incorporado ao executor em ambos os modos.
+
+Inspeção visual dos clipes e das capturas: personagem sobre o piso no exterior/interior, gesto para a porta, maçaneta/folha animadas, câmera avançando no vão, sala revelada após o fade, câmera do patamar restaurada na saída e proporção mantida em janela 4:3. Evidências: `docs/evidence/dylan/door-opening.png` e `room-arrival.png`; demais imagens locais por `tools/preview_dylan_animation.gd` e pelo probe novo. Detalhes/limites em `DYLAN_ANIMATION.md`.
+
 ## Regressão local de conteúdo — sala e exterior, 11/10/2026
 
 Após criar a sala e o exterior por geometria autorada, a seleção `--only=cenas,percurso,operacao,calibracao-estudos,sala-geometria,exterior-geometria,sala-grafica,exterior-grafico` passou no Windows/RTX 5060: **8 probes, 0 falhas, saída 0**. Carregamento cobriu 20 cenas. Exterior: 3488 ticks/99,41 m em headless e 3498 ticks/99,47 m em gráfico, ida/volta em geometria e arte, quatro cortes por volta e 56 colisores. Sala: 2205 ticks/42,00 m, sem falhas em ambos os modos. Logs em `.local/tests/`.

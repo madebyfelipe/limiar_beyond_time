@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/backgrounds/composition_study.svg" id="1_background"]
+[ext_resource type="PackedScene" path="res://systems/rendering/retro_filter.tscn" id="2_retro"]
 
 [sub_resource type="Environment" id="Environment_actors"]
 background_mode = 0
@@ -98,3 +99,5 @@ fov = 50.0
 [node name="Capsule" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World"]
 position = Vector3(0, 0.9, 0)
 mesh = SubResource("Mesh_capsule")
+
+[node name="RetroFilter" parent="Frame/Composition" instance=ExtResource("2_retro")]

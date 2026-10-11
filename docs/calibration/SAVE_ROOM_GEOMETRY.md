@@ -1,5 +1,7 @@
 # Sala da guarita — geometria antes da arte
 
+Atualização de 11/10/2026: a sala agora recebe Dylan animado de 1,8 m, abre com a arte aplicada e se conecta ao exterior por **E** junto à porta, com transição de abertura em 3D. Os resultados anteriores com cápsula permanecem históricos. Não foi implementada persistência de salvamento. Ver `../DYLAN_ANIMATION.md`.
+
 Data: 11/10/2026. Fluxo autorizado: geometria simples → câmera → teste de circulação → captura 3D → arte com imagegen. A câmera foi aproximada a pedido do usuário antes da última geração.
 
 ## Entregas

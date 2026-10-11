@@ -16,6 +16,7 @@ var shots: Array[ShotRig] = []
 var director: CameraDirector
 var presentation: PresentationController
 var art_available: bool = true
+var doorway: DoorInteraction
 
 func _ready() -> void:
 	world.get_node("Capsule").hide()
@@ -99,6 +100,17 @@ func _ready() -> void:
 	director.shot_changed.connect(func(_previous: StringName,_current: StringName) -> void: _update_label())
 	world.add_child(director)
 	set_art_mode(art_available)
+	doorway = DoorInteraction.new()
+	doorway.player = player
+	doorway.approach = Vector3(-4.45, 0.6, 3.7)
+	doorway.facing = 0.0
+	doorway.target_scene = "res://environments/save_room.tscn"
+	add_child(doorway)
+
+func arrive_from_door() -> void:
+	player.reset_to(Transform3D(Basis.IDENTITY, Vector3(-4.45, 0.66, 3.85)))
+	player.visual.rotation.y = PI
+	director.reset_to(shots[2])
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -118,4 +130,4 @@ func set_art_mode(enabled: bool) -> void:
 
 func _update_label() -> void:
 	var shot_name: String = String(presentation.current_shot.definition.shot_id) if presentation.current_shot else ""
-	instructions.text = "EXTERIOR · %s · %s\nWASD/setas mover · Shift correr · B arte/geometria · R reiniciar · Esc sair\nSiga a estrada, passe a cancela e suba até a porta da guarita." % [shot_name,"ARTE CANDIDATA — alinhamento em revisão" if presentation.art_mode else "GEOMETRIA 3D"]
+	instructions.text = "EXTERIOR · %s · %s\nWASD/setas mover · Shift correr · E abrir porta · B arte/geometria · F4 filtro · R reiniciar · Esc sair\nSiga a estrada, passe a cancela e suba até a porta da guarita." % [shot_name,"ARTE CANDIDATA — alinhamento em revisão" if presentation.art_mode else "GEOMETRIA 3D"]

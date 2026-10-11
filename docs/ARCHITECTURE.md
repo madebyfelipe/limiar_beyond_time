@@ -1,11 +1,23 @@
 # Arquitetura — LIMIAR Recon
 
+## Apresentação PSX/CRT — 11/10/2026
+
+`systems/rendering/retro_filter.tscn` é o último filho da composição Background/Actors, antes da UI. BackBufferCopy + shader de canvas fazem amostragem nearest em 320×180, quantização RGB e dithering Bayer, com scanlines/vinheta opcionais. Origem e extensão da área útil mantêm a grade alinhada ao redimensionar e deixam barras pretas intactas. Cada instância tem material próprio; F4 compartilha a seleção durante a sessão pelo script/grupo, sem autoload. A porta instancia o mesmo componente dentro do seu quadro, com cópia de tela própria, abaixo do fade; quadro e filtro são ocultados juntos na troca. A resolução do viewport 3D e as câmeras continuam sendo autoridade de composição/oclusão. Detalhes e testes em `RETRO_FILTER.md`.
+
+## Dylan e passagem entre ambientes — 11/10/2026
+
+- `dylan_visual.gd` gera uma biblioteca AnimationPlayer com idle, walk, run e door_interact. Tracks de rotação usam os ossos reais e convertem os eixos pelos ancestrais já posados; a malha, skin e GLB permanecem intactos. Velocidade real do corpo seleciona e regula a locomoção, com blend de 0,16 s. Nenhum root motion interfere na física.
+- Exterior e sala instanciam `player_dylan.tscn`, com altura visual/colisão locais de 1,8 m. O padrão de 2,4 m continua nos ensaios originais. `target_height` controla apenas a apresentação; ao alterar escala de uma cena, atualizar também sua colisão e validar enquadramento.
+- `DoorInteraction` é um componente local: referência ao jogador, ponto de aproximação, orientação e caminho do destino. A ação E exige distância horizontal ≤0,85 m e diferença de altura <0,25 m. Gesto e viagem bloqueiam movimento e novas interações.
+- `door_transition.gd` é uma CanvasLayer temporária no root, com mundo 3D próprio e composição 16:9. Sobrevive à troca de cena, anima maçaneta/folha/câmera, troca o ambiente sob preto e chama `arrive_from_door()` no destino. Depois restaura controle e se libera. Sem autoload ou gerenciador global. As portas pintadas e seus colisores ficam intactos.
+- A cena principal/preset técnicos permanecem T07/T10. O fluxo conectado está disponível em `executar-exterior.cmd` e `executar-sala.cmd`.
+
 ## Estudos autorados de interior e exterior — 11/10/2026
 
 - `save_room_source.tscn` e `exterior_source.tscn` são fontes espaciais editáveis, construídas antes da arte por scripts em `tools/`. Suas capturas e fichas de câmera são as referências estruturais para image_gen.
 - `save_room.tscn` permite comparar arte/geometria e inspecionar o interior. `exterior.tscn` reutiliza CameraDirector, CameraZone, ShotRig e MovementReference com três enquadramentos do mesmo mundo.
 - `exterior_presentation.gd` estende PresentationController: após a troca atômica existente, aplica o shader de background na fonte compartilhada ou restaura seus materiais para inspeção. Colisores são copiados uma vez das dimensões/transforms autoradas e permanecem independentes da apresentação.
-- São cenas de conteúdo isoladas; a cena principal e o preset da Fase 1 não mudaram. Arte candidata e limitações em `docs/calibration/SAVE_ROOM_GEOMETRY.md` e `docs/calibration/exterior/EXTERIOR_GEOMETRY.md`.
+- Exterior e sala agora estão conectados por interação E e transição; a cena principal e o preset da Fase 1 não mudaram. Arte candidata e limitações em `docs/calibration/SAVE_ROOM_GEOMETRY.md` e `docs/calibration/exterior/EXTERIOR_GEOMETRY.md`.
 
 ## Implementado na T00
 

@@ -1,5 +1,7 @@
 # ENV_1 — ensaio contínuo com três renders
 
+Atualização posterior de 11/10/2026: Dylan agora usa ciclos idle/walk/run gerados em `dylan_visual.gd`, preservando a altura de 2,4 m deste ensaio. Os registros abaixo sobre pose fixa descrevem a integração anterior. A porta interativa está no novo exterior autorado, não neste ensaio dos renders originais; ver `../DYLAN_ANIMATION.md`.
+
 11/10/2026. Os três PNGs originais já podem ser percorridos no mesmo ensaio. **Funcionamento da faixa verificado; calibração do ambiente ainda pendente.** O usuário autorizou corrigir cópias dos renders quando necessário, preservando os originais. T07 principal e build permanecem com os estudos aprovados; T08 não foi iniciada.
 
 ## Abrir

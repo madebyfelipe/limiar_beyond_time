@@ -1,0 +1,8 @@
+OK    operacao                    2.2 s  saída 0 · T08 failures=0
+OK    dylan-portas                0.9 s  saída 0 · DYLAN doors round_trips=1 animated_legs=true ticks=962 failures=0
+OK    composicao                  2.5 s  saída 0 · T01 failures=0
+OK    oclusao                     5.2 s  saída 0 · T02 failures=0
+OK    renderizacao                6.4 s  saída 0 · T07 rendering failures=0
+OK    dylan-portas-grafico       11.4 s  saída 0 · DYLAN doors round_trips=1 animated_legs=true ticks=962 failures=0
+OK    filtro-retro                2.8 s  saída 0 · RETRO failures=0
+T09 runner executed=7 failed=0

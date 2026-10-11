@@ -1,11 +1,19 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 [ext_resource type="PackedScene" path="res://environments/composition.tscn" id="1"]
 [ext_resource type="Script" path="res://environments/save_room.gd" id="2"]
-[ext_resource type="PackedScene" path="res://actors/player/player.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://actors/player/player_dylan.tscn" id="3"]
+[sub_resource type="CapsuleShape3D" id="GuaritaCollision"]
+radius = 0.3
+height = 1.8
 [node name="SaveRoom" instance=ExtResource("1")]
 script = ExtResource("2")
 [node name="Player" parent="Frame/Composition/Actors/WorldViewport/World" instance=ExtResource("3")]
 position = Vector3(-2.4,0.06,0.55)
+[node name="Collision" parent="Frame/Composition/Actors/WorldViewport/World/Player"]
+position = Vector3(0,0.9,0)
+shape = SubResource("GuaritaCollision")
+[node name="DylanVisual" parent="Frame/Composition/Actors/WorldViewport/World/Player/Visual"]
+target_height = 1.8
 [node name="Instructions" type="Label" parent="."]
 offset_left = 16.0
 offset_top = 12.0

@@ -36,7 +36,7 @@ Prompts completos e correção estão nos arquivos `ART_CAM01_PROMPT.txt`, `ART_
 
 ## Abrir e reproduzir
 
-`executar-exterior.cmd`, ou F6 em `environments/exterior.tscn`. Começa com arte quando as três imagens foram importadas. WASD/setas movem; Shift corre; B alterna arte e geometria; R reinicia; Esc fecha. Subir a escada leva até a porta, sem carregar automaticamente a sala. A cena principal e o preset do percurso técnico continuam próprios da T07/T10.
+`executar-exterior.cmd`, ou F6 em `environments/exterior.tscn`. Começa com arte quando as três imagens foram importadas. WASD/setas movem; Shift corre; B alterna arte e geometria; R reinicia; Esc fecha. Dylan agora tem ciclos de locomoção, com escala/colisão de 1,8 m para este ambiente. Subir a escada e pressionar **E** junto à porta inicia o gesto e a transição de abertura até a sala. E na porta interna retorna ao patamar externo. A cena principal e o preset do percurso técnico continuam próprios da T07/T10. Detalhes em `../../DYLAN_ANIMATION.md`.
 
 ```powershell
 $ExteriorGodot = '.\.tools\godot-4.7.2\Godot_v4.7.2-stable_win64_console.exe'

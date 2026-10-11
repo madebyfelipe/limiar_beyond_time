@@ -1,5 +1,23 @@
 # Progresso — LIMIAR Recon
 
+## Filtro PSX/CRT — 11/10/2026
+
+- Pedido: aproximar a apresentação do PSX. Criado filtro compartilhado em `systems/rendering`, aplicado à composição 2D/3D e à transição da porta: 320×180 virtual, 32 níveis por canal, dithering Bayer e CRT opcional (scanlines/vinheta).
+- F4 alterna PSX → PSX + CRT → Original. Padrão PSX, aviso temporário, textos nítidos, seleção mantida ao trocar de ambiente durante a sessão. Entrada bloqueada durante a porta.
+- Importação sem erros; inspeção dos três modos e da porta com CRT. Runner: **7 probes, zero falhas** — composição, oclusão, renderização, operação, portas headless/gráficas e filtro retrô. Sem emendas nos oclusores, pixels virtuais estáveis em três resoluções, barras preservadas e original restaurado exatamente.
+- Documentação em `RETRO_FILTER.md`; capturas e resumo em `docs/evidence/retro/`. Sem exportação/benchmark; trata-se de pós-processamento, não de emulação de hardware ou redução do custo 3D.
+
+## Dylan animado e porta exterior ↔ sala — 11/10/2026
+
+- Pedido: animar Dylan e adicionar transição de abertura de porta no ritmo de RE/Dino Crisis ao interagir. Implementados clipes autorais idle/walk/run/door_interact no rig, com blends, velocidade pela locomoção real e eixos compensados pela pose dos ancestrais.
+- Dylan instalado no exterior e na sala em escala visual/colisão de 1,8 m para a geometria autorada. Os ensaios originais preservam 2,4 m. GLB intacto; SHA-256 idêntico ao inventário.
+- Ação E, aviso contextual, bloqueio por distância/altura/echo, gesto e orientação do corpo. Camada temporária no root com porta metálica 3D, maçaneta, abertura, avanço de câmera, fades e sons sintetizados autorais. Troca de cena sob preto, chegada junto à porta e restauração de controle/câmera nos dois sentidos; sem autoload.
+- Ambiente local preparado: distribuição oficial Godot `4.7.2.stable.official.ed1daf0bf` em `.tools/godot-4.7.2`, importação concluída no Windows. GPU observada nos probes gráficos: NVIDIA RTX 4050 Laptop GPU, Vulkan 1.4.341/Forward+. Não é a máquina RTX 5060 de referência.
+- Verificação final: `tests/run_all.gd -- --only=unidades,cenas,locomocao,cameras,referencia,calibracao-estudos,percurso,operacao,env1-estrada,env1-continuidade,sala-geometria,exterior-geometria,dylan-portas,sala-grafica,exterior-grafico,dylan-portas-grafico,renderizacao`: **17 probes, 0 falhas, saída 0, sem erros do engine**. Carregamento de 20 cenas aprovado. Probe novo: ida/volta real, seleção de clipes, ossos animados, E/echo/distância, controles bloqueados, oito etapas, troca sob preto, chegada, câmera e reinício; **962 ticks, zero falhas** em headless/gráfico.
+- Inspeção visual: quatro poses por clipe geradas por `tools/preview_dylan_animation.gd`; personagem deformando no rig, braços/joelhos flexionados e gesto para frente. Porta fechada/aberta em 16:9 e 4:3, chegada à sala e retorno ao patamar inspecionados. Evidências finais em `docs/evidence/dylan`; demais logs/capturas e GIF de prévia em `.local`.
+- Atalhos existentes funcionam com a engine instalada: `executar-exterior.cmd` e `executar-sala.cmd`. F5/preset técnicos preservados. Sem nova exportação, benchmark, persistência de salvamento ou aprovação da calibração fina dos fundos nesta entrega. Clipes procedurais de protótipo; IK de pés e mão presa à maçaneta ficam como acabamento.
+- Detalhes e reprodução em `DYLAN_ANIMATION.md`; resultados em `TEST_REPORT.md`. Código novo em `systems/interaction`, áudio em `assets/audio`, probe `tests/check_dylan_doors.gd` integrado ao executor.
+
 ## Exterior da guarita — geometria antes da arte, 11/10/2026
 
 - Autorização do usuário: repetir o fluxo da sala no exterior, criar novos assets e publicar na main antes/depois. Commit inicial da sala: `e546081`, push concluído.

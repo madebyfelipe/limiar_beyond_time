@@ -1,5 +1,9 @@
 # LIMIAR Recon
 
+**Visual PSX/CRT:** o jogo inicia com pixels em resolução virtual 320×180, cores reduzidas e dithering. **F4** alterna **PSX → PSX + CRT → Original**, com aviso do modo na tela. O CRT acrescenta linhas de TV e vinheta suave. Vale para cenário, Dylan e transição da porta; textos permanecem legíveis. A escolha acompanha a troca de sala durante a sessão. Detalhes e capturas em [docs/RETRO_FILTER.md](docs/RETRO_FILTER.md).
+
+**Dylan animado e passagem pela porta:** abra `executar-exterior.cmd`, siga até a porta da guarita e pressione **E** quando aparecer o aviso. Dylan faz o gesto; a maçaneta gira, a porta abre em close sobre fundo preto e a câmera atravessa antes de revelar a sala. E junto à porta interna faz o retorno. Repouso, caminhada e corrida usam clipes originais gerados no rig. A guarita usa Dylan de 1,8 m, compatível com sua geometria; os ensaios dos renders originais mantêm a escala de 2,4 m. Detalhes em `docs/DYLAN_ANIMATION.md`.
+
 **Novo exterior criado a partir de geometria 3D:** abra `executar-exterior.cmd` (ou F6 em `environments/exterior.tscn`). Estrada → cancela aberta → escada/porta da guarita, com três câmeras fixas e novos fundos nevados. Começa com arte; B compara geometria, R reinicia, Esc sai. WASD/setas e Shift. Ficha, prompts e validação em `docs/calibration/exterior/EXTERIOR_GEOMETRY.md`.
 
 **Estudo da sala de salvamento da guarita:** abra `executar-sala.cmd` (ou F6 em `environments/save_room.tscn`). Geometria foi criada antes da arte, com câmera próxima de interior. WASD/setas movem, Shift corre, B compara arte/geometria, C abre visão técnica ampla, R reinicia e Esc sai. Arte ainda em revisão de alinhamento. Ficha e limites em `docs/calibration/SAVE_ROOM_GEOMETRY.md`.

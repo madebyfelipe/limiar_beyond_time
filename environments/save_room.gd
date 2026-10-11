@@ -12,6 +12,7 @@ var source: Node3D
 var colliders: Node3D
 var art_mode: bool = false
 var overview: bool = false
+var doorway: DoorInteraction
 
 func _ready() -> void:
 	$Frame/Composition/Actors/WorldViewport/World/Capsule.hide()
@@ -42,7 +43,18 @@ func _ready() -> void:
 	camera.rotation_degrees = SHOT.camera_rotation_degrees
 	camera.fov = SHOT.fov
 	player.camera = camera
-	_update_label()
+	set_art_mode(true)
+	doorway = DoorInteraction.new()
+	doorway.player = player
+	doorway.approach = Vector3(-2.4, 0.0, 0.55)
+	doorway.facing = PI / 2
+	doorway.target_scene = "res://environments/exterior.tscn"
+	doorway.returning_outside = true
+	add_child(doorway)
+
+func arrive_from_door() -> void:
+	player.reset_to_start()
+	player.visual.rotation.y = -PI / 2
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -73,7 +85,7 @@ func set_art_mode(enabled: bool) -> void:
 	_update_label()
 
 func _update_label() -> void:
-	label.text = "SALA — %s | WASD/setas mover · B arte/geometria · C visão técnica/interior · R reiniciar · Esc sair" % ("ARTE CANDIDATA — alinhamento em revisão" if art_mode else ("GEOMETRIA · visão técnica" if overview else "GEOMETRIA · interior"))
+	label.text = "SALA — %s\nWASD/setas mover · E abrir porta · B arte/geometria · C visão técnica/interior · F4 filtro · R reiniciar · Esc sair" % ("ARTE CANDIDATA — alinhamento em revisão" if art_mode else ("GEOMETRIA · visão técnica" if overview else "GEOMETRIA · interior"))
 
 func set_overview(enabled: bool) -> void:
 	if enabled and art_mode:
