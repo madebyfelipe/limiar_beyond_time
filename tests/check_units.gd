@@ -80,7 +80,7 @@ func contracts() -> void:
 	f3.pressed = true
 	check(f3.is_action_pressed("toggle_diagnostics"),"F3 must toggle diagnostics")
 	var route: GDScript = load("res://environments/technical_route.gd")
-	check(route.format_time(83.26) == "1:23,3" and route.format_time(5.0) == "0:05,0" and route.format_time(600.0) == "10:00,0","Completion time format incorrect")
+	check(route.format_time(83.26) == "1:23,3" and route.format_time(5.0) == "0:05,0" and route.format_time(600.0) == "10:00,0" and route.format_time(59.96) == "1:00,0" and route.format_time(119.94) == "1:59,9","Completion time format incorrect")
 
 func make_shot(id: StringName) -> ShotRig:
 	var rig := ShotRig.new()
@@ -185,6 +185,9 @@ func pause_menu() -> void:
 	check(paused,"Focus loss must pause")
 	menu.notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
 	check(paused,"Focus return must not resume")
+	menu.restart_button.grab_focus()
+	menu.notification(Node.NOTIFICATION_WM_WINDOW_FOCUS_OUT)
+	check(menu.restart_button.has_focus(),"A second focus loss must not move the menu focus")
 	menu.restart_button.pressed.emit()
 	check(restarts[0] == 1 and not paused and not menu.visible,"Restart must signal and resume")
 	menu.pause_on_focus_loss = false

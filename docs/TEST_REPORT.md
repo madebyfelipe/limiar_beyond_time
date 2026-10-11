@@ -50,6 +50,8 @@ Execução completa nesta sessão (`xvfb-run … --headless --path . --script re
 
 Tempos gráficos longos refletem renderização por CPU com `--fixed-fps 60`.
 
+Execução final após a T10 e a revisão de código (mesmo comando, log `.local/final-runner-full.out`): **22 executados, 0 falhas, saída 0** — os 20 acima mais `robustez-10min` (605,6 s de jogo, 27 voltas, 0 falhas) e `benchmark-funcional` (piloto automático da cena principal, 1 volta, 0 erros).
+
 Casos obrigatórios do plano e onde são cobertos:
 
 | Caso | Probe |

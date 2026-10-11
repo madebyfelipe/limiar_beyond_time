@@ -174,7 +174,9 @@ func shot_for(feet: Vector3) -> ShotRig:
 	return selected
 
 static func format_time(seconds: float) -> String:
-	return ("%d:%04.1f" % [int(seconds/60.0),fmod(seconds,60.0)]).replace(".",",")
+	# Round to tenths first, so 59,96 s reads 1:00,0 rather than 0:60,0.
+	var tenths: int = roundi(seconds*10.0)
+	return ("%d:%04.1f" % [tenths/600,(tenths%600)/10.0]).replace(".",",")
 
 func _on_endpoint_reached() -> void:
 	_update_objective()
