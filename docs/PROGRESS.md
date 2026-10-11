@@ -1,5 +1,15 @@
 # Progresso — LIMIAR Recon
 
+## Exterior da guarita — geometria antes da arte, 11/10/2026
+
+- Autorização do usuário: repetir o fluxo da sala no exterior, criar novos assets e publicar na main antes/depois. Commit inicial da sala: `e546081`, push concluído.
+- Implementados fonte espacial autorada, três fichas de câmera/capturas, cena `exterior.tscn`, profundidade via shader existente, 56 colisores e `executar-exterior.cmd`.
+- Trajeto contínuo estrada → cancela → escada → porta → retorno, com prioridade/residência e referência de movimento dos componentes existentes. Geometria foi testada e inspecionada antes de gerar imagens.
+- Três fundos por image_gen; a vista 2 foi corrigida para retirar poste adicional da IA. PNGs ativos: `art_cam01_v01`, `art_cam02_v02`, `art_cam03_v01`, no diretório `assets/backgrounds/env_1/exterior_authored`.
+- Headless e gráfico: zero falhas em ida/volta com geometria e arte, contato com chão/plataforma, cortes, paredes/porta e margem da estrada. Imagens de jogo/4:3 inspecionadas.
+- Probes da sala e do exterior adicionados ao executor de regressão. Ficha, comandos, prompts e limites em `calibration/exterior/EXTERIOR_GEOMETRY.md`.
+- Novos fundos ainda candidatos a calibração fina, sem gate independente de 8 px. Sem transição jogável à sala, nova exportação ou benchmark. A cena principal T07/T10 permanece separada.
+
 ## Estudo de interior da guarita — 11/10/2026
 
 - Solicitado pelo usuário: geometria primeiro, câmera fixa, circulação, captura 3D e geração de arte; câmera aproximada em seguida para eliminar a vista externa do ambiente.

@@ -1,5 +1,11 @@
 # Relatório de testes — percurso técnico (T09)
 
+## Regressão local de conteúdo — sala e exterior, 11/10/2026
+
+Após criar a sala e o exterior por geometria autorada, a seleção `--only=cenas,percurso,operacao,calibracao-estudos,sala-geometria,exterior-geometria,sala-grafica,exterior-grafico` passou no Windows/RTX 5060: **8 probes, 0 falhas, saída 0**. Carregamento cobriu 20 cenas. Exterior: 3488 ticks/99,41 m em headless e 3498 ticks/99,47 m em gráfico, ida/volta em geometria e arte, quatro cortes por volta e 56 colisores. Sala: 2205 ticks/42,00 m, sem falhas em ambos os modos. Logs em `.local/tests/`.
+
+Capturas gráficas das três vistas externas e da janela 4:3 foram inspecionadas após a correção da vista 2. O teste automático confere movimento, contato com chão/rampa/patamar, câmera/imagem sincronizadas e obstáculos; a aprovação técnica não mede o erro de correspondência dos contornos da imagem. Arte continua candidata, com gate fino de calibração pendente. Fichas e prompts: `docs/calibration/SAVE_ROOM_GEOMETRY.md` e `docs/calibration/exterior/EXTERIOR_GEOMETRY.md`. Os resultados históricos da T09/T10 abaixo pertencem ao percurso técnico e às sessões anteriores.
+
 Data: 11/10/2026. Escopo: percurso técnico T07 com a operação T08. Este relatório separa o que foi **verificado automaticamente** do que foi **inspecionado visualmente** e do que **não foi verificado**. Evidências versionadas em `docs/evidence/`; demais capturas/logs ficam em `.local/` e `user://`, ignorados pelo Git.
 
 ## Ambiente

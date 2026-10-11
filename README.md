@@ -1,5 +1,7 @@
 # LIMIAR Recon
 
+**Novo exterior criado a partir de geometria 3D:** abra `executar-exterior.cmd` (ou F6 em `environments/exterior.tscn`). Estrada → cancela aberta → escada/porta da guarita, com três câmeras fixas e novos fundos nevados. Começa com arte; B compara geometria, R reinicia, Esc sai. WASD/setas e Shift. Ficha, prompts e validação em `docs/calibration/exterior/EXTERIOR_GEOMETRY.md`.
+
 **Estudo da sala de salvamento da guarita:** abra `executar-sala.cmd` (ou F6 em `environments/save_room.tscn`). Geometria foi criada antes da arte, com câmera próxima de interior. WASD/setas movem, Shift corre, B compara arte/geometria, C abre visão técnica ampla, R reinicia e Esc sai. Arte ainda em revisão de alinhamento. Ficha e limites em `docs/calibration/SAVE_ROOM_GEOMETRY.md`.
 
 Protótipo 2.5D para Windows: ator 3D sobre fundos pré-renderizados e câmeras fixas. **T01–T09 concluídas com estudos técnicos provisórios; T10 pronta para revisão** — build Windows x64 exportada e validada nesta sessão em nuvem (Linux), faltando abrir o `.exe` no Windows e medir o desempenho na máquina de referência (veja [Build Windows](#build-windows-t10)). O percurso T07, com a operação T08 (pausa, reinício, diagnóstico F3, conclusão e recuperação), é a cena principal. Os renders de floresta/guarita ENV_1 continuam preservados para refinamento; sua geometria comum ainda não foi aprovada.

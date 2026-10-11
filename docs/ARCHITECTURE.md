@@ -1,5 +1,12 @@
 # Arquitetura — LIMIAR Recon
 
+## Estudos autorados de interior e exterior — 11/10/2026
+
+- `save_room_source.tscn` e `exterior_source.tscn` são fontes espaciais editáveis, construídas antes da arte por scripts em `tools/`. Suas capturas e fichas de câmera são as referências estruturais para image_gen.
+- `save_room.tscn` permite comparar arte/geometria e inspecionar o interior. `exterior.tscn` reutiliza CameraDirector, CameraZone, ShotRig e MovementReference com três enquadramentos do mesmo mundo.
+- `exterior_presentation.gd` estende PresentationController: após a troca atômica existente, aplica o shader de background na fonte compartilhada ou restaura seus materiais para inspeção. Colisores são copiados uma vez das dimensões/transforms autoradas e permanecem independentes da apresentação.
+- São cenas de conteúdo isoladas; a cena principal e o preset da Fase 1 não mudaram. Arte candidata e limitações em `docs/calibration/SAVE_ROOM_GEOMETRY.md` e `docs/calibration/exterior/EXTERIOR_GEOMETRY.md`.
+
 ## Implementado na T00
 
 - `project.godot`: Godot 4.7.2 Standard, GDScript, Forward+, base 1920 × 1080, janela inicial 1280 × 720, proporção preservada.

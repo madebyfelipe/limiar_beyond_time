@@ -21,6 +21,8 @@ const PROBES: Array[Dictionary] = [
 	{"name": "operacao", "script": "res://tests/check_operation.gd", "args": HEADLESS_FIXED, "summary": "T08 failures=0"},
 	{"name": "env1-estrada", "script": "res://tests/check_env1_road_probe.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "env1-continuidade", "script": "res://tests/check_env1_continuity.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
+	{"name": "sala-geometria", "script": "res://tests/check_save_room.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
+	{"name": "exterior-geometria", "script": "res://tests/check_exterior.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "cena-principal", "script": "", "args": ["--headless", "--quit-after", "30"], "summary": ""},
 	{"name": "robustez-10min", "script": "res://tests/check_soak.gd", "args": HEADLESS_FIXED, "summary": "T10 soak minutes=10.0"},
 	{"name": "benchmark-funcional", "script": "", "args": ["--headless"], "extra": ["--benchmark", "--warmup=0", "--duration=45"], "summary": "execução funcional OK"},
@@ -32,6 +34,8 @@ const PROBES: Array[Dictionary] = [
 	{"name": "renderizacao", "script": "res://tests/check_route_rendering.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "rendering failures=0"},
 	{"name": "percurso-grafico", "script": "res://tests/check_technical_route.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "T07 failures=0"},
 	{"name": "operacao-grafica", "script": "res://tests/check_operation.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "T08 failures=0"},
+	{"name": "sala-grafica", "script": "res://tests/check_save_room.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": " failures=0"},
+	{"name": "exterior-grafico", "script": "res://tests/check_exterior.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": " failures=0"},
 ]
 ## Engine lines that mean failure, whatever the exit code says.
 const ERROR_PREFIXES: PackedStringArray = ["ERROR:", "SCRIPT ERROR:", "USER ERROR:", "Parse Error"]
