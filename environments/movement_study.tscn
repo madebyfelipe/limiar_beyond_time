@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="PackedScene" path="res://environments/camera_study.tscn" id="1_scene"]
+[node name="MovementStudy" instance=ExtResource("1_scene")]
+[node name="ZoneA" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(0, 1, 2.5)
+rotation = Vector3(0, 1.5707963, 0)
+[node name="ZoneB" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(0, 1, -2.5)
+rotation = Vector3(0, 1.5707963, 0)
+[editable path="Frame/Composition/Actors/WorldViewport/World"]

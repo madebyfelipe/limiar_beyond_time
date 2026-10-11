@@ -1,0 +1,100 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/backgrounds/composition_study.svg" id="1_background"]
+
+[sub_resource type="Environment" id="Environment_actors"]
+background_mode = 0
+ambient_light_source = 3
+ambient_light_color = Color(0.7, 0.8, 1, 1)
+ambient_light_energy = 0.4
+tonemap_mode = 0
+tonemap_exposure = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Material_capsule"]
+albedo_color = Color(0.15, 0.85, 0.9, 1)
+roughness = 0.8
+
+[sub_resource type="CapsuleMesh" id="Mesh_capsule"]
+material = SubResource("Material_capsule")
+radius = 0.3
+height = 1.8
+
+[node name="Composition" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Bars" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Frame" type="AspectRatioContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+ratio = 1.7777778
+
+[node name="Composition" type="Control" parent="Frame"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Background" type="TextureRect" parent="Frame/Composition"]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_background")
+expand_mode = 1
+
+[node name="Actors" type="SubViewportContainer" parent="Frame/Composition"]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="WorldViewport" type="SubViewport" parent="Frame/Composition/Actors"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+
+[node name="World" type="Node3D" parent="Frame/Composition/Actors/WorldViewport"]
+
+[node name="Environment" type="WorldEnvironment" parent="Frame/Composition/Actors/WorldViewport/World"]
+environment = SubResource("Environment_actors")
+
+[node name="Light" type="DirectionalLight3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+rotation = Vector3(-0.7, -0.5, 0)
+light_energy = 1.2
+
+[node name="Camera" type="Camera3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(0, 3.5, 7)
+rotation = Vector3(-0.35, 0, 0)
+current = true
+fov = 50.0
+
+[node name="Capsule" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(0, 0.9, 0)
+mesh = SubResource("Mesh_capsule")

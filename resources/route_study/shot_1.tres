@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CalibrationDefinition" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/backgrounds/route_study/shot_1.png" id="1_2x0yo"]
+[ext_resource type="Script" path="res://systems/camera/calibration_definition.gd" id="1_cv1du"]
+
+[resource]
+script = ExtResource("1_cv1du")
+source_dimensions = Vector2i(1920, 1080)
+calibration_status = "ESTUDO TÉCNICO VALIDADO (T06)"
+scale_notes = "Estudo autoral, 1 unidade = 1 m. Fonte route_study_source.tscn. Pixels medidos por centroide da cor dos marcos no PNG; câmeras e geometria autoradas, sem ajuste automático."
+reference_labels = PackedStringArray("SurveyMark00", "SurveyMark01", "SurveyMark02", "SurveyMark03", "SurveyMark04", "SurveyMark05", "SurveyMark06", "SurveyMark07")
+reference_pixels = PackedVector2Array(704, 577, 1031, 718, 865, 447, 1162, 550, 915, 407, 1202, 498, 825, 520, 1058, 610)
+reference_world = PackedVector3Array(-4, 0.025, 8, 4, 0.025, 8, -4, 0.025, 2, 4, 0.025, 2, -4, 0.025, -0.3, 4, 0.025, -0.3, -3, 0.025, 5, 3, 0.025, 5)
+capsule_position = Vector3(0, 0, 9)
+grid_origin = Vector3(0, 0, 4)
+shot_id = &"route_1"
+background = ExtResource("1_2x0yo")
+camera_position = Vector3(11, 16, 22)
+camera_rotation_degrees = Vector3(-37.179325, 31.429565, 0)
+fov = 49.0

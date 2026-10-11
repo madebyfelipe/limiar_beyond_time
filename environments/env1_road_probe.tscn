@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="PackedScene" path="res://environments/composition.tscn" id="1"]
+[ext_resource type="Script" path="res://environments/env1_road_probe.gd" id="2"]
+[ext_resource type="PackedScene" path="res://actors/player/player_dylan.tscn" id="3"]
+[ext_resource type="Resource" path="res://resources/env_1/calibration_cam02.tres" id="4"]
+[node name="Env1RoadProbe" node_paths=PackedStringArray("world","background","player") instance=ExtResource("1")]
+script = ExtResource("2")
+definition = ExtResource("4")
+world = NodePath("Frame/Composition/Actors/WorldViewport/World")
+background = NodePath("Frame/Composition/Background")
+player = NodePath("Frame/Composition/Actors/WorldViewport/World/Player")
+road_stations = PackedVector2Array(14,7.9,17.3,8.1,21.9,7.5,25.1,7.15,30,6.13)
+[node name="Background" parent="Frame/Composition"]
+stretch_mode = 5
+[node name="Capsule" parent="Frame/Composition/Actors/WorldViewport/World"]
+visible = false
+[node name="Camera" parent="Frame/Composition/Actors/WorldViewport/World"]
+current = false
+[node name="Light" parent="Frame/Composition/Actors/WorldViewport/World"]
+light_color = Color(0.68,0.77,0.9,1)
+light_energy = 0.85
+[node name="FillLight" type="DirectionalLight3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+rotation = Vector3(-0.4,2.2,0)
+light_color = Color(0.55,0.66,0.85,1)
+light_energy = 0.4
+[node name="Player" parent="Frame/Composition/Actors/WorldViewport/World" instance=ExtResource("3")]
+position = Vector3(28.5,0.06,3.4)
+[node name="Instructions" type="Label" parent="Frame/Composition"]
+offset_left = 24.0
+offset_top = 20.0
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_shadow_color = Color(0,0,0,1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+text = "ENV_1 / ensaio local com o render original\nWASD / setas: mover · Shift: correr · G: mostrar faixa de ensaio\nEscala e chão provisórios. Ligação com as outras vistas em calibração."
+mouse_filter = 2
+[editable path="Frame/Composition/Actors/WorldViewport/World"]

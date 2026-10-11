@@ -1,0 +1,36 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="PackedScene" path="res://environments/composition.tscn" id="1_scene"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/occlusion_study.svg" id="2_background"]
+[ext_resource type="Shader" path="res://systems/camera/background_occluder.gdshader" id="3_shader"]
+[ext_resource type="Script" path="res://environments/occlusion_proof.gd" id="4_script"]
+
+[sub_resource type="ShaderMaterial" id="Material_occluder"]
+shader = ExtResource("3_shader")
+shader_parameter/background = ExtResource("2_background")
+
+[sub_resource type="BoxMesh" id="Mesh_obstacle"]
+size = Vector3(2, 2.6, 1)
+material = SubResource("Material_occluder")
+
+[sub_resource type="BoxShape3D" id="Shape_obstacle"]
+size = Vector3(2, 2.6, 1)
+
+[node name="OcclusionProof" node_paths=PackedStringArray("capsule") instance=ExtResource("1_scene")]
+script = ExtResource("4_script")
+capsule = NodePath("Frame/Composition/Actors/WorldViewport/World/Capsule")
+
+[node name="Background" parent="Frame/Composition" index="0"]
+texture = ExtResource("2_background")
+
+[node name="Obstacle" type="StaticBody3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(0, 1.3, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Frame/Composition/Actors/WorldViewport/World/Obstacle"]
+shape = SubResource("Shape_obstacle")
+
+[node name="Occluder" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(0, 1.3, 0)
+mesh = SubResource("Mesh_obstacle")
+
+[editable path="Frame/Composition/Actors/WorldViewport/World"]

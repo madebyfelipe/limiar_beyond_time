@@ -1,0 +1,68 @@
+[gd_scene load_steps=10 format=3]
+[ext_resource type="PackedScene" path="res://environments/composition.tscn" id="1_scene"]
+[ext_resource type="PackedScene" path="res://actors/player/player.tscn" id="2_player"]
+[sub_resource type="StandardMaterial3D" id="FloorMaterial"]
+albedo_color = Color(0.24, 0.32, 0.38, 1)
+roughness = 1.0
+[sub_resource type="BoxMesh" id="FloorMesh"]
+size = Vector3(10, 0.2, 10)
+material = SubResource("FloorMaterial")
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(10, 0.2, 10)
+[sub_resource type="BoxMesh" id="WallMesh"]
+size = Vector3(0.2, 1, 10)
+[sub_resource type="BoxShape3D" id="WallShape"]
+size = Vector3(0.2, 1, 10)
+[sub_resource type="BoxMesh" id="RampMesh"]
+size = Vector3(2, 0.2, 4)
+[sub_resource type="BoxShape3D" id="RampShape"]
+size = Vector3(2, 0.2, 4)
+[node name="LocomotionArena" instance=ExtResource("1_scene")]
+[node name="Camera" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(0, 8, 12)
+rotation = Vector3(-0.55, 0, 0)
+[node name="Capsule" parent="Frame/Composition/Actors/WorldViewport/World"]
+visible = false
+[node name="Player" parent="Frame/Composition/Actors/WorldViewport/World" node_paths=PackedStringArray("camera") instance=ExtResource("2_player")]
+position = Vector3(-2, 0.1, 2)
+camera = NodePath("../Camera")
+[node name="Floor" type="StaticBody3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(0, -0.1, 0)
+[node name="Collision" type="CollisionShape3D" parent="Frame/Composition/Actors/WorldViewport/World/Floor"]
+shape = SubResource("FloorShape")
+[node name="Mesh" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World/Floor"]
+mesh = SubResource("FloorMesh")
+[node name="LeftWall" type="StaticBody3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(-5, 0.5, 0)
+[node name="Collision" type="CollisionShape3D" parent="Frame/Composition/Actors/WorldViewport/World/LeftWall"]
+shape = SubResource("WallShape")
+[node name="Mesh" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World/LeftWall"]
+mesh = SubResource("WallMesh")
+[node name="RightWall" type="StaticBody3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(5, 0.5, 0)
+[node name="Collision" type="CollisionShape3D" parent="Frame/Composition/Actors/WorldViewport/World/RightWall"]
+shape = SubResource("WallShape")
+[node name="Mesh" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World/RightWall"]
+mesh = SubResource("WallMesh")
+[node name="BackWall" type="StaticBody3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(0, 0.5, -5)
+rotation = Vector3(0, 1.5707963, 0)
+[node name="Collision" type="CollisionShape3D" parent="Frame/Composition/Actors/WorldViewport/World/BackWall"]
+shape = SubResource("WallShape")
+[node name="Mesh" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World/BackWall"]
+mesh = SubResource("WallMesh")
+[node name="FrontWall" type="StaticBody3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(0, 0.5, 5)
+rotation = Vector3(0, 1.5707963, 0)
+[node name="Collision" type="CollisionShape3D" parent="Frame/Composition/Actors/WorldViewport/World/FrontWall"]
+shape = SubResource("WallShape")
+[node name="Mesh" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World/FrontWall"]
+mesh = SubResource("WallMesh")
+[node name="Ramp" type="StaticBody3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+position = Vector3(1.5, 0.421, 0)
+rotation = Vector3(0.2617994, 0, 0)
+[node name="Collision" type="CollisionShape3D" parent="Frame/Composition/Actors/WorldViewport/World/Ramp"]
+shape = SubResource("RampShape")
+[node name="Mesh" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World/Ramp"]
+mesh = SubResource("RampMesh")
+[editable path="Frame/Composition/Actors/WorldViewport/World"]

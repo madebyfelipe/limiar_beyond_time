@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ShotDefinition" load_steps=3 format=3]
+[ext_resource type="Script" path="res://systems/camera/shot_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/occlusion_study.svg" id="2"]
+[resource]
+script = ExtResource("1")
+shot_id = &"study_a"
+background = ExtResource("2")
+camera_position = Vector3(0, 3.5, 7)
+camera_rotation_degrees = Vector3(-20.0535228, 0, 0)

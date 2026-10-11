@@ -1,0 +1,9 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="PackedScene" path="res://environments/calibration_env1.tscn" id="1"]
+[ext_resource type="Resource" path="res://resources/route_study/shot_1.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/route_study/shot_2.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/route_study/shot_3.tres" id="4"]
+[node name="CalibrationRouteStudy" instance=ExtResource("1")]
+definition = ExtResource("2")
+available_definitions = [ExtResource("2"),ExtResource("3"),ExtResource("4")]
+show_grid = false

@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=3]
+[ext_resource type="PackedScene" path="res://environments/composition.tscn" id="1_base"]
+[ext_resource type="Script" path="res://environments/calibration_study.gd" id="2_script"]
+[ext_resource type="Resource" path="res://resources/env_1/calibration_cam03.tres" id="3_definition"]
+[ext_resource type="Script" path="res://systems/camera/calibration_overlay.gd" id="4_overlay"]
+[ext_resource type="Resource" path="res://resources/env_1/calibration_cam01.tres" id="5_cam01"]
+[ext_resource type="Resource" path="res://resources/env_1/calibration_cam02.tres" id="6_cam02"]
+[node name="CalibrationEnv1" node_paths=PackedStringArray("background","viewport","camera","capsule","grid","markers","caption") instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+definition = ExtResource("3_definition")
+available_definitions = [ExtResource("5_cam01"), ExtResource("6_cam02"), ExtResource("3_definition")]
+background = NodePath("Frame/Composition/Background")
+viewport = NodePath("Frame/Composition/Actors/WorldViewport")
+camera = NodePath("Frame/Composition/Actors/WorldViewport/World/Camera")
+capsule = NodePath("Frame/Composition/Actors/WorldViewport/World/Capsule")
+grid = NodePath("Frame/Composition/Actors/WorldViewport/World/Grid")
+markers = NodePath("Frame/Composition/Actors/WorldViewport/World/Markers")
+caption = NodePath("Frame/Composition/Caption")
+[node name="Background" parent="Frame/Composition"]
+stretch_mode = 5
+[node name="Grid" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+cast_shadow = 0
+[node name="Markers" type="MeshInstance3D" parent="Frame/Composition/Actors/WorldViewport/World"]
+cast_shadow = 0
+[node name="Overlay" type="Node2D" parent="Frame/Composition" node_paths=PackedStringArray("study")]
+script = ExtResource("4_overlay")
+study = NodePath("../../..")
+[node name="Caption" type="Label" parent="Frame/Composition"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 1700.0
+offset_bottom = 100.0
+theme_override_colors/font_color = Color(1,1,1,1)
+theme_override_colors/font_shadow_color = Color(0,0,0,1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+[editable path="Frame/Composition/Actors/WorldViewport/World"]

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CalibrationDefinition" load_steps=3 format=3]
+[ext_resource type="Script" path="res://systems/camera/calibration_definition.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/env_1/env01_cam02_bg.png.png" id="2"]
+[resource]
+script = ExtResource("1")
+shot_id = &"env01_cam02_draft"
+background = ExtResource("2")
+camera_position = Vector3(63.80803,34.98116,-25.13368)
+camera_rotation_degrees = Vector3(-34,126.5,0)
+fov = 15.0
+source_dimensions = Vector2i(1672,941)
+scale_notes = "Hipótese local revisada: perspectiva comprimida, FOV 15 graus; portão 5,6 x 1,6 m; quatro postes com separação vertical candidata de 1,3 m; piso y=0. Alvos observados no original, sem rocha/neve tratadas como borda direita. Pontos inferiores dos postes ancoram um traçado provisório por raios sobre o plano e arredondamento manual: NÃO são pés confirmados nem validação independente; os apoios reais estão ocultos ou abaixo da pista. Topos conferem a hipótese de altura comum, sem alturas livres por poste. Escala absoluta, plano e ligação às outras vistas não confirmados. Ver docs/calibration/ENV_1_REFINEMENT.md."
+calibration_status = "PROXY LOCAL — CHÃO E CONEXÃO PENDENTES"
+reference_labels = PackedStringArray("portão topo esquerdo", "portão topo direito", "portão base direita", "portão base esquerda", "poste próximo inferior (âncora provisória)", "poste próximo topo", "poste médio A inferior (âncora provisória)", "poste médio A topo", "poste médio B inferior (âncora provisória)", "poste médio B topo", "poste distante inferior (âncora provisória)", "poste distante topo")
+reference_pixels = PackedVector2Array(1063,132,1310,219,1301,289,1058,203,483,730,475,669,665,521,661,458,762,432,758,363,887,312,892,253)
+reference_world = PackedVector3Array(12,1.6,7.8,12,1.6,2.2,12,0,2.2,12,0,7.8,31.35,0,5.85,31.35,1.3,5.85,25.1,0,7.15,25.1,1.3,7.15,21.9,0,7.5,21.9,1.3,7.5,17.3,0,8.1,17.3,1.3,8.1)
+reference_anchor_mask = PackedByteArray(0,0,0,0,1,0,1,0,1,0,1,0)
+capsule_position = Vector3(24,0,5)
+grid_origin = Vector3(24,0,5)

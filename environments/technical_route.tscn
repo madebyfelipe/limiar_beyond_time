@@ -1,0 +1,36 @@
+[gd_scene load_steps=8 format=3]
+[ext_resource type="PackedScene" path="res://environments/composition.tscn" id="1"]
+[ext_resource type="Script" path="res://environments/technical_route.gd" id="2"]
+[ext_resource type="PackedScene" path="res://environments/route_study_source.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://actors/player/player.tscn" id="4"]
+[ext_resource type="Resource" path="res://resources/route_study/shot_1.tres" id="5"]
+[ext_resource type="Resource" path="res://resources/route_study/shot_2.tres" id="6"]
+[ext_resource type="Resource" path="res://resources/route_study/shot_3.tres" id="7"]
+[node name="TechnicalRoute" node_paths=PackedStringArray("world","background","player") instance=ExtResource("1")]
+script = ExtResource("2")
+geometry = ExtResource("3")
+definitions = [ExtResource("5"),ExtResource("6"),ExtResource("7")]
+world = NodePath("Frame/Composition/Actors/WorldViewport/World")
+background = NodePath("Frame/Composition/Background")
+player = NodePath("Frame/Composition/Actors/WorldViewport/World/Player")
+zone_centers = Array[Vector3]([Vector3(0,2,4.75),Vector3(0,2,-6.5),Vector3(0,2,-18.25)])
+zone_sizes = Array[Vector3]([Vector3(13,6,14.5),Vector3(4,6,15),Vector3(13,6,14.5)])
+[node name="Light" parent="Frame/Composition/Actors/WorldViewport/World"]
+visible = false
+[node name="Capsule" parent="Frame/Composition/Actors/WorldViewport/World"]
+visible = false
+[node name="Camera" parent="Frame/Composition/Actors/WorldViewport/World"]
+current = false
+[node name="Player" parent="Frame/Composition/Actors/WorldViewport/World" instance=ExtResource("4")]
+position = Vector3(0,0.06,9)
+[node name="Instructions" type="Label" parent="Frame/Composition"]
+offset_left = 24.0
+offset_top = 22.0
+theme_override_font_sizes/font_size = 25
+theme_override_colors/font_color = Color(0.85,0.92,0.93,1)
+theme_override_colors/font_shadow_color = Color(0.04,0.08,0.1,1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+text = "LIMIAR / percurso técnico\nContorne o caixote, suba a rampa e alcance a marca dourada. Depois volte.\nWASD / setas: mover   ·   Shift: correr"
+mouse_filter = 2
+[editable path="Frame/Composition/Actors/WorldViewport/World"]

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#383442"/>
+  <path d="M0 380H1920V1080H0Z" fill="#565264"/>
+  <g fill="none" stroke="#837d93" stroke-width="3">
+    <path d="M0 380H1920M0 470H1920M0 600H1920M0 790H1920M0 1060H1920"/>
+    <path d="M600 380L-400 1080M600 380L250 1080M600 380L700 1080M600 380L1220 1080M600 380L1670 1080M600 380L2320 1080"/>
+  </g>
+  <rect x="24" y="24" width="1872" height="1032" fill="none" stroke="#d0c5dc" stroke-width="4"/>
+  <!-- Same physical box as study A, viewed from (6,3.5,6), pitch -17.035°, yaw 45°. -->
+  <path d="M819.0565 310.2623L1015.609 333.2343L1112.797 320.7823L916.4012 301.2571Z" fill="#d8b486"/>
+  <path d="M830.3851 632.5134L1010.396 706.966L1015.609 333.2343L819.0565 310.2623Z" fill="#ad805c"/>
+  <path d="M1010.396 706.966L1099.573 666.8798L1112.797 320.7823L1015.609 333.2343Z" fill="#916647"/>
+</svg>

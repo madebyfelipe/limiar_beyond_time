@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="PackedScene" path="res://actors/player/player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/dylan_protagonist/model-rigged.glb" id="2"]
+[ext_resource type="Script" path="res://actors/player/dylan_visual.gd" id="3"]
+[sub_resource type="CapsuleShape3D" id="DylanCollision"]
+radius = 0.3
+height = 2.4
+[node name="Dylan" instance=ExtResource("1")]
+[node name="Collision" parent="."]
+position = Vector3(0,1.2,0)
+shape = SubResource("DylanCollision")
+[node name="Capsule" parent="Visual"]
+visible = false
+[node name="Facing" parent="Visual"]
+visible = false
+[node name="DylanVisual" type="Node3D" parent="Visual"]
+script = ExtResource("3")
+[node name="Model" parent="Visual/DylanVisual" instance=ExtResource("2")]
+[node name="DirectionIndicator" parent="."]
+visible = false
