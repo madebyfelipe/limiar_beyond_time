@@ -18,11 +18,19 @@ func set_control_enabled(enabled: bool) -> void:
 		movement_reference.reset()
 
 func reset_to_start() -> void:
-	global_transform = spawn_transform
+	reset_to(spawn_transform)
+
+func reset_to(target: Transform3D) -> void:
+	global_transform = target
 	velocity = Vector3.ZERO
 	desired_direction = Vector3.ZERO
 	visual.rotation = Vector3.ZERO
 	movement_reference.reset()
+
+func _notification(what: int) -> void:
+	# Pausing interrupts input; the next directional input uses the current camera.
+	if what == NOTIFICATION_PAUSED:
+		movement_reference.reset()
 
 func _physics_process(delta: float) -> void:
 	var input: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down") if control_enabled else Vector2.ZERO

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=12 format=3]
 [ext_resource type="PackedScene" path="res://environments/composition.tscn" id="1"]
 [ext_resource type="Script" path="res://environments/technical_route.gd" id="2"]
 [ext_resource type="PackedScene" path="res://environments/route_study_source.tscn" id="3"]
@@ -6,7 +6,18 @@
 [ext_resource type="Resource" path="res://resources/route_study/shot_1.tres" id="5"]
 [ext_resource type="Resource" path="res://resources/route_study/shot_2.tres" id="6"]
 [ext_resource type="Resource" path="res://resources/route_study/shot_3.tres" id="7"]
-[node name="TechnicalRoute" node_paths=PackedStringArray("world","background","player") instance=ExtResource("1")]
+[ext_resource type="Script" path="res://environments/route_progress.gd" id="8"]
+[ext_resource type="PackedScene" path="res://ui/diagnostics_overlay.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://ui/pause_menu.tscn" id="10"]
+[sub_resource type="StyleBoxFlat" id="NoticePanel"]
+content_margin_left = 34.0
+content_margin_top = 18.0
+content_margin_right = 34.0
+content_margin_bottom = 18.0
+bg_color = Color(0.05, 0.08, 0.09, 0.88)
+border_width_top = 3
+border_color = Color(0.85, 0.72, 0.32, 1)
+[node name="TechnicalRoute" node_paths=PackedStringArray("world","background","player","progress","pause_menu","diagnostics","instructions","notice") instance=ExtResource("1")]
 script = ExtResource("2")
 geometry = ExtResource("3")
 definitions = [ExtResource("5"),ExtResource("6"),ExtResource("7")]
@@ -15,6 +26,11 @@ background = NodePath("Frame/Composition/Background")
 player = NodePath("Frame/Composition/Actors/WorldViewport/World/Player")
 zone_centers = Array[Vector3]([Vector3(0,2,4.75),Vector3(0,2,-6.5),Vector3(0,2,-18.25)])
 zone_sizes = Array[Vector3]([Vector3(13,6,14.5),Vector3(4,6,15),Vector3(13,6,14.5)])
+progress = NodePath("Progress")
+pause_menu = NodePath("PauseMenu")
+diagnostics = NodePath("Frame/Composition/Diagnostics")
+instructions = NodePath("Frame/Composition/Instructions")
+notice = NodePath("Frame/Composition/Notice")
 [node name="Light" parent="Frame/Composition/Actors/WorldViewport/World"]
 visible = false
 [node name="Capsule" parent="Frame/Composition/Actors/WorldViewport/World"]
@@ -31,6 +47,28 @@ theme_override_colors/font_color = Color(0.85,0.92,0.93,1)
 theme_override_colors/font_shadow_color = Color(0.04,0.08,0.1,1)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
-text = "LIMIAR / percurso técnico\nContorne o caixote, suba a rampa e alcance a marca dourada. Depois volte.\nWASD / setas: mover   ·   Shift: correr"
+text = "LIMIAR / percurso técnico\nContorne o caixote, suba a rampa e alcance a marca dourada.\nWASD / setas: mover   ·   Shift: correr   ·   Esc: pausa   ·   F3: diagnóstico"
 mouse_filter = 2
+[node name="Notice" type="Label" parent="Frame/Composition"]
+visible = false
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = -170.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 30
+theme_override_colors/font_color = Color(0.96, 0.88, 0.58, 1)
+theme_override_styles/normal = SubResource("NoticePanel")
+horizontal_alignment = 1
+vertical_alignment = 1
+mouse_filter = 2
+[node name="Diagnostics" parent="Frame/Composition" instance=ExtResource("9")]
+[node name="Progress" type="Node" parent="." node_paths=PackedStringArray("player")]
+script = ExtResource("8")
+player = NodePath("../Frame/Composition/Actors/WorldViewport/World/Player")
+[node name="PauseMenu" parent="." instance=ExtResource("10")]
 [editable path="Frame/Composition/Actors/WorldViewport/World"]

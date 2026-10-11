@@ -1,11 +1,14 @@
 # Limitações e pendências
 
-## Estado atual — T07
+## Estado atual — T08
 
 - F5 e `executar-percurso.cmd` abrem T07; a build diagnóstica atual está em `builds/windows-t07`. A antiga pasta `builds/windows` continua T05.
 - T06 concluída com estudos autorais escolhidos pelo usuário e reprodução independente. T07 validada por ida/volta, desafios de colisão, oclusão e capturas; ENV_1 continua pendente de arte, preservado.
 - O percurso é técnico e curto: ida caminhando/volta correndo do probe durou 36,12 s simulados. Não satisfaz por si só a expectativa de exploração de 3–5 min, os dez minutos de robustez ou o orçamento 1080p/60 FPS do fechamento da Fase 1.
-- Pausa, reinício, perda de foco, recuperação e aviso de conclusão ainda não existem (T08). Fechar pelo botão padrão da janela; ponto final apenas marcado no chão. Usabilidade com teclado físico e exploração humana prolongada não foram verificadas.
+- T08 implementada: Esc/menu, reinício, F3, conclusão, recuperação abaixo do cenário e pausa por perda de foco. Teclas e botões foram exercitados por eventos de entrada injetados na janela do jogo; a perda de foco foi simulada pela notificação do engine, não por troca real de janela no Windows. Usabilidade com teclado físico e exploração humana prolongada não foram verificadas.
+- Pausar interrompe a referência de movimento: ao retomar segurando uma direção, ela é recapturada pela câmera atual (decisão T08). A continuidade de direção através de cortes sem pausa continua como na T05.
+- A recuperação é rede de segurança: no percurso fechado atual a queda só foi provocada no teste, posicionando o ator fora dos limites. O checkpoint é o último pad (azul na ida, dourado na volta); não existe sistema geral de checkpoints.
+- Evidências da sessão em nuvem (Linux) foram renderizadas por software (Mesa llvmpipe sob Xvfb). FPS exibido nessas capturas não mede o desempenho da máquina de referência.
 - Prévia de calibração aprovada: `calibration_route_study.tscn`; originais: `calibration_env1.tscn` / `executar-calibracao.cmd`. Usar F6 para a cena aberta. Os probes são `SceneTree` e exigem `--script`.
 
 ## T00 — Histórico concluído
@@ -26,7 +29,7 @@
 - A revisão T00 foi concluída posteriormente por captura nativa do renderizador. Após autorização de execução contínua, T01–T05 foram implementadas e revisadas; resultados separados em `PROGRESS.md`.
 - SVGs atuais são estudos originais geométricos, sem aprovação canônica ou calibração de ambientes. Chão e referências gerais do estudo ainda precisam de ajuste aos renders; colisões/oclusão das provas são técnicas.
 - Filtros nearest mantêm cores equivalentes entre fundo e oclusor nas resoluções testadas (diferença de pixels zero). Reavaliar qualidade de filtragem quando integrar renders reais.
-- Indicador de direção é uma seta 3D e pode ser ocultado pela geometria. Overlay F3 continua previsto para T08.
+- Indicador de direção é uma seta 3D e pode ser ocultado pela geometria. O overlay F3 (T08) mostra a direção desejada em texto.
 - Entrada sintética/probes reais confirmam contratos; exploração humana prolongada e usabilidade no teclado ainda não verificadas.
 - Na fase T01–T05 os arquivos ainda não eram rastreados, portanto `git diff --check` não cobria aquele conteúdo; alterações foram relidas diretamente. Posteriormente o projeto foi commitado e publicado em `madebyfelipe/limiar_beyond_time`, conforme registro em `PROGRESS.md`. GLBs originais permanecem preservados.
 
@@ -55,7 +58,7 @@ Medições das fichas preservadas: cam01/cam02/cam03 **7,005 / 9,016 / 32,265 px
 ## Ainda não verificado / tarefas futuras
 
 - Calibração de arte ENV_1 ainda pendente. T01–T07 concluídas no escopo técnico com os estudos autorais.
-- Pausa, recuperação e diagnóstico: T08.
+- Pausa, recuperação e diagnóstico: T08 concluída no escopo técnico; foco real de janela e teclado físico ainda dependem de teste humano.
 - Regressões automatizadas de gameplay e inspeção do percurso: T09.
 - Desempenho 1080p/60 FPS, exploração de dez minutos e piloto executável: T10.
 - Cor do oclusor validada nos estudos; sombras de contato e coerência dos ambientes reais permanecem pendentes.

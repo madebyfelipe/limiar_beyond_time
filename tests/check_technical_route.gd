@@ -92,6 +92,8 @@ func run() -> void:
 	scene = load("res://environments/technical_route.tscn").instantiate()
 	root.add_child(scene)
 	player = scene.player
+	# Desktop focus changes must not pause this probe; T08 covers that path.
+	scene.pause_menu.pause_on_focus_loss = false
 	scene.director.shot_changed.connect(func(_from: StringName, to: StringName) -> void: cuts.append(to))
 	await tick(25)
 	check(scene.shots.size() == 3 and scene.director.zones.size() == 3,"Three shots/zones required")

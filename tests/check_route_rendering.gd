@@ -28,6 +28,8 @@ func run() -> void:
 	create_timer(90).timeout.connect(func() -> void: quit(124))
 	scene = load("res://environments/technical_route.tscn").instantiate()
 	root.add_child(scene)
+	# Desktop focus changes must not pause this probe; T08 covers that path.
+	scene.pause_menu.pause_on_focus_loss = false
 	scene.director.set_physics_process(false)
 	scene.player.set_physics_process(false)
 	scene.player.hide()

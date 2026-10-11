@@ -39,6 +39,13 @@ func _physics_process(delta: float) -> void:
 		candidate = null
 		candidate_time = 0.0
 
+## Restart/recovery: selects a shot immediately, discarding any candidate.
+func reset_to(shot: ShotRig) -> void:
+	candidate = null
+	candidate_time = 0.0
+	if shot != current_shot:
+		_activate(shot)
+
 func _activate(shot: ShotRig) -> void:
 	var previous: StringName = current_shot.definition.shot_id if current_shot else &""
 	presentation.apply_shot(shot)

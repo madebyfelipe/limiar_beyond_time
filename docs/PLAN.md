@@ -56,6 +56,8 @@ Usar cenas pequenas, referências explícitas no Inspector e sinais. Não criar 
 
 Autorização específica de 11/10/2026: o usuário pediu continuidade até T07, escolheu fundos de estudo com perspectiva consistente e autorizou revisão independente da T06 por subagente. Essa autorização permite concluir T06 e T07 na mesma solicitação, preservando os critérios abaixo e os renders ENV_1 para refinamento. Não abrange T08.
 
+Autorização seguinte (sessão em nuvem iniciada em 11/10/2026): o usuário pediu retomar a última tarefa pendente da lista e continuar o máximo possível sem consultas, pois estaria ausente por cerca de cinco horas. Essa autorização permite executar T08, T09 e T10 em sequência, mantendo dependências, critérios de aceite, revisão técnica e inspeção visual de cada tarefa. Não abrange o backlog posterior à Fase 1 (combate, animais, missões) nem aprovação de ENV_1.
+
 ### T00 — Preparar projeto e registro de decisões
 
 - Entregar projeto mínimo Godot 4.7.2 com cena inicial vazia, Git, exclusões, diretórios de assets e preset Windows x64.

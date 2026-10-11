@@ -1,19 +1,22 @@
 # LIMIAR Recon
 
-Protótipo 2.5D para Windows: ator 3D sobre fundos pré-renderizados e câmeras fixas. **T01–T07 concluídas com estudos técnicos provisórios.** O percurso T07 é a cena principal. Os renders de floresta/guarita ENV_1 continuam preservados para refinamento; sua geometria comum ainda não foi aprovada.
+Protótipo 2.5D para Windows: ator 3D sobre fundos pré-renderizados e câmeras fixas. **T01–T08 concluídas com estudos técnicos provisórios.** O percurso T07, com a operação T08 (pausa, reinício, diagnóstico F3, conclusão e recuperação), é a cena principal. Os renders de floresta/guarita ENV_1 continuam preservados para refinamento; sua geometria comum ainda não foi aprovada.
 
 Repositório: [madebyfelipe/limiar_beyond_time](https://github.com/madebyfelipe/limiar_beyond_time). O Git inclui código, cenas, recursos, documentação, modelos, texturas e fundos. Engine local, cache de importação, logs/capturas de teste e builds geradas ficam nas pastas ignoradas.
 
 Em outra máquina, clone o repositório e abra `project.godot` com Godot 4.7.2 Standard. Para usar os atalhos `.cmd`, coloque a distribuição Windows da engine em `.tools/godot-4.7.2/`, incluindo `Godot_v4.7.2-stable_win64_console.exe`. O editor reimporta os assets ao abrir. F6 na cena `environments/env1_continuity_probe.tscn` executa Dylan com os renders originais; F5 executa o percurso técnico.
 
-## Jogar o percurso T07
+## Jogar o percurso
 
 Dê dois cliques em **`executar-percurso.cmd`**. No Godot, **F5** executa o mesmo percurso. Contorne o caixote, atravesse o corredor, suba a rampa e passe pela abertura à direita da estante para chegar à marca dourada. Depois volte à marca azul inicial.
 
 - WASD/setas: mover em relação à tela. Shift: correr.
 - Segurar uma direção durante o corte conserva a direção mundial; soltar todas e pressionar novamente usa a câmera atual.
 - Duas áreas, três enquadramentos, obstáculo contornável, rampa e passagem de 1,6 m.
-- Feche a janela pelo botão padrão do Windows. Pausa, reinício e mensagem de conclusão pertencem à T08. A marca dourada é apenas o ponto final espacial.
+- **Esc**: pausa com Continuar, Reiniciar percurso e Sair do jogo (mouse ou setas + Enter). Esc de novo retoma. Perder o foco da janela também pausa; voltar à janela não retoma sozinho.
+- **F3**: diagnóstico com FPS, tempo de quadro, posição, velocidade, enquadramento ativo/candidato, referência de movimento, etapa/tempo do percurso e estado da simulação. Funciona também com o jogo pausado.
+- Ao pisar na marca dourada, o objetivo muda para voltar à marca azul; ao voltar, aparece **PERCURSO TÉCNICO CONCLUÍDO** com o tempo. Reiniciar percurso restaura personagem, câmera, entrada e objetivo.
+- Se o personagem cair abaixo do cenário (pés abaixo de −4 m), ele volta à última marca alcançada naquela tentativa, com a câmera correspondente.
 
 Os fundos são estudos geométricos autorais, não arte final. A ida caminhando e a volta correndo do probe percorreram 86,16 m em 36,12 s simulados; isso não comprova a duração de exploração de 3–5 min ou desempenho do marco final.
 
@@ -55,9 +58,10 @@ Os estudos têm oito referências distribuídas por vista e erros máximos abaix
 & $GodotExe --headless --path $PWD --fixed-fps 60 --script res://tests/check_technical_route.gd
 & $GodotExe --path $PWD --fixed-fps 60 --script res://tests/check_technical_route.gd
 & $GodotExe --path $PWD --fixed-fps 60 --script res://tests/check_route_rendering.gd
+& $GodotExe --headless --path $PWD --fixed-fps 60 --script res://tests/check_operation.gd
 ```
 
-O primeiro/segundo fazem ida e volta com o controlador real e sem teleporte no percurso, conferem limites, chão/rampa, enquadramento, cortes e desafios de colisão. O terceiro exige renderizador gráfico: verifica oclusão e ausência de emendas nas três vistas em 1920×1080, 1280×720 e janela 1280×960 com barras. Os probes retornam código diferente de zero ao falhar. Headless não comprova renderização.
+O primeiro/segundo fazem ida e volta com o controlador real e sem teleporte no percurso, conferem limites, chão/rampa, enquadramento, cortes e desafios de colisão. O terceiro exige renderizador gráfico: verifica oclusão e ausência de emendas nas três vistas em 1920×1080, 1280×720 e janela 1280×960 com barras. Os probes retornam código diferente de zero ao falhar. Headless não comprova renderização. `check_operation.gd` (T08) usa eventos reais de teclado para Esc/F3/setas/Enter: pausa congelando física, candidato de corte e relógio; F3 durante a pausa; reinício pelo menu restaurando personagem/câmera/entrada; perda de foco; duas recuperações de queda; marca dourada e conclusão. Sem `--headless`, salva capturas `t08-*.png`.
 
 Regressões anteriores:
 
