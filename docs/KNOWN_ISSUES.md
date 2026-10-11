@@ -28,7 +28,7 @@
 - Filtros nearest mantêm cores equivalentes entre fundo e oclusor nas resoluções testadas (diferença de pixels zero). Reavaliar qualidade de filtragem quando integrar renders reais.
 - Indicador de direção é uma seta 3D e pode ser ocultado pela geometria. Overlay F3 continua previsto para T08.
 - Entrada sintética/probes reais confirmam contratos; exploração humana prolongada e usabilidade no teclado ainda não verificadas.
-- Arquivos continuam não rastreados no Git, sem commit inicial. `git diff --check` não valida esse conteúdo; alterações foram relidas diretamente. Não houve publicação ou edição dos GLBs.
+- Na fase T01–T05 os arquivos ainda não eram rastreados, portanto `git diff --check` não cobria aquele conteúdo; alterações foram relidas diretamente. Posteriormente o projeto foi commitado e publicado em `madebyfelipe/limiar_beyond_time`, conforme registro em `PROGRESS.md`. GLBs originais permanecem preservados.
 
 ## Exportação — Falha reproduzida e corrigida
 
