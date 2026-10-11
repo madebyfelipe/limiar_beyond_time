@@ -132,6 +132,13 @@ func _ready() -> void:
 	notice_timer.timeout.connect(notice.hide)
 	add_child(notice_timer)
 	_update_objective()
+	if OS.get_cmdline_user_args().has("--benchmark"):
+		# T10 measurement autopilot; a focus change must not stall it.
+		pause_menu.pause_on_focus_loss = false
+		var benchmark := RouteBenchmark.new()
+		benchmark.name = "Benchmark"
+		benchmark.route = self
+		add_child(benchmark)
 
 func _physics_process(_delta: float) -> void:
 	if player.global_position.y < recovery_height:

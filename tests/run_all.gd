@@ -22,6 +22,8 @@ const PROBES: Array[Dictionary] = [
 	{"name": "env1-estrada", "script": "res://tests/check_env1_road_probe.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "env1-continuidade", "script": "res://tests/check_env1_continuity.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "cena-principal", "script": "", "args": ["--headless", "--quit-after", "30"], "summary": ""},
+	{"name": "robustez-10min", "script": "res://tests/check_soak.gd", "args": HEADLESS_FIXED, "summary": "T10 soak minutes=10.0"},
+	{"name": "benchmark-funcional", "script": "", "args": ["--headless"], "extra": ["--benchmark", "--warmup=0", "--duration=45"], "summary": "execução funcional OK"},
 	{"name": "composicao", "script": "res://tests/check_composition.gd", "args": [], "graphical": true, "summary": "T01 failures=0"},
 	{"name": "oclusao", "script": "res://tests/check_occlusion.gd", "args": [], "graphical": true, "summary": "T02 failures=0"},
 	{"name": "distancia-30", "script": "res://tests/check_distance.gd", "args": ["--disable-vsync", "--max-fps", "30"], "graphical": true, "summary": "ticks=120"},
