@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3]
 [ext_resource type="PackedScene" path="res://actors/player/player.tscn" id="1"]
-[ext_resource type="PackedScene" path="res://assets/models/dylan_protagonist/model-rigged.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/dylan_protagonist/mixamo/dylan_rig_idle.fbx" id="2"]
 [ext_resource type="Script" path="res://actors/player/dylan_visual.gd" id="3"]
 [sub_resource type="CapsuleShape3D" id="DylanCollision"]
 radius = 0.3

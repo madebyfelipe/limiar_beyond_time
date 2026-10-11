@@ -6,10 +6,20 @@
 - É pós-processamento da composição 16:9: não é emulação do hardware, não introduz jitter/warping de geometria e não reduz o custo da renderização 3D. Textos ficam nítidos. Para calibração visual fina, selecionar Original.
 - Sete regressões aprovadas no Windows/RTX 4050 Laptop GPU. Sem nova build ou benchmark de desempenho nesta integração.
 
+## Atualização — enquadramento, inércia e controles, 11/10/2026
+
+- A vista 2 do exterior passou a usar recorte projetivo (`zoom` 1,25). Dylan cresce de 102 para ~128 px sem arte nova, mas a imagem fica mais macia e o desalinhamento conhecido do poste é ampliado na mesma proporção. Detalhes e margens em `calibration/exterior/EXTERIOR_GEOMETRY.md`.
+- Controles de tanque disponíveis (botão na pausa, ou T no exterior e na sala), com captura própria de marcha à ré e de giro no lugar — as duas pendências anotadas mais cedo nesta data foram resolvidas no mesmo dia.
+- Corrigido em 11/10/2026, após relato do usuário: o pivô entrava 72,6° virado e deslocado 0,18 m, porque a janela recortada carregava a guinada e a posição do meio da captura. Mesmo defeito de posição no gesto da porta. Detalhes e a nova asserção em `DYLAN_ANIMATION.md`.
+- O giro no lugar vem de uma captura de giro único, recortada e costurada em loop. A emenda ficou em 1° somados onze ossos, mas o primeiro quarto do ciclo é uma mistura entre o fim e o começo: ali o movimento é um pouco mais mole que no original.
+- A captura de marcha à ré tem o quadril girado cerca de 27° em relação às de frente. Não aparece como desvio de rota, porque o deslocamento é imposto pelo controlador, e o tronco lido nas capturas de pose está reto; se incomodar em cena, dá para corrigir com uma guinada fixa no `build_dylan_animations.gd`.
+- Velocidades e rampas mudaram (1,8/3,8 m/s, 26/40 m/s²). O contrato anterior 2,5/5,0 com 15/20 valia até esta data e aparece em registros antigos do `PROGRESS.md`.
+
 ## Atualização — Dylan e portas, 11/10/2026
 
 - Exterior e sala estão conectados por E; Dylan possui clipes de repouso, caminhada, corrida e interação. As menções históricas a pose fixa/ausência de passagem foram superadas nesta integração. A sala ainda não salva progresso.
-- Animações são procedurais de protótipo, sem IK de pés ou alinhamento exato da mão com a maçaneta. A transição mostra uma porta 3D própria em close; a folha pintada no background continua estática durante o gesto inicial.
+- Animações substituídas por captura de movimento do Mixamo em 11/10/2026 sobre um rig novo de 65 ossos; a menção a clipes procedurais acima é histórica. Seguem sem IK de pés em degraus e sem a mão acompanhando a maçaneta: o gesto empurra, a folha pintada no background continua estática durante o gesto inicial e a transição mostra uma porta 3D própria em close.
+- Resolvido em 11/10/2026: a cadência era medida pela amplitude da passada, errava 24% e fazia o pé deslizar. Agora sai do pé plantado (1,48 e 2,73 m/s) e as velocidades do jogo caíram para 1,8 e 3,8 m/s, com rampas de 26/40 m/s². Guardado por `check_foot_contact.gd`.
 - A guarita usa escala visual/colisão de 1,8 m; o ensaio dos renders originais preserva 2,4 m. Sem nova exportação, medição de desempenho ou fechamento T10 nesta integração. F5/preset continuam no percurso técnico; jogar o novo fluxo por `executar-exterior.cmd`.
 - Godot 4.7.2 oficial instalado localmente em `.tools/godot-4.7.2`; importação e regressões agora executadas no Windows/NVIDIA RTX 4050 Laptop GPU. Resultados desta sessão em `DYLAN_ANIMATION.md`/`TEST_REPORT.md`; não representam a RTX 5060 de referência.
 

@@ -40,7 +40,7 @@ func walk_to(player: PlayerController, target: Vector3, running: bool = false) -
 	release()
 	await tick(12)
 	var visual: Node = player.visual.get_node("DylanVisual")
-	var bone: int = visual.skeleton.find_bone("tripo__1_Left_Limb_0")
+	var bone: int = visual.skeleton.find_bone("mixamorig_RightUpLeg")
 	var initial: Quaternion = visual.skeleton.get_bone_pose_rotation(bone)
 	var reached: bool = false
 	for frame: int in range(1000):

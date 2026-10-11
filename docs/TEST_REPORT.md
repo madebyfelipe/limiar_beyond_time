@@ -1,5 +1,17 @@
 # Relatório de testes — percurso técnico (T09)
 
+## Captura de movimento, enquadramento e controles — Windows, 11/10/2026
+
+Godot `4.7.2.stable.official.ed1daf0bf`, Forward+/Vulkan, NVIDIA RTX 4050 Laptop GPU. Executor completo: **31 probes, 0 falhas, saída 0**, já com os dois probes novos.
+
+`check_foot_contact.gd` (`contato-pes`) mede o pé que está no chão enquanto o corpo anda, pelo controlador real, e reprova deslize: **0,04 m/s sob um corpo a 1,80 m/s** e **0,36 m/s a 3,80 m/s**. Amostra só com o corpo livre — encostado numa parede, o deslocamento aponta para fora da frente do personagem e nenhum ciclo mantém contato. Foi assim que a patinação relatada ficou objetiva: a cadência vinha de uma estimativa de passada 24% alta.
+
+`check_tank_controls.gd` (`controles-tanque`): **363 ticks, 0 falhas**. Giro no lugar sem deslocar o corpo, avanço ao longo da frente, ré mais lenta e no sentido oposto, preferência preservada na troca de cena, esquema de câmera intacto quando selecionado, e parada em menos de 0,25 m depois de soltar a tecla. Depois da entrada das capturas de giro e de ré, o probe também exige o clipe certo em cada caso — `turn_left` à esquerda, `turn_right` à direita com rotação horária conferida, e `walk_back` na ré. Essa verificação pegou as duas capturas de giro trocadas entre si: o sentido foi então medido pela direção do quadril, não pelo nome do arquivo. Depois do relato do usuário sobre o pivô jogar o corpo para o lado, o probe passou a medir também o ângulo entre a frente renderizada e a direção comandada (limite 15°) e o salto da base dos pés (limite 0,15 m). A asserção foi validada contra o próprio defeito: com a guinada reintroduzida no builder ela reprova com `Pivot points the body 72.6 deg away from its heading`, e volta a passar com a correção. Vale registrar que as 31 regressões passavam com o defeito presente — nenhuma olhava para onde o corpo apontava.
+
+Probes ajustados para não fixarem velocidade: `distance_sampler.gd` integra a expectativa a partir do `PlayerConfig` e `check_locomotion.gd` compara com os valores configurados; o contrato numérico continua em `check_units.gd`. A rampa passou a ser verificada por chegada, não por tempo fixo. O recorte da vista 2 foi medido à parte: reprojeção de 818 pontos da área caminhável com erro de 0,000 px.
+
+Uma execução gráfica de `operacao` falhou uma vez por perda de foco da janela durante a suíte (o próprio probe documenta esse risco com entrada sintética) e passou em três execuções seguidas depois, além da suíte completa final.
+
 ## PSX/CRT — Windows, 11/10/2026
 
 Godot 4.7.2/Forward+/Vulkan, NVIDIA RTX 4050 Laptop GPU. **7 probes, zero falhas, saída 0**: composição, oclusão, renderização, operação, portas headless/gráficas e filtro retrô. Resumo em `docs/evidence/retro/regression-summary.txt`.

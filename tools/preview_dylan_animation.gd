@@ -34,7 +34,7 @@ func run() -> void:
 	light.rotation_degrees = Vector3(-45, -25, 0)
 	light.light_energy = 1.5
 	world.add_child(light)
-	for clip: String in ["idle", "walk", "run", "door_interact"]:
+	for clip: String in dylan.animator.get_animation_list():
 		for frame: int in range(4):
 			dylan.animator.play(clip)
 			dylan.animator.seek((float(frame) / 4.0) * dylan.animator.get_animation(clip).length, true)

@@ -47,6 +47,7 @@
 ## Implementado na T04
 
 - ShotDefinition, ShotRig, CameraZone (`shot_priority`), CameraDirector e PresentationController implementam os contratos de enquadramento e troca atômica. Cada rig possui câmera, luz e oclusores; colisões compartilhadas permanecem independentes dos rigs.
+- Um plano pode ser reenquadrado sem refazer a arte: `zoom`/`focus` em ShotDefinition estreitam o frustum da câmera e ampliam a arte em torno do mesmo ponto. Como é o mesmo pinhole sobre um retângulo menor do plano de imagem, o registro entre pintura e geometria se mantém — a reprojeção foi medida em 0,000 px. O corte é aplicado em três lugares que precisam concordar: `ShotRig._apply_crop()` (frustum), `background_crop.gdshader` (placa de fundo) e `background_occluder.gdshader` (oclusores que se repintam com a placa).
 - `environments/camera_study.tscn` herda a arena T03 e contém dois enquadramentos/zonas de estudo. Seleção por prioridade, empate atual, último válido e permanência de 0,2 s; enquadramento inicial explícito.
 - `tests/check_cameras.gd` exercita 20 passagens por sentido com o controlador real e inspeciona a apresentação a cada tick/sinal. Movimento ainda usa a câmera corrente, até integração T05.
 
@@ -128,16 +129,17 @@ A troca de câmera, imagem e conjunto de oclusores deve ser atômica antes da pr
 - Eixos da câmera projetados no plano horizontal; W para o fundo da tela; A/D para os lados.
 - Normalizar entrada para evitar ganho diagonal. Visual gira suavemente para o deslocamento.
 - Guardar base da câmera no início da entrada. Manter enquanto houver direcional, mesmo após cortes. Liberar quando todas as teclas direcionais forem soltas.
-- Valores iniciais: caminhada 2,5 m/s; corrida 5 m/s; aceleração 15 m/s²; desaceleração 20 m/s²; gravidade 20 m/s². Rotação configurável em PlayerConfig.
+- Valores vigentes desde 11/10/2026: caminhada 1,8 m/s; corrida 3,8 m/s; aceleração 26 m/s²; desaceleração 40 m/s²; gravidade 20 m/s². Rotação configurável em PlayerConfig. As velocidades acompanham a passada das capturas do Dylan (1,48 e 2,73 m/s), e as rampas firmes removem a derrapagem ao soltar a tecla; o contrato anterior era 2,5/5,0 com 15/20. `tank_turn_speed` 1,5 rad/s e `tank_reverse_factor` 0,45 regem o esquema de tanque, ambos escolhidos para ficar perto do que as capturas de giro e de marcha à ré carregam.
 - WASD e setas; Shift corre. Sem mouse look, salto, esquiva, mira ou stamina na Fase 1.
 
 ## Interfaces mínimas planejadas
 
 | Componente | Contrato |
 | --- | --- |
-| PlayerConfig : Resource | Velocidades, aceleração, desaceleração, gravidade, velocidade de rotação |
+| PlayerConfig : Resource | Velocidades, aceleração, desaceleração, gravidade, velocidade de rotação, giro e ré do modo tanque |
+| ControlScheme | Preferência de controle (câmera ou tanque), estática no processo e gravada em `user://settings.cfg` |
 | PlayerController | Movimento físico, habilitar/desabilitar controle, reposicionar no início |
-| ShotDefinition : Resource | ID, background e parâmetros da câmera |
+| ShotDefinition : Resource | ID, background, parâmetros da câmera e o recorte projetivo (`zoom`/`focus`) do enquadramento autorado |
 | ShotRig | Definição, câmera e malhas de oclusão do enquadramento |
 | CameraZone : Area3D | Volume, enquadramento e prioridade |
 | CameraDirector | Seleção; sinal `shot_changed(previous_id, current_id)` |

@@ -57,7 +57,7 @@ func run() -> void:
 	await tick(25)
 	check(scene.director.current_shot.definition.shot_id == &"env1_cam02","Must start on the road")
 	var dylan: Node3D = player.get_node("Visual/DylanVisual")
-	check(dylan.skeleton.get_bone_count() == 26,"Dylan rig missing")
+	check(dylan.skeleton.get_bone_count() == 65,"Dylan rig missing")
 	check(not player.get_node("Visual/Capsule").visible,"Placeholder capsule still visible")
 	check(is_equal_approx(dylan.model.scale.y*dylan.SOURCE_HEIGHT,2.4),"Dylan height adapter wrong")
 	check(is_equal_approx(player.get_node("Collision").shape.height,2.4),"Physical capsule does not match Dylan")
