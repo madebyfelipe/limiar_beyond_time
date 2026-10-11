@@ -19,6 +19,7 @@ Entregar primeiro uma base jogável 2.5D, com personagens 3D sobre backgrounds p
 | Fase 1 | Percurso técnico de 3–5 minutos |
 | Piloto completo | Experiência de 20–30 minutos |
 | Arte inicial | Placeholders substituíveis, sem aprovação canônica implícita |
+| Exatidão arte × geometria | Diretriz do usuário (11/10/2026): só nas áreas em que o jogador interage — chão caminhável, limites e obstáculos com colisão, escadas/rampas, portas, objetos de interação e superfícies que ocultam o ator no trajeto. Fundo decorativo fora do alcance (árvores distantes, céu, telhados, detalhes inventados pela IA) não precisa coincidir com a geometria |
 
 A proposta é tecnicamente viável. O risco principal é alinhar perspectiva da imagem, personagens e geometria invisível. Imagens geradas por IA não fornecem automaticamente câmera ou profundidade confiáveis; cada enquadramento exige calibração.
 
@@ -102,7 +103,7 @@ Autorização seguinte (sessão em nuvem iniciada em 11/10/2026): o usuário ped
 - Entregar grade 3D, marcadores de debug, cápsula de 1,8 m e ajustes de câmera no Inspector.
 - Ficha por enquadramento: imagem, dimensões, câmera, escala e pontos de referência.
 - Ajuste manual no editor, sem reconstrução automática por IA.
-- Pelo menos seis referências distribuídas entre perto/longe e esquerda/direita; buscar erro máximo de oito pixels em 1080p nos estudos.
+- Pelo menos seis referências distribuídas entre perto/longe e esquerda/direita; buscar erro máximo de oito pixels em 1080p nos estudos. Pela diretriz posterior do usuário, a meta vale para as referências das áreas em que o jogador interage; fundo decorativo fora do alcance fica isento.
 - Aceite: outro executor reproduz e confirma o enquadramento pela ficha.
 - Corrigir ou rejeitar imagens incompatíveis; nunca distorcer o personagem para compensar a perspectiva.
 

@@ -140,6 +140,8 @@ Interação, tiros, alcance e dano futuros usam coordenadas e colisões 3D. Pixe
 
 Backgrounds pintados/IA serão calibrados manualmente com câmera e volumes, sem reconstrução automática. Ficha por enquadramento, seis referências perto/longe/esquerda/direita e cápsula de 1,8 m. Imagem incoerente deve ser corrigida ou rejeitada.
 
+Diretriz do usuário (11/10/2026): a exatidão geométrica entre arte e geometria só importa onde o jogador interage. Isso inclui chão caminhável, limites e obstáculos com colisão, escadas/rampas, portas, objetos de interação e superfícies que ocultam o ator ao longo do trajeto. Elementos decorativos fora do alcance (árvores distantes, céu, telhados, ornamentos inventados pela IA) podem divergir da geometria. Se um elemento decorativo tiver colisor em área alcançável, ou o colisor some, ou o elemento passa a contar como área de interação.
+
 Manter modelos GLB em `assets/models`, fontes separadas, metadados de origem/licença/escala/orientação/aprovação. Não alterar o modelo existente como parte da preparação T00. Não assumir aprovação canônica de Dylan, Cryopteryx, narrativa ou arte pelo simples uso de placeholders.
 
 ## Referências oficiais

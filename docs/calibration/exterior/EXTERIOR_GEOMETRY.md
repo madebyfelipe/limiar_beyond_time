@@ -83,3 +83,11 @@ Pedido do usuário: verificar o exterior gerado a partir da geometria. Nenhum as
 **Veredito.** O gate de ≤ 8 px por vista **não passa como conjunto** por causa do poste de luz (vistas 1 e 2) e da tolerância um pouco maior do telhado e do plinto. As estruturas jogáveis do trajeto estão alinhadas. Correção recomendada: editar ou regenerar o poste nas artes 1 e 2 seguindo a inclinação projetada da captura de geometria, sem mexer no resto da imagem. Mover o poste 3D não resolve, porque um poste desenhado vertical na imagem não corresponde a nenhuma posição 3D nas duas vistas ao mesmo tempo.
 
 **Reprodução e testes desta sessão (Linux, Godot 4.7.2 oficial, Mesa llvmpipe).** `check_exterior.gd` headless: 3488 ticks, 99,41 m, 0 falhas; gráfico: 3498 ticks, 99,47 m, 0 falhas, cortes 1→2→3→2→1 em geometria e arte. Os números são idênticos aos do Windows. Capturas de jogo em modo arte inspecionadas: ator sobre a estrada, junto à cancela, na base da escada e na porta, mais barras 4:3. Sobreposições versionadas em `docs/evidence/exterior/overlay-cam0{1,2,3}.jpg` e comparação do poste em `docs/evidence/exterior/light-pole-geometry-vs-art.jpg`.
+
+### Reavaliação pela diretriz "exatidão só onde o jogador interage"
+
+Em 11/10/2026 o usuário definiu que a exatidão geométrica só deve preocupar nas áreas em que o jogador interage. Aplicando a diretriz à medição acima:
+
+- **Dentro da meta:** estrada e guard rails (2–5 px), cancela (≤ 5 px na vista 1, 5–10 px na vista 2, no limite), escada, corrimãos, plataforma e porta (≤ 5 px), caixas (≤ 5 px), muros do perímetro que limitam o pátio (≈ 5–10 px no plinto). O trajeto estrada → cancela → escada → porta atende à exigência.
+- **Isentos:** pinheiros, telhado (≤ 10 px, inalcançável), floresta e céu, e a árvore próxima da vista 1, que não cruza a estrada.
+- **Único ponto pendente:** o poste de luz. Ele é decorativo, mas tem colisor no canto sudeste do pátio, área que o jogador alcança. Pela diretriz há duas saídas: remover o colisor/oclusor do poste (ou bloquear aquele canto), deixando-o como fundo, ou corrigir o poste pintado nas artes 1 e 2. Nenhuma das duas foi aplicada; aguarda decisão do usuário.
