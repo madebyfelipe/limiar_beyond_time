@@ -20,5 +20,8 @@ func _apply_material() -> void:
 		material = ShaderMaterial.new()
 		material.shader = preload("res://systems/camera/background_occluder.gdshader")
 		material.set_shader_parameter("background",current_shot.definition.background)
+		# Occluders repaint themselves with the plate, so they share its crop.
+		material.set_shader_parameter("zoom",current_shot.definition.zoom)
+		material.set_shader_parameter("focus",current_shot.definition.effective_focus())
 	for mesh: MeshInstance3D in source.get_children():
 		mesh.material_override = material

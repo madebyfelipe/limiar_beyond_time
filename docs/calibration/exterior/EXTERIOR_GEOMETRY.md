@@ -93,3 +93,18 @@ Em 11/10/2026 o usuário definiu que a exatidão geométrica só deve preocupar 
 - **Único ponto pendente:** o poste de luz. Ele é decorativo, mas tem colisor no canto sudeste do pátio, área que o jogador alcança. Pela diretriz há duas saídas: remover o colisor/oclusor do poste (ou bloquear aquele canto), deixando-o como fundo, ou corrigir o poste pintado nas artes 1 e 2. Nenhuma das duas foi aplicada; aguarda decisão do usuário.
 
 **Decisão do usuário (11/10/2026): corrigir a arte.** Só a vista 2 precisa ser editada, pelo critério de interação. Material para a geração em `pole_fix/` (guia com o poste-alvo em ciano, máscara de edição e referência de geometria na resolução da arte) e prompt em `ART_CAM02_POLE_FIX_PROMPT.txt`. A arte v02 continua ativa até a nova versão ser gerada, integrada e verificada.
+
+## Reenquadramento da vista 2 — 11/10/2026
+
+O usuário apontou que Dylan fica pequeno demais na cena do poste. A causa não é escala: medido na própria câmera, ele tem 1,773 m de altura real e projeta 102 px, enquanto a porta de 2,10 m projeta 107 px na profundidade dela e o poste de 2,70 m projeta 185 px — proporções corretas. O problema é o enquadramento: a vista 2 é um plano aberto de todo o pátio, e a área que o jogador realmente percorre ocupa só 1320 × 726 px de um quadro de 1920 × 1080, deslocada para baixo e para a direita.
+
+A correção é um **recorte projetivo**, não uma câmera nova: `zoom` e `focus` em `resources/exterior/shot_2.tres` estreitam o frustum e ampliam a arte em torno do mesmo ponto do plano de imagem. Como o pinhole não muda, a arte continua registrada — a reprojeção de 818 pontos da área caminhável deu erro de **0,000 px** em todos os zooms testados (1,20 a 1,45).
+
+- Valor aplicado: `zoom = 1.25`, `focus = (0.523, 0.659)`. O foco é o centro da área caminhável; `effective_focus()` o limita a (0,523; 0,600) para a janela não sair da imagem.
+- Resultado: Dylan passa de 102 px para ~128 px de altura, a cancela e o poste dominam o quadro e a porta/escada da guarita seguem visíveis no topo.
+- Margem medida com a área caminhável inteira: 135 px à esquerda e à direita, 166 px acima e 6 px abaixo. A margem inferior é apertada porque a área caminhável já tocava a borda de baixo no enquadramento original.
+- Teto prático: 1,35 ainda cabe (69 px nas laterais), mas corta a guarita. Acima de 1,45 a área caminhável sai do quadro. É uma linha em `shot_2.tres`.
+- Custo: a arte tem 1672 × 941 e já era ampliada para o quadro; com o recorte a ampliação total passa a ~1,43x. O filtro PSX/CRT absorve boa parte, mas a vista 2 fica mais macia que as outras.
+- **O desalinhamento do poste descrito acima é ampliado junto**, de 26–50 px para 33–63 px. A correção da arte pendente em `pole_fix/` continua valendo e ficou mais visível, não menos.
+
+`tools/calibration/exterior_alignment_overlay.py` segue comparando o quadro autorado inteiro, sem recorte; é a referência de autoria, não o que a cena mostra.

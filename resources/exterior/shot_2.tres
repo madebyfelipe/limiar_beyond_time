@@ -8,3 +8,5 @@ shot_id = &"exterior_2"
 camera_position = Vector3(9, 10, 16)
 camera_rotation_degrees = Vector3(-33.781128, 48.012783, 0)
 fov = 52.0
+zoom = 1.25
+focus = Vector2(0.523384, 0.659224)
