@@ -34,6 +34,14 @@ var endpoint: Marker3D
 var notice_timer: Timer
 
 func _ready() -> void:
+	var hud_layer := CanvasLayer.new()
+	hud_layer.layer = 8
+	add_child(hud_layer)
+	var hud := GameHud.new()
+	hud.player = player
+	hud.objective_provider = func() -> String: return ["ALCANCE A MARCA", "VOLTE AO INÍCIO", "CONCLUÍDO"][progress.stage]
+	hud_layer.add_child(hud)
+	instructions.visible = OS.get_cmdline_args().has("--debug-instructions")
 	var source: Node3D = geometry.instantiate()
 	source.name = "AuthoredGeometry"
 	source.visible = false

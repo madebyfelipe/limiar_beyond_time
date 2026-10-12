@@ -1,0 +1,10 @@
+Use case: ui-mockup.
+Asset type: Transparent gameplay HUD overlay for the Godot PSX survival-horror game LIMIAR.
+Input image 1: style reference ONLY for pixel monospaced lettering, desaturated cyan-green bracket frames, dark teal surfaces, pale phosphor mint lines and late-1990s Dino Crisis 2 computer interface aesthetic. Generate a new sparse HUD; do not reuse the menu composition.
+Primary request: A genuinely transparent 16:9 overlay canvas with compact interface elements ONLY in the corners and a small bottom-center interaction prompt. The whole middle 75% of the screen is empty alpha transparency. Keep all panels inside a 5% safe margin.
+Top left: small dark teal rectangular panel with thin bracket corners, "DYLAN", a long segmented mint health bar and "FINE" beneath.
+Top right: small dark teal bracket panel, "HANDGUN", large legible "15 / 90" and a tiny pixel silhouette of a handgun.
+Bottom left: compact objective panel with exactly "OBJECTIVE" and "REACH THE TERMINAL".
+Bottom center: compact interaction prompt "[E] TERMINAL".
+Style: Crisp restrained PSX pixel UI, simple squared geometry and cyan-green technical corners matching reference, subtle dithering confined inside the panel fills, very subtle scanline texture within panel surfaces only, readable letters, minimal restrained bloom, no screen-sized frame.
+Constraints: True alpha transparency outside the panels and glyphs, no checkerboard drawn into the image, no scene, no black full background, no character, no dinosaur, no real-game logo, no HUD component covering the central play area, no diagram labels, no collage, no watermark. One production-oriented HUD overlay concept. Text and numerical values are illustrative examples to be implemented dynamically in engine.

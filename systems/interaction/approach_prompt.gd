@@ -11,6 +11,7 @@ var prompt: Label
 var busy: bool = false
 
 func _ready() -> void:
+	add_to_group(&"approach_prompts")
 	layer = 5
 	prompt = label(-78, -30)
 	prompt.text = prompt_text()
