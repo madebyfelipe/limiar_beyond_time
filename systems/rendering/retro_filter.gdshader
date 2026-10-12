@@ -20,12 +20,32 @@ uniform float vignette : hint_range(0.0, 1.0) = 0.0;
 uniform float gain : hint_range(0.5, 3.0) = 1.0;
 // Five-bit colour with ordered dithering, switchable on its own.
 uniform float quantize : hint_range(0.0, 1.0) = 1.0;
+// How the virtual framebuffer is blown up to the window: 0 keeps each virtual
+// pixel a hard block (nearest), 1 blends between neighbouring virtual pixels
+// (bilinear), the soft look of a console picture through a scaler.
+uniform float smoothing : hint_range(0.0, 1.0) = 0.0;
 
 // Ordered dithering stays attached to the virtual framebuffer, without noise/flicker.
 const float BAYER[16] = float[16](
 	0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0,
 	3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0
 );
+
+// One virtual pixel as the framebuffer holds it: a single point sample of the
+// composition, lifted by the gain and reduced to five bits. Bilinear blends
+// four of these, so the dithering and the palette still belong to the virtual
+// pixels and the blend only happens on the way to the window.
+vec3 virtual_texel(vec2 pixel) {
+	pixel = clamp(pixel, vec2(0.0), virtual_resolution - 1.0);
+	vec2 sample_uv = screen_origin + (pixel + 0.5) / virtual_resolution * screen_span;
+	vec3 color = min(textureLod(screen_texture, sample_uv, 0.0).rgb * gain, vec3(1.0));
+	if (quantize > 0.0) {
+		int index = int(mod(pixel.x, 4.0)) + int(mod(pixel.y, 4.0)) * 4;
+		float threshold = (BAYER[index] + 0.5) / 16.0 - 0.5;
+		color = floor(clamp(color + threshold * (0.85 / 31.0), 0.0, 1.0) * 31.0 + 0.5) / 31.0;
+	}
+	return color;
+}
 
 void fragment() {
 	vec2 uv = UV;
@@ -40,14 +60,19 @@ void fragment() {
 		uv = centered * 0.5 + 0.5;
 	}
 	vec2 pixel = min(floor(uv * virtual_resolution), virtual_resolution - 1.0);
-	vec2 snapped_uv = (pixel + 0.5) / virtual_resolution;
-	// Sample only inside this composition, including when the window has black bars.
-	vec2 sample_uv = screen_origin + snapped_uv * screen_span;
-	vec3 color = min(textureLod(screen_texture, sample_uv, 0.0).rgb * gain, vec3(1.0));
-	if (quantize > 0.0) {
-		int index = int(mod(pixel.x, 4.0)) + int(mod(pixel.y, 4.0)) * 4;
-		float threshold = (BAYER[index] + 0.5) / 16.0 - 0.5;
-		color = floor(clamp(color + threshold * (0.85 / 31.0), 0.0, 1.0) * 31.0 + 0.5) / 31.0;
+	// Sampling stays inside this composition, including when the window has
+	// black bars: virtual_texel clamps to the framebuffer edge.
+	vec3 color;
+	if (smoothing > 0.0) {
+		// Weights from the distance to the four nearest virtual pixel centres.
+		vec2 position = uv * virtual_resolution - 0.5;
+		vec2 base = floor(position);
+		vec2 weight = position - base;
+		vec3 top = mix(virtual_texel(base), virtual_texel(base + vec2(1.0, 0.0)), weight.x);
+		vec3 bottom = mix(virtual_texel(base + vec2(0.0, 1.0)), virtual_texel(base + vec2(1.0, 1.0)), weight.x);
+		color = mix(virtual_texel(pixel), mix(top, bottom, weight.y), smoothing);
+	} else {
+		color = virtual_texel(pixel);
 	}
 	// One dark band per virtual row: the gap the electron beam left behind.
 	if (scanline > 0.0) {

@@ -151,6 +151,29 @@ func run() -> void:
 				check(image.get_pixel(640, 60) == Color.BLACK and image.get_pixel(640, 900) == Color.BLACK, "Filter contaminated letterbox bars")
 			print("RETRO window=", dimensions, " step=", RetroFilter.PIXEL_STEPS[step]["name"], " inconsistent_blocks=", varied)
 	root.size = Vector2i(1280, 720)
+	# --- Bilinear scaling blends neighbouring virtual pixels ---
+	# The same interior blocks the nearest contract holds flat must now carry a
+	# gradient wherever the scene changes from one virtual pixel to the next,
+	# and switching back must give the hard blocks back exactly.
+	RetroFilter.set_pixel_step(filter, 3)
+	var hard: Image = await capture()
+	RetroFilter.set_scaling(filter, 1)
+	var soft: Image = await capture()
+	check(float(filter.effect.material.get_shader_parameter("smoothing")) == 1.0, "Bilinear did not reach the shader")
+	var cells_psx: Vector2 = RetroFilter.PIXEL_STEPS[3]["size"]
+	var block_psx: int = int(1280 / cells_psx.x)
+	var blended: int = 0
+	var sampled: int = 0
+	for y: int in range(int(cells_psx.y * 0.25), int(cells_psx.y * 0.8), 3):
+		for x: int in range(int(cells_psx.x * 0.12), int(cells_psx.x * 0.88), 3):
+			sampled += 1
+			if soft.get_pixel(x * block_psx, y * block_psx) != soft.get_pixel(x * block_psx + block_psx - 1, y * block_psx + block_psx - 1):
+				blended += 1
+	check(blended > sampled / 10, "Bilinear left the virtual pixels as hard blocks: %d of %d varied" % [blended, sampled])
+	RetroFilter.set_scaling(filter, 0)
+	var hard_again: Image = await capture()
+	check(hard.get_data() == hard_again.get_data(), "Going back to nearest did not restore the hard blocks")
+	print("RETRO bilinear blended_blocks=%d of %d" % [blended, sampled])
 	# --- The settings follow the player into the next scene ---
 	RetroFilter.set_pixel_step(filter, 3)
 	RetroFilter.set_effect(filter, RetroFilter.Effect.CURVE, true)
@@ -174,6 +197,11 @@ func run() -> void:
 	menu.pixel_button.pressed.emit()
 	await capture()
 	check(RetroFilter.pixel_step != before, "The pixelation stepper did nothing")
+	var scaling_before: int = RetroFilter.scaling
+	menu.scaling_button.pressed.emit()
+	check(RetroFilter.scaling != scaling_before, "The scaling stepper did nothing")
+	menu.scaling_button.pressed.emit()
+	check(RetroFilter.scaling == scaling_before, "The scaling stepper did not wrap back")
 	for row: Dictionary in RetroFilter.EFFECTS:
 		var id: int = int(row["id"])
 		var was: bool = RetroFilter.is_effect_on(id)
