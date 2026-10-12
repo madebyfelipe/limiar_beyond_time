@@ -94,6 +94,7 @@ func run() -> void:
 	var record: Dictionary = SaveGame.read()
 	check(terminal.menu.visible and paused, "E did not open the terminal")
 	check(record.is_empty(), "Opening the menu wrote a save before SAVE")
+	terminal.menu.input_field.text = "save"
 	key(KEY_ENTER)
 	await tick(4)
 	record = SaveGame.read()
@@ -112,6 +113,7 @@ func run() -> void:
 	key(KEY_E)
 	await tick(4)
 	record = SaveGame.read()
+	terminal.menu.input_field.text = "save"
 	key(KEY_ENTER)
 	await tick(4)
 	record = SaveGame.read()
@@ -157,6 +159,7 @@ func run() -> void:
 	await tick(6)
 	key(KEY_E)
 	await tick(4)
+	room.terminal.menu.input_field.text = "save"
 	key(KEY_ENTER)
 	await tick(4)
 	room.terminal.menu.close()

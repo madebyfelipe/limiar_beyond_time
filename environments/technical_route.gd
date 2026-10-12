@@ -39,9 +39,9 @@ func _ready() -> void:
 	add_child(hud_layer)
 	var hud := GameHud.new()
 	hud.player = player
-	hud.objective_provider = func() -> String: return ["ALCANCE A MARCA", "VOLTE AO INÍCIO", "CONCLUÍDO"][progress.stage]
 	hud_layer.add_child(hud)
 	instructions.visible = OS.get_cmdline_args().has("--debug-instructions")
+	notice.modulate.a = 1.0 if instructions.visible else 0.0
 	var source: Node3D = geometry.instantiate()
 	source.name = "AuthoredGeometry"
 	source.visible = false

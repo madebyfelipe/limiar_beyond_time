@@ -1,7 +1,8 @@
 extends SceneTree
-## Real keyboard/mouse flow, save failure, purchase limits and session restore.
+## Command console through native key events: dispatch, editing, purchase and save.
 var failures: int = 0
 var room: Node
+var menu: TerminalMenu
 
 func _init() -> void:
 	create_timer(90).timeout.connect(func() -> void: quit(124))
@@ -17,16 +18,43 @@ func tick(count: int = 3) -> void:
 		await physics_frame
 		await process_frame
 
-func press(code: Key) -> void:
+func press(code: Key, ctrl: bool = false) -> void:
 	for down: bool in [true, false]:
 		var event := InputEventKey.new()
 		event.keycode = code
 		event.physical_keycode = code
 		event.pressed = down
+		event.ctrl_pressed = ctrl
 		root.push_input(event)
 
-func click(button: Button) -> void:
-	var point: Vector2 = button.get_global_rect().get_center()
+func type_text(value: String) -> void:
+	for index: int in range(value.length()):
+		var symbol: String = value.substr(index, 1)
+		for down: bool in [true, false]:
+			var event := InputEventKey.new()
+			event.keycode = symbol.to_upper().unicode_at(0)
+			event.physical_keycode = event.keycode
+			event.unicode = symbol.unicode_at(0)
+			event.pressed = down
+			root.push_input(event)
+
+func command(text: String) -> void:
+	menu.input_field.clear()
+	menu.input_field.grab_focus()
+	type_text(text)
+	check(menu.input_field.text == text, "Native typing lost characters: " + text)
+	press(KEY_ENTER)
+	await tick()
+
+func capture(name: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	await tick(5)
+	await RenderingServer.frame_post_draw
+	check(root.get_texture().get_image().save_png("res://.local/console-%s.png" % name) == OK, "Capture failed")
+
+func click(control: Control) -> void:
+	var point: Vector2 = control.get_global_rect().get_center()
 	var motion := InputEventMouseMotion.new()
 	motion.position = point
 	root.push_input(motion, true)
@@ -36,13 +64,6 @@ func click(button: Button) -> void:
 		event.button_index = MOUSE_BUTTON_LEFT
 		event.pressed = down
 		root.push_input(event, true)
-
-func capture(name: String) -> void:
-	if DisplayServer.get_name() == "headless":
-		return
-	await tick(5)
-	await RenderingServer.frame_post_draw
-	check(root.get_texture().get_image().save_png("res://.local/ui-%s.png" % name) == OK, "Screenshot failed: " + name)
 
 func run() -> void:
 	SaveGame.clear()
@@ -56,90 +77,117 @@ func run() -> void:
 	room.player.reset_to(Transform3D(Basis.IDENTITY, room.TERMINAL_APPROACH + Vector3.UP * 0.06))
 	await tick(6)
 	var hud: GameHud = room.operation.hud
-	check(hud.visible and hud.hint.text == "[E] TERMINAL", "HUD did not show nearby terminal")
-	await capture("hud")
+	check(hud.visible and hud.gauge.ratio == 1.0, "Vitality HUD did not start full")
+	room.player.vitality = 50
+	await tick()
+	check(is_equal_approx(hud.gauge.ratio, 0.5), "Vitality did not follow the player")
+	room.player.vitality = 100
 	press(KEY_E)
 	await tick()
-	var menu: TerminalMenu = room.terminal.menu
-	check(paused and menu.visible and menu.save_button.has_focus(), "Terminal did not open with SAVE focused")
-	check(not SaveGame.has_record(), "E saved without SAVE")
-	check(not hud.visible, "Gameplay HUD remained visible behind modal")
-	var position: Vector3 = room.player.global_position
+	menu = room.terminal.menu
+	check(paused and menu.visible and menu.input_field.has_focus(), "Console did not open with input focused")
+	check(menu.input_field.text.is_empty(), "Opening E leaked into the command line")
+	check(not SaveGame.has_record() and not hud.visible, "Opening saved or left HUD visible")
+	var standing: Vector3 = room.player.global_position
 	Input.action_press("move_up")
 	await tick(12)
 	Input.action_release("move_up")
-	check(room.player.global_position.distance_to(position) < 0.001, "Player moved behind terminal")
-	await capture("terminal")
-	# Disk failure must be visible and leave the live objective untouched.
-	SaveGame.path = "res://.local/missing-ui-save-directory/save.cfg"
+	check(room.player.global_position.distance_to(standing) < 0.001, "Actor moved behind console")
+	await capture("boot")
 	press(KEY_ENTER)
 	await tick()
-	check(menu.message.text.contains("FALHA"), "Save failure displayed success")
-	check(MissionState.stage == MissionState.Stage.TERMINAL, "Failed save advanced the mission")
-	SaveGame.path = SaveGame.PROBE_PATH
-	# Keyboard selects SHOP; mouse buys and changes real stock.
+	check(not SaveGame.has_record(), "Empty Enter saved")
+	await command("help")
+	check(menu.output.text.contains("buy ammo") and menu.input_field.has_focus(), "Help or input focus failed")
+	type_text("in")
+	press(KEY_UP)
+	check(menu.input_field.text == "help", "Up did not recall the last command")
 	press(KEY_DOWN)
-	check(menu.shop_button.has_focus(), "Arrow key did not select SHOP")
+	check(menu.input_field.text == "in", "Down did not restore the unfinished draft")
+	press(KEY_TAB)
+	check(menu.input_field.text == "inventory", "Tab did not complete a command")
 	press(KEY_ENTER)
 	await tick()
-	check(menu.in_shop and menu.item_buttons[0].has_focus(), "SHOP did not open")
-	click(menu.buy_button)
-	await tick()
-	check(SupplyStock.credits == 2100 and SupplyStock.ammo == 120, "AMMO purchase did not debit credits and add 30 rounds")
-	click(menu.item_buttons[1])
-	click(menu.buy_button)
-	await tick()
-	check(SupplyStock.credits == 1600 and SupplyStock.med_kits == 1, "MED KIT purchase failed")
-	click(menu.item_buttons[2])
-	check(menu.buy_button.disabled, "Unaffordable weapon remains buyable")
-	click(menu.buy_button)
-	check(SupplyStock.credits == 1600 and not SupplyStock.weapon, "Disabled BUY spent credits")
-	# Boundary rules: an owned weapon cannot be purchased twice.
+	check(menu.output.text.contains("CARTUCHOS 90"), "Inventory did not report real stock")
+	menu.input_field.text = "buy me"
+	press(KEY_TAB)
+	check(menu.input_field.text == "buy medkit", "Tab did not complete a product")
+	menu.input_field.clear()
+	# Failed saves leave progress alone and preserve the console for retry.
+	SaveGame.path = "res://.local/missing-console-directory/save.cfg"
+	await command("save")
+	check(menu.output.text.contains("FALHA AO GRAVAR"), "Disk failure showed success")
+	check(MissionState.stage == MissionState.Stage.TERMINAL, "Failed save advanced objective")
+	SaveGame.path = SaveGame.PROBE_PATH
+	await command("save now")
+	check(not SaveGame.has_record(), "Malformed save wrote anyway")
+	await command("exit now")
+	check(menu.visible and paused, "Malformed exit closed the console")
+	await command("unknown-command")
+	check(menu.output.text.contains("Comando desconhecido"), "Unknown command had no response")
+	await command("shop")
+	check(menu.output.text.contains("medkit") and menu.output.text.contains("1800"), "Shop did not list products")
+	await command("  BuY    AMMO  ")
+	check(SupplyStock.credits == 2100 and SupplyStock.ammo == 120, "Case/whitespace or AMMO purchase failed")
+	await command("comprar med kit")
+	check(SupplyStock.credits == 1600 and SupplyStock.med_kits == 1, "Portuguese alias or multiword product failed")
 	var acquired: Dictionary = SupplyStock.snapshot()
+	await command("buy weapon")
+	check(SupplyStock.snapshot() == acquired and menu.output.text.contains("Créditos insuficientes"), "Unaffordable buy changed stock")
+	await command("buy medkit 2")
+	check(SupplyStock.snapshot() == acquired, "Unsupported quantity was charged")
 	SupplyStock.credits = 2400
-	check(SupplyStock.buy(2), "Affordable weapon could not be acquired")
+	await command("buy weapon")
+	check(SupplyStock.weapon and SupplyStock.credits == 600, "Weapon purchase failed")
 	SupplyStock.credits = 2400
-	check(not SupplyStock.buy(2) and SupplyStock.credits == 2400, "Owned weapon was charged twice")
+	await command("buy weapon")
+	check(SupplyStock.credits == 2400 and menu.output.text.contains("já foi adquirida"), "Duplicate weapon was charged")
 	SupplyStock.restore(acquired)
-	menu.select_item(0)
-	await capture("shop")
-	press(KEY_ESCAPE)
-	check(menu.visible and not menu.in_shop and paused, "ESC in SHOP did not return to the terminal")
-	check(not room.operation.pause_menu.visible, "Pause opened over SHOP")
-	menu.show_shop()
-	# Letterboxing and hit targets share the same transform at 4:3.
+	await command("clear")
+	check(menu.output.text.is_empty(), "Clear left old transcript")
+	await command("shop")
+	await command("inventory")
+	await command("save")
+	var record: Dictionary = SaveGame.read()
+	check(record.get("supplies", {}) == acquired and MissionState.stage == MissionState.Stage.DONE, "Save did not store stock/objective")
+	check(menu.output.text.contains("PROGRESSO E ESTOQUE SALVOS"), "Save acknowledgement missing")
+	await capture("session")
 	root.size = Vector2i(1280, 960)
 	await tick(8)
-	check(is_equal_approx(menu.canvas.scale.x, menu.canvas.scale.y), "Menu stretched at 4:3")
-	check(menu.canvas.position.y > 100, "4:3 menu was not letterboxed")
-	click(menu.back_button)
-	check(not menu.in_shop and paused, "BACK closed the terminal or left SHOP active")
-	await capture("terminal-4x3")
-	click(menu.save_button)
+	check(is_equal_approx(menu.canvas.scale.x, menu.canvas.scale.y), "Console stretched at 4:3")
+	check(menu.canvas.position.y > 100, "4:3 console did not keep the composition letterbox")
+	click(menu.input_field)
+	check(menu.input_field.has_focus(), "Mouse could not focus the command line after resize")
+	await capture("4x3")
+	# Scrolling follows actual output and Ctrl+L clears without resetting history.
+	for index: int in range(30):
+		menu.execute_command("help")
+	await tick(8)
+	check(menu.lines.size() <= TerminalMenu.MAX_LINES, "Transcript grew without limit")
+	var bottom: int = menu.scroll.scroll_vertical
+	check(bottom > 0, "Long transcript did not scroll")
+	press(KEY_PAGEUP)
+	check(menu.scroll.scroll_vertical < bottom, "PageUp did not scroll history")
+	press(KEY_L, true)
 	await tick()
-	var record: Dictionary = SaveGame.read()
-	check(record.get("supplies", {}) == acquired, "SAVE did not store purchased stock")
-	check(MissionState.stage == MissionState.Stage.DONE, "SAVE did not finish the objective")
+	check(menu.output.text.is_empty() and not menu.history.is_empty(), "Ctrl+L erased command history or left output")
+	press(KEY_UP)
+	check(menu.input_field.text == "help", "History disappeared after clear")
+	menu.input_field.clear()
+	await command("exit")
+	check(not paused and not menu.visible and not room.operation.pause_menu.visible, "Exit did not resume or opened pause")
+	await tick()
+	check(hud.visible, "HUD did not return")
+	press(KEY_E)
+	await tick()
+	check(menu.visible and menu.history.has("save"), "Reopening lost command history")
 	press(KEY_ESCAPE)
 	await tick()
-	check(not paused and not menu.visible and not room.operation.pause_menu.visible, "ESC opened pause over terminal exit")
-	check(hud.visible and hud.status.text.contains("1600") and hud.supplies.text.contains("120"), "HUD did not refresh credits/ammo")
+	check(not paused and not menu.visible and not room.operation.pause_menu.visible, "Esc did not close only the console")
 	press(KEY_ESCAPE)
 	await tick()
 	var pause: PauseMenu = room.operation.pause_menu
-	check(pause.visible and paused and pause.resume_button.has_focus(), "Pause menu failed after terminal")
-	var mode: int = ControlScheme.mode
-	click(pause.scheme_button)
-	check(ControlScheme.mode != mode, "Control scheme button stopped working")
-	# The presentation row opens a page of its own; the stepper lives there.
-	var step: int = RetroFilter.pixel_step
-	click(pause.filter_button)
-	check(pause._is_filter_page_open(), "Presentation page did not open from the menu")
-	click(pause.pixel_button)
-	check(RetroFilter.pixel_step != step, "Pixelation stepper stopped working")
-	pause._close_filter_page()
-	await tick()
-	await capture("pause-4x3")
+	check(pause.visible and paused and pause.resume_button.has_focus(), "Pause failed after console")
 	click(pause.resume_button)
 	check(not paused, "Mouse Continue did not resume")
 	room.free()
@@ -148,17 +196,17 @@ func run() -> void:
 	room = load("res://environments/save_room.tscn").instantiate()
 	root.add_child(room)
 	await tick(20)
-	check(room.resumed and SupplyStock.snapshot() == acquired, "New room did not restore stock and credits")
+	check(room.resumed and SupplyStock.snapshot() == acquired, "New session did not restore stock")
 	room.free()
-	# Optional stock fields preserve compatibility with previous format-2 saves.
+	# Older records without supplies retain their documented defaults.
 	var legacy := ConfigFile.new()
 	legacy.set_value(SaveGame.SECTION, "format", SaveGame.FORMAT)
 	legacy.set_value(SaveGame.SECTION, "scene", "res://environments/save_room.tscn")
 	legacy.set_value(SaveGame.SECTION, "position", Vector3.ZERO)
-	check(legacy.save(SaveGame.path) == OK, "Could not create legacy record")
+	check(legacy.save(SaveGame.path) == OK, "Legacy record failed")
 	SupplyStock.loaded = false
 	SupplyStock.ensure_loaded()
-	check(SupplyStock.credits == 2400 and SupplyStock.ammo == 90 and not SupplyStock.weapon, "Legacy save did not get starter supplies")
+	check(SupplyStock.credits == 2400 and SupplyStock.ammo == 90 and not SupplyStock.weapon, "Legacy defaults broke")
 	SaveGame.clear()
 	SupplyStock.reset()
 	MissionState.reset()

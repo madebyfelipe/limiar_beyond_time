@@ -136,7 +136,7 @@ func run() -> void:
 	room.terminal.interact()
 	check(paused and room.terminal.menu.visible, "E did not open the terminal menu")
 	check(not SaveGame.has_record(), "Opening the terminal saved without confirmation")
-	room.terminal.menu.save_button.pressed.emit()
+	room.terminal.menu.execute_command("save")
 	room.terminal.menu.close()
 	await tick(4)
 	check(MissionState.stage == MissionState.Stage.DONE, "Saving did not close the objective")

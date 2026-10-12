@@ -3,6 +3,7 @@ extends Control
 ## Fixed design coordinates shared by the generated skins and live controls.
 ## Uniform fitting keeps artwork, hit targets and text aligned at 4:3/16:9.
 const DESIGN := Vector2(1672, 941)
+var design_size: Vector2 = DESIGN
 var canvas: Control
 var backdrop: TextureRect
 static var mono: Font
@@ -27,13 +28,13 @@ func build(texture: Texture2D, opaque: bool = true) -> void:
 		dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(dim)
 	canvas = Control.new()
-	canvas.size = DESIGN
+	canvas.size = design_size
 	canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(canvas)
 	backdrop = TextureRect.new()
 	backdrop.texture = texture
 	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	backdrop.size = DESIGN
+	backdrop.size = design_size
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(backdrop)
 	resized.connect(fit)
@@ -42,9 +43,9 @@ func build(texture: Texture2D, opaque: bool = true) -> void:
 func fit() -> void:
 	if canvas == null:
 		return
-	var ratio: float = minf(size.x / DESIGN.x, size.y / DESIGN.y)
+	var ratio: float = minf(size.x / design_size.x, size.y / design_size.y)
 	canvas.scale = Vector2.ONE * ratio
-	canvas.position = (size - DESIGN * ratio) * 0.5
+	canvas.position = (size - design_size * ratio) * 0.5
 
 func label_at(text: String, box: Rect2, point_size: int = 30) -> Label:
 	var result := Label.new()

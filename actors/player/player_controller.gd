@@ -6,6 +6,8 @@ extends CharacterBody3D
 @export var visual: Node3D
 @export var movement_reference: MovementReference
 var control_enabled: bool = true
+## HUD source for the exploration prototype; damage/combat is not implemented.
+@export_range(0.0, 100.0) var vitality: float = 100.0
 var desired_direction: Vector3 = Vector3.ZERO
 ## Tank steering only: +1 turning left, -1 turning right, 0 otherwise.
 var turn_input: float = 0.0

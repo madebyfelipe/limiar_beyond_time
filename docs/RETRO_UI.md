@@ -1,21 +1,23 @@
-# Menus CRT integrados — 11/10/2026
+# HUD e terminal de comandos — 11/10/2026
 
-As quatro artes agora fazem parte das cenas jogáveis. As skins v02 foram editadas
-com a ferramenta integrada image_gen para retirar os dados e a seleção fixos;
-botões, mensagens, seleção e valores são controles reais do Godot. Os conceitos
-v01 e todos os prompts foram preservados em `assets/ui/retro_terminal/`.
+O terminal agora é um computador simulado com comandos, conforme o novo pedido.
+Digite `help`, `save`, `shop`, `buy ammo`, `inventory`, `status`, `clear` ou `exit`
+no prompt `GUARITA>`. O HUD mantém apenas VITALITY, conforme a referência fornecida.
+Interface e barra são controles nativos do Godot. As artes anteriores continuam
+como histórico, sem consumo pelo terminal atual.
+Fluxo completo e capturas atualizadas: [COMMAND_TERMINAL.md](COMMAND_TERMINAL.md).
 
 ## Jogar
 
 Abra `executar-exterior.cmd`, atravesse a porta e vá até a mesa, ou abra diretamente
 `executar-sala.cmd`. Pressione **E** perto do computador:
 
-- **SAVE** grava posição, orientação, objetivo e suprimentos no registro existente.
-- **SHOP** abre a loja. Escolha um item e **BUY** para comprar; o saldo e o estoque
-  mudam imediatamente. **SAVE** após comprar guarda os suprimentos para a sessão seguinte.
-- **BACK/Esc** na loja retorna ao terminal. **EXIT/Esc** no terminal retoma o jogo.
-- Mouse, setas/Tab e Enter funcionam nas duas telas. O personagem e o mundo param
-  enquanto o terminal está aberto. Nenhum save é feito apenas por abrir o terminal.
+- `save` grava posição, orientação, objetivo e suprimentos.
+- `shop` lista produtos e preços; `buy ammo`, `buy medkit` ou `buy weapon` compra.
+  Use `save` após comprar para guardar o estoque para a sessão seguinte.
+- `help` lista comandos; `inventory` mostra estoque; `status` mostra o registro.
+- `exit` ou Esc retoma o jogo. Enter executa, Tab completa e ↑/↓ percorrem histórico.
+  Nenhum save é feito apenas por abrir o terminal ou enviar uma linha vazia.
 
 **Esc** durante a exploração abre a pausa CRT: Continuar, Reiniciar, Controles,
 Filtro e Sair do jogo. Os controles e os presets de vídeo mantêm as funções já
@@ -29,12 +31,14 @@ WEAPON custa 1800 e registra a pistola. Créditos insuficientes, limites de esto
 ou uma pistola já adquirida desativam BUY. A aquisição da arma não implementa
 combate; disparos, dano e uso de kits continuam pendentes.
 
-O HUD usa transparência real e apresenta créditos, kits, cartuchos, aquisição da
-pistola, objetivo atual e E apenas quando uma porta ou o terminal estão ao alcance.
-No percurso técnico, o objetivo vem do progresso desse percurso. O HUD desaparece
-durante os menus e a transição de porta. Avisos temporários ficam no centro superior.
-A lista técnica de teclas pode ser exibida com `--debug-instructions`.
-Os rótulos do HUD são curtos e maiores para suportar o filtro PSX global atual.
+O HUD mostra somente VITALITY, sem nome, créditos, estoque, objetivos, molduras ou
+avisos de interação. A barra lê `PlayerController.vitality` (0–100), inicialmente
+100. Dano/combate ainda não está implementado, portanto a barra permanece cheia
+no fluxo atual de exploração. O HUD desaparece durante menus e transições de porta.
+Objetivos, interações e estoque continuam funcionando sem esses readouts na tela.
+Avisos técnicos e a lista de teclas podem ser exibidos com `--debug-instructions`.
+Estoque, saldo e registro aparecem na saída apenas quando os comandos correspondentes
+são solicitados. A interface inicial contém o texto de abertura e a linha de entrada.
 O preset Windows passou a incluir exterior, sala, suas artes ativas e os recursos
 de UI. Uma build já exportada precisa ser regenerada para receber essas mudanças.
 
@@ -44,10 +48,10 @@ nem avançam o objetivo; só SAVE bem-sucedido conclui o objetivo do terminal.
 
 ## Implementação
 
-- `ui/retro_screen.gd`: canvas 1672×941, escala uniforme e barras ao ajustar a janela.
+- `ui/retro_screen.gd`: escala uniforme; console 1280×720, alinhado à composição.
 - `ui/retro_button.gd`: Button nativo com foco, cursor e moldura angular desenhada.
-- `ui/terminal_menu.gd`: telas SAVE/SHOP, seleção, dados de registro e mensagens.
-- `ui/game_hud.gd`: regiões da skin transparente, dados reais e interação próxima.
+- `ui/terminal_menu.gd`: entrada de comandos, transcript, histórico e autocompletar.
+- `ui/game_hud.gd` e `ui/vitality_gauge.gd`: VITALITY sem informações adicionais.
 - `ui/pause_menu.gd`: skin CRT, cinco opções e proteção contra outro modal aberto.
 - `systems/save/supply_stock.gd`: compras, limites, estoque e restauração.
 - `systems/interaction/terminal_interaction.gd`: abertura por E e gravação por SAVE.
@@ -56,25 +60,25 @@ nem avançam o objetivo; só SAVE bem-sucedido conclui o objetivo do terminal.
 ## Verificação
 
 Godot 4.7.2: `check_terminal_ui.gd` passou em headless e em execução gráfica
-OpenGL Compatibility, com teclado e cliques reais enviados ao viewport. Cobre
-abertura sem gravação, SAVE sem permissão de escrita, personagem imóvel enquanto
-o menu está aberto, compras e débitos, créditos insuficientes, aquisição única da
-arma, BACK/Esc, hit targets após ajuste para 4:3, retomada do estoque, compatibilidade
-com registros antigos, controles/filtro da pausa e atualização do HUD.
+OpenGL Compatibility, com digitação e cliques reais enviados ao viewport.
+Cobre comandos, histórico, Tab, argumentos inválidos, falha de save, compras,
+rolagem, resize 4:3, retorno por exit/Esc e retomada. Detalhes atuais em
+[COMMAND_TERMINAL.md](COMMAND_TERMINAL.md). Persistência e operação dos cenários
+também foram reexecutadas após a mudança v04, com zero falhas.
 
 Regressões: `check_save_persistence.gd` (136 ticks), `check_level_operation.gd`
 (172 ticks) e `check_operation.gd` passaram com zero falhas.
-`check_dylan_doors.gd` também passou: 1164 ticks, ida e volta pela porta, zero falhas.
+Na integração anterior, `check_dylan_doors.gd` passou com 1164 ticks, zero falhas.
 `check_scenes.gd` validou as 20 cenas com zero falhas. Os testes de terminal usam
 exclusivamente `res://.local/save_probe.cfg`. O engine emite avisos
 locais de acesso a certificados/cache no sandbox, sem falhas de script nas execuções.
 
 Capturas reais do renderer:
 
-- [Terminal](evidence/ui/terminal.png)
-- [SHOP](evidence/ui/shop.png)
-- [HUD na sala](evidence/ui/hud.png)
-- [Terminal em 4:3](evidence/ui/terminal-4x3.png)
+- [Terminal v04](evidence/ui/console-boot-v04.png)
+- [Sessão de comandos v04](evidence/ui/console-session-v04.png)
+- [HUD na sala v03](evidence/ui/hud-v03.png)
+- [Terminal em 4:3 v04](evidence/ui/console-4x3-v04.png)
 - [Pausa em 4:3](evidence/ui/pause-4x3.png)
 
 ## Verificação solicitada sobre o poste

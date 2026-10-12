@@ -1,6 +1,6 @@
 class_name TerminalInteraction
 extends ApproachPrompt
-## E opens the terminal; its SAVE button records position, objective and stock.
+## E opens the console; the save command records position, objective and stock.
 
 signal saved(record: Dictionary)
 
@@ -9,7 +9,7 @@ var notice: Label
 var menu: TerminalMenu
 
 func prompt_text() -> String:
-	return "E · Terminal SAVE / SHOP"
+	return "E · Acessar terminal"
 
 func _ready() -> void:
 	super()
@@ -39,13 +39,12 @@ func save_progress() -> void:
 	var record: Dictionary = SaveGame.write(scene_path, player.global_position, player.visual.rotation.y, MissionState.Stage.DONE)
 	if record.is_empty():
 		announce("TERMINAL SEM RESPOSTA — progresso não salvo")
-		menu.message.text = "FALHA AO GRAVAR · PROGRESSO NÃO SALVO."
+		menu.write_line("FALHA AO GRAVAR: progresso não salvo. Tente save novamente.")
 		return
 	MissionState.reach(MissionState.Stage.DONE)
 	saved.emit(record)
 	announce("PROGRESSO SALVO · registro %d · %s" % [record["saves"], SaveGame.stamp(record)])
-	menu.refresh_record()
-	menu.message.text = "PROGRESSO E ESTOQUE SALVOS · REGISTRO %d" % record["saves"]
+	menu.write_line("PROGRESSO E ESTOQUE SALVOS · REGISTRO %d · %s" % [record["saves"], SaveGame.stamp(record)])
 
 ## Shows a line over the prompt and lets it fade, the way a terminal would
 ## acknowledge and then go quiet again.

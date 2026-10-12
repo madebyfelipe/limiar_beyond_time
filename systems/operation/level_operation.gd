@@ -51,6 +51,7 @@ func _ready() -> void:
 	frame.add_child(diagnostics)
 	notice = Label.new()
 	notice.name = "Notice"
+	notice.modulate.a = 1.0 if OS.get_cmdline_args().has("--debug-instructions") else 0.0
 	notice.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	notice.offset_top = 38.0
 	notice.offset_bottom = 145.0

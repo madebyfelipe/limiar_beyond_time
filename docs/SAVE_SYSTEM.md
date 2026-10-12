@@ -8,11 +8,11 @@ anotada em `PROJECT_AUDIT.md` (item 2) e nas fichas da sala.
 - `systems/save/save_game.gd` (`SaveGame`): leitor/escritor estático, sem autoload,
   no mesmo padrão de `ControlScheme`. Arquivo em `user://save.cfg`.
 - `systems/interaction/terminal_interaction.gd` (`TerminalInteraction`): a ação **E**
-  junto à mesa grava o registro e confirma na tela.
+  junto à mesa abre a sessão; o comando `save` grava e confirma na saída do console.
 - `systems/interaction/approach_prompt.gd` (`ApproachPrompt`): base comum da porta e
   do terminal. Existe uma única definição de "estar perto" — distância horizontal
-  dentro do raio e diferença de altura < 0,25 m — e o aviso na tela aparece
-  exatamente enquanto a tecla faria algo.
+  dentro do raio e diferença de altura < 0,25 m. O HUD minimalista não mostra
+  aviso de interação, mas E continua funcionando perto da porta e da mesa.
 - `environments/save_room.gd`: instala o terminal e, ao abrir, retoma do registro.
 
 ## O registro
@@ -50,11 +50,12 @@ Dylan fica à esquerda do monitor, e não centrado nele.
 
 ## Como se comporta
 
-- **Salvar**: andar até a mesa, **E** abre o terminal, **SAVE** grava. Abrir o menu
+- **Salvar**: andar até a mesa, **E** abre o terminal, digitar `save` e Enter grava. Abrir a sessão
   não grava. O terminal confirma o registro e o estoque; se o arquivo não puder
   ser escrito, mostra a falha e não avança o objetivo.
-- **SHOP**: compras descontam créditos e acrescentam estoque; usar **SAVE** depois
-  das compras para persistir. **BACK/Esc** volta ao terminal; **EXIT/Esc** fecha.
+- **Comprar**: `shop` lista o catálogo; `buy ammo`, `buy medkit` ou `buy weapon`
+  desconta créditos e acrescenta estoque. Usar `save` depois das compras persiste
+  os suprimentos. `exit` ou Esc fecha a sessão. Ver [COMMAND_TERMINAL.md](COMMAND_TERMINAL.md).
 - **Retomar**: abrir `executar-sala.cmd` com um registro gravado começa na posição e
   orientação salvas, e a lista de teclas mostra "· retomado". Sem registro, a sala
   usa o spawn da porta e avisa "SEM REGISTRO".
