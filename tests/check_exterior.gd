@@ -127,6 +127,16 @@ func round_trip(art: bool) -> void:
 	check(player.position.distance_to(Vector3(0,0,22)) < 0.25,"Return failed")
 	print("EXTERIOR round_trip mode=",mode," cuts=",cuts)
 
+## Whether the 1,8 m player capsule fits at a world position.
+func free_at(at: Vector3) -> bool:
+	var shape := CapsuleShape3D.new()
+	shape.radius = 0.3
+	shape.height = 1.8
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform = Transform3D(Basis.IDENTITY,at)
+	return player.get_world_3d().direct_space_state.intersect_shape(query,1).is_empty()
+
 func run() -> void:
 	create_timer(180).timeout.connect(func() -> void: quit(124))
 	visual = DisplayServer.get_name() != "headless"
@@ -135,6 +145,10 @@ func run() -> void:
 	root.add_child(scene)
 	player = scene.player
 	check(scene.shots.size() == 3 and scene.colliders.get_child_count() >= 40,"Spatial source or cameras incomplete")
+	# The painted plate puts the pole tens of pixels off the geometry, so it is a
+	# visual and depth occluder only: a collider there would block empty snow.
+	check(scene.colliders.get_node_or_null("LightPole") == null,"The light pole still has a collider")
+	check(free_at(Vector3(5.5,0.96,8.9)),"Something still blocks the player where the pole stands")
 	scene.director.shot_changed.connect(func(_old: StringName,new: StringName) -> void: cuts.append(new))
 	await round_trip(false)
 	if scene.art_available:

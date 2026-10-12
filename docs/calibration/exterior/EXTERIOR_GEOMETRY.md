@@ -92,7 +92,9 @@ Em 11/10/2026 o usuário definiu que a exatidão geométrica só deve preocupar 
 - **Isentos:** pinheiros, telhado (≤ 10 px, inalcançável), floresta e céu, e a árvore próxima da vista 1, que não cruza a estrada.
 - **Único ponto pendente:** o poste de luz. Ele é decorativo, mas tem colisor no canto sudeste do pátio, área que o jogador alcança. Pela diretriz há duas saídas: remover o colisor/oclusor do poste (ou bloquear aquele canto), deixando-o como fundo, ou corrigir o poste pintado nas artes 1 e 2. Nenhuma das duas foi aplicada; aguarda decisão do usuário.
 
-**Decisão do usuário (11/10/2026): corrigir a arte.** Só a vista 2 precisa ser editada, pelo critério de interação. Material para a geração em `pole_fix/` (guia com o poste-alvo em ciano, máscara de edição e referência de geometria na resolução da arte) e prompt em `ART_CAM02_POLE_FIX_PROMPT.txt`. A arte v02 continua ativa até a nova versão ser gerada, integrada e verificada.
+**Decisão posterior do usuário (11/10/2026): remover o colisor do poste.** Feito — o `LightPole` não gera mais corpo estático, no `exterior_source.tscn` e no `author_exterior.gd`, e `check_exterior.gd` passou a exigir que nada bloqueie a base do poste. Com isso **acaba o poste invisível**, que era a parte do problema que o jogador sentia. O poste **continua oclusor de profundidade**, então o recorte do personagem contra um "poste" pintado fora de lugar permanece: para isso, só a correção da arte resolve, e o material abaixo continua pronto.
+
+**Decisão anterior do usuário (11/10/2026): corrigir a arte.** Só a vista 2 precisa ser editada, pelo critério de interação. Material para a geração em `pole_fix/` (guia com o poste-alvo em ciano, máscara de edição e referência de geometria na resolução da arte) e prompt em `ART_CAM02_POLE_FIX_PROMPT.txt`. A arte v02 continua ativa até a nova versão ser gerada, integrada e verificada.
 
 ## Reenquadramento da vista 2 — 11/10/2026
 

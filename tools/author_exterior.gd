@@ -78,7 +78,9 @@ func build_source() -> void:
 	box("GateMotor",Vector3(2.7,0.6,9.5),Vector3(0.55,1.2,0.55),Color("8f9279"),true)
 	var arm := box("RaisedBarrier",Vector3(1.7,2.7,10),Vector3(3.6,0.16,0.16),Color("d2c794"),true)
 	arm.rotation.z = deg_to_rad(123.69)
-	box("LightPole",Vector3(5.5,2.7,8.9),Vector3(0.18,5.4,0.18),Color("4c5b65"),true)
+	# The pole stays a visual and depth occluder only: the painted plate places it
+	# 33-63 px from the geometry, so a collider there blocks where nothing is drawn.
+	box("LightPole",Vector3(5.5,2.7,8.9),Vector3(0.18,5.4,0.18),Color("4c5b65"))
 	box("PoleLamp",Vector3(5,5.35,8.9),Vector3(1.1,0.16,0.35),Color("ecdfa7"))
 	# Matches the interior's 6x5 m plan after a 90 degree rotation, floor y=0.6.
 	box("Guardhouse",Vector3(-5,2.15,0),Vector3(5.4,3.1,6.4),Color("7d898f"),true)

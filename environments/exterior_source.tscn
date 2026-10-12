@@ -2107,7 +2107,6 @@ metadata/collision_size = Vector3(3.6, 0.16, 0.16)
 [node name="LightPole" type="MeshInstance3D" parent="." unique_id=1652601873]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 2.7, 8.9)
 mesh = SubResource("BoxMesh_p75at")
-metadata/collision_size = Vector3(0.18, 5.4, 0.18)
 
 [node name="PoleLamp" type="MeshInstance3D" parent="." unique_id=1317407000]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 5.35, 8.9)
