@@ -1,5 +1,15 @@
 # Arquitetura — LIMIAR Recon
 
+
+## Combate — pistola, mira e alvos, 11/10/2026
+
+- `systems/combat/`: `PlayerWeapon` (filho `Weapon` do `player_dylan.tscn`) é o **único dono da mira**. Processa antes do corpo (`process_physics_priority = -1`); `PlayerController` e `DylanVisual` só leem `aiming`, `heading` e `turn_input`. Tanque com a arma erguida: pés plantados e corpo girado pela arma. Esquema câmera: pernas pelas teclas, corpo encarando a mira, 70% da caminhada.
+- `AimSettings` (estático, `user://settings.cfg` seção `[aim]`, mesmas regras do `ControlScheme`): modo da mira moderna — cursor no chão / livre 360 / assistida — e mira automática do tanque. O livre 360 guarda o rumo em espaço de **mundo**, para não mudar a cada corte de câmera.
+- `AimSolver` leva o mouse da janela ao `SubViewport` 3D (`SubViewportContainer` com `stretch`) antes de virar raio; o container ignora mouse, então nada depende de eventos chegarem ao viewport.
+- Tiros e linhas de visada são raios 3D do peito (2/3 da altura da cápsula: 1,2 m no Dylan de 1,8 m). Camadas físicas nomeadas: 1 "mundo", 3 "alvos". `Hurtbox` (Area3D na camada 3) encaminha dano a um `Health`; ao zerar, sai da camada e do grupo `combat_targets`. Pode apontar o próprio `body` para não bloquear a linha de visada até si.
+- `AimPose` (`SkeletonModifier3D` filho do `Skeleton3D`) monta a pose de pistola sobre qualquer clipe, com `influence` em rampa. Resultado de modificador só é legível em `modification_processed`/`skeleton_updated`; a pistola é posicionada nesse sinal.
+- Menu de pausa: a linha `CONTROLES` virou `JOGABILIDADE`, que abre uma página (`_build_gameplay_page`) com esquema de controle, mira moderna e mira automática. Detalhes em `COMBAT.md`.
+
 ## Apresentação PSX/CRT — 11/10/2026
 
 `systems/rendering/retro_filter.tscn` é o último filho da composição Background/Actors, antes da UI. BackBufferCopy + shader de canvas fazem amostragem nearest em 320×180, quantização RGB e dithering Bayer, com scanlines/vinheta opcionais. Origem e extensão da área útil mantêm a grade alinhada ao redimensionar e deixam barras pretas intactas. Cada instância tem material próprio; F4 compartilha a seleção durante a sessão pelo script/grupo, sem autoload. A porta instancia o mesmo componente dentro do seu quadro, com cópia de tela própria, abaixo do fade; quadro e filtro são ocultados juntos na troca. A resolução do viewport 3D e as câmeras continuam sendo autoridade de composição/oclusão. Detalhes e testes em `RETRO_FILTER.md`.
@@ -103,7 +113,7 @@ Retomada de arte ENV_1: `env1_road_probe.tscn` é um ensaio isolado sobre o PNG 
 - `tests/check_soak.gd`: dez minutos de jogo no percurso real (ida/volta caminhando e correndo, pausas, F3, reinícios no meio da volta, recuperações), falhando em erro do engine, volta que não termina ou crescimento de nós/objetos/memória estática.
 - Fora do jogo exportado: modelos, ENV_1, testes, ferramentas de autoria e calibração.
 
-Não há combate ou animais implementados. As demais interfaces abaixo continuam contratos para as tarefas correspondentes.
+Combate: primeira fatia implementada (ver topo e `COMBAT.md`). Não há animais nem inimigos. As demais interfaces abaixo continuam contratos para as tarefas correspondentes.
 
 ## Decisões e motivos
 

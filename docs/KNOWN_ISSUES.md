@@ -1,5 +1,18 @@
 # Limitações e pendências
 
+
+## Atualização — armas, mira e suavização, 11/10/2026
+
+- **Pistola jogável** nos dois esquemas, com mira automática estilo RE/Dino Crisis no tanque e três modos de mira selecionáveis no esquema câmera. Ver `COMBAT.md`.
+- **Pose de mira procedural, não capturada.** Faltam do Mixamo: `aim_idle`, `strafe_left`, `strafe_right`, caminhada mirada, disparo e recarga. Até lá, andar de lado mirando usa o clipe de caminhada para frente e as pernas não acompanham o deslize. O seletor já procura esses nomes; basta adicioná-los a `tools/build_dylan_animations.gd`.
+- Sem inimigos: só os alvos do estande usam `Health`/`Hurtbox`. Sem dano ao jogador, esquiva, som de disparo ou marca de impacto. Gamepad sem mapeamento.
+- O carregador não entra no salvamento (a reserva entra, via `SupplyStock`).
+- **Suavização da pixelização** (mais próximo / bilinear) na página de apresentação. Ver `RETRO_PRESETS.md`.
+- Corrigido: o botão "APRESENTAÇÃO" do menu principal esticava além da moldura com resumos longos; as linhas-resumo agora cortam com reticências.
+- Corrigido no probe `operacao-grafica`: a pausa por perda de foco ficava ligada o probe inteiro, e uma perda de foco real na área de trabalho durante a seção de quedas reprovava a suíte ("Fall below the level was not recovered from (8.5, 0.5, -6.0)"). Reproduzido injetando a perda de foco; agora a pausa por foco só fica ligada na seção que a testa.
+- **Aberto: a suíte completa morreu em silêncio uma vez** ao entrar no `robustez-10min` (saída 0, sem resumo), num worktree isolado, sem segundo agente escrevendo. Não é, portanto, colisão de dois agentes como o handoff anterior supunha. Não reproduziu isolado nem nas execuções seguintes. Hipótese não verificada: o processo pai roda com janela (sem `--headless`) e recebe um pedido de fechamento.
+- Título das páginas do menu ("APRESENTAÇÃO", "JOGABILIDADE") aparece deslocado para a esquerda e acima do painel do skin. Anterior a esta sessão; não corrigido.
+
 ## Atualização — operação, objetivos, menu e presets, 11/10/2026
 
 - **Esc abre o menu de pausa no exterior e na guarita.** Antes fechava o jogo na hora. Junto vieram F3 e rede de queda nesses cenários, fechando a pendência de prioridade 2 "levar a operação básica aos cenários novos". Ver `LEVEL_OPERATION.md`.

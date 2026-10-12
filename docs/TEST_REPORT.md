@@ -1,5 +1,25 @@
 # Relatório de testes — percurso técnico (T09)
 
+
+## Armas, mira e suavização — Windows, 11/10/2026 (sessão Opus 5.5)
+
+Godot `4.7.2.stable.official.ed1daf0bf`, Forward+/Vulkan, NVIDIA RTX 4050 Laptop GPU. Trabalho feito num worktree isolado (`.claude/worktrees/armas`, branch `feat/armas`), sem outro agente escrevendo nos mesmos arquivos.
+
+**Suíte completa, duas passadas seguidas no estado final: 36 probes, 0 falhas, saída 0 — e de novo 36 probes, 0 falhas, saída 0.** Inclui o probe novo `combate` (808 ticks, 0 falhas), o soak de dez minutos, todas as regressões gráficas e o `terminal-ui` do Codex. O gate de desempenho continua `NÃO MEDIDO` em headless.
+
+Antes de chegar lá, quatro execuções completas, registradas como aconteceram:
+
+| Execução | Estado | Resultado |
+| --- | --- | --- |
+| 1 | base `0aa2722` | **Morreu em silêncio** depois do probe 21 (`cena-principal`), ao iniciar `robustez-10min`: saída 0, sem resumo. Mesmo sintoma do handoff, mas **sem segundo agente** — não é colisão. Não reproduziu isolado nem depois. Continua aberto em `KNOWN_ISSUES.md`. |
+| 2 | base + suavização em edição | 35 probes, 1 falha: `operacao-grafica`, "Fall below the level was not recovered from (8.5, 0.5, -6.0)". Causa: pausa por perda de foco ligada no probe inteiro; foco real da área de trabalho pausava a queda. Reproduzido injetando a perda de foco, corrigido no probe. |
+| A | armas, antes da escala de 1,8 m | 36 probes, 1 falha: `benchmark-funcional`, 0 voltas em 45 s com a máquina carregada (5881 quadros contra 6524 isolado). Rota técnica usa o jogador-cápsula, sem arma: não é regressão. Janela ampliada para 75 s. |
+| B, C | estado final | 36/0 e 36/0. |
+
+`check_combat.gd` (`combate`, novo): auto-mira do tanque pega o alvo visível mais próximo e ignora o escondido atrás da parede; Tab percorre Low → Left → Far → Low; pés plantados com a arma erguida; quatro tiros derrubam o alvo e a arma passa ao próximo; a parede para o tiro; ↑ inclina; giro à mão solta a trava na velocidade do tanque; recarga tira do estoque real e não acontece com estoque zero; antebraço alinhado ao tiro a 0,00°; três modos modernos medidos (cursor, livre 360 sem deriva ao andar e ao cortar câmera, assistida com cone de 20°); caminhada mirada a 1,26 m/s de lado; tiro do peito de um corpo de 1,8 m; página JOGABILIDADE; nenhuma escrita em `settings.cfg`. **Dez defeitos reintroduzidos, todos acusados** — tabela em `COMBAT.md`.
+
+`check_retro_filter.gd`: no nível PSX, com bilinear, 2629 de 2673 blocos interiores passam a ter gradiente; voltar ao mais próximo restaura a imagem byte a byte; o botão do menu alterna e dá a volta.
+
 ## Apresentação montável e operação nos cenários — Windows, 11/10/2026
 
 Godot `4.7.2.stable.official.ed1daf0bf`, Forward+/Vulkan, NVIDIA RTX 4050 Laptop GPU.

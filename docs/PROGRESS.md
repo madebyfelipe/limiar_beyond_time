@@ -1,5 +1,17 @@
 # Progresso — LIMIAR Recon
 
+
+## Armas e mira — 11/10/2026
+
+- Pedido: armas, com tanque estilo Resident Evil / Dino Crisis (mira automática) e modo moderno seguindo o mouse em volta do Dylan, andando e mirando em todas as direções. Decisão do usuário: os três jeitos de mira moderna viram opção no menu de jogabilidade.
+- Feito: `systems/combat/` (arma, mira, saúde, hurtbox, definição de arma), pose de mira procedural, pistola na mão, traçador, retículo que mostra obstrução, mostrador de munição, página JOGABILIDADE no menu, estande de tiro (`executar-estande.cmd`). A arma é a que o terminal vende; a reserva é o estoque do terminal.
+- Probe `combate`: 808 ticks, 0 falhas; dez defeitos reintroduzidos, todos acusados. Ver `COMBAT.md`.
+- Pendente: capturas do Mixamo para mira/strafe/disparo/recarga (exige navegador; autorização a confirmar), inimigos, dano ao jogador, esquiva, som.
+
+## Suavização da pixelização — 11/10/2026
+
+- Pedido: "adicionar opção de pixelização entre mais próximo e bilinear". Linha SUAVIZAÇÃO na página de apresentação; bilinear mistura pixels virtuais já quantizados. Ver `RETRO_PRESETS.md`.
+
 ## Filtro PSX/CRT — 11/10/2026
 
 - Pedido: aproximar a apresentação do PSX. Criado filtro compartilhado em `systems/rendering`, aplicado à composição 2D/3D e à transição da porta: 320×180 virtual, 32 níveis por canal, dithering Bayer e CRT opcional (scanlines/vinheta).
