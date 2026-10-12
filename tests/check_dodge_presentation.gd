@@ -30,9 +30,12 @@ func run() -> void:
 	await tick(8)
 	var player: PlayerController = scene.player
 	var visual: Node3D = player.visual.get_node("DylanVisual")
-	check(visual.animator.has_animation("dodge_right"), "Mixamo dodge missing")
-	var clip: Animation = visual.animator.get_animation("dodge_right")
-	check(clip.loop_mode == Animation.LOOP_NONE and clip.get_track_count() > 30, "Dodge is not a full-body one-shot")
+	var dodges: Array[String] = ["dodge_forward", "dodge_back", "dodge_left", "dodge_right"]
+	for name: String in dodges:
+		check(visual.animator.has_animation(name), "Mixamo dodge missing: " + name)
+		var clip: Animation = visual.animator.get_animation(name)
+		check(clip.loop_mode == Animation.LOOP_NONE and clip.get_track_count() > 30, "Dodge is not a full-body one-shot: " + name)
+	var used := {}
 	PlayerWeapon.magazine = 2
 	check(player.weapon.reload(), "Could not start reload before dodge")
 	check(player.start_dodge() and not player.weapon.is_reloading(), "Dodge did not cancel reload")
@@ -43,13 +46,20 @@ func run() -> void:
 		Input.action_press(action)
 		check(player.start_dodge(), "Could not start dodge")
 		await tick(8)
-		check(visual.animator.current_animation in ["dodge_right", "dodge_left"], "Locomotion interrupted dodge")
+		check(visual.animator.current_animation in dodges, "Locomotion interrupted dodge")
+		used[visual.animator.current_animation] = true
 		check(player.position.is_finite(), "Invalid dodge transform")
 		await capture(action)
 		Input.action_release(action)
 		await tick(60)
-		check(visual.animator.current_animation not in ["dodge_right", "dodge_left"], "Dodge did not return to locomotion")
+		check(visual.animator.current_animation not in dodges, "Dodge did not return to locomotion")
 		check(absf(angle_difference(visual.model.rotation.y, PI)) < 0.01, "Dodge left the model turned sideways")
+	check(used.size() == 4, "Four escapes did not use four captures: %s" % [used.keys()])
+	player.reset_to_start()
+	check(player.start_dodge(), "Could not start neutral dodge")
+	await tick(4)
+	check(visual.animator.current_animation == "dodge_back", "Neutral dodge is not the backward hop")
+	await tick(60)
 	AimSettings.modern = AimSettings.Modern.CURSOR
 	scene.restart()
 	GamepadControls.shared.gamepad_active = false

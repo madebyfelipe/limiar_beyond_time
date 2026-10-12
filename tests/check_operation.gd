@@ -131,14 +131,14 @@ func run() -> void:
 	# Initial state and process modes.
 	check(not paused and not menu.visible and not overlay.visible and not scene.notice.visible,"Unexpected initial operation state")
 	check(menu.process_mode == Node.PROCESS_MODE_ALWAYS and overlay.process_mode == Node.PROCESS_MODE_ALWAYS,"UI must process while paused")
-	check(progress.stage == RouteProgress.Stage.OUTBOUND and scene.instructions.text.contains("Esc: pausa") and scene.instructions.text.contains("F3"),"Objective/controls missing")
+	check(progress.stage == RouteProgress.Stage.OUTBOUND and scene.instructions.text.contains("Esc: pause") and scene.instructions.text.contains("F3"),"Objective/controls missing")
 	check(presentation_matches(shots[0]),"Initial presentation incoherent")
 
 	# F3 readout.
 	await tap(KEY_F3)
 	check(overlay.visible,"F3 did not show diagnostics")
 	await tick(3)
-	for fragment: String in ["FPS","Posição","Enquadramento route_1","Referência livre","Percurso ida","Simulação active"]:
+	for fragment: String in ["FPS","Position","Shot route_1","Reference free","Route outbound","Simulation active"]:
 		check(overlay.label.text.contains(fragment),"Diagnostics missing '%s': %s" % [fragment,overlay.label.text])
 	await capture("f3")
 
@@ -146,7 +146,7 @@ func run() -> void:
 	await tap(KEY_ESCAPE)
 	check(paused and menu.visible and menu.resume_button.has_focus(),"Esc did not open focused pause menu")
 	await tick(5)
-	check(overlay.label.text.contains("Simulação paused"),"Diagnostics stopped updating while paused")
+	check(overlay.label.text.contains("Simulation paused"),"Diagnostics stopped updating while paused")
 	await tap(KEY_F3)
 	check(not overlay.visible,"F3 inoperable while paused")
 	await tap(KEY_F3)
@@ -251,7 +251,7 @@ func run() -> void:
 	check(recoveries.size() == 1 and recoveries[0] == progress.start_pad,"Outbound recovery used the wrong checkpoint")
 	check(recovery_states[0][0].distance_to(progress.start_pad+Vector3(0,0.06,0)) < 0.001 and recovery_states[0][1] == Vector3.ZERO,"Actor not restored to the start pad")
 	check(recovery_states[0][2] == shots[0] and presentation_matches(shots[0]) and progress.stage == RouteProgress.Stage.OUTBOUND,"Outbound recovery camera/stage incoherent")
-	check(scene.notice.visible and scene.notice.text.contains("Recuperação"),"Recovery notice missing")
+	check(scene.notice.visible and scene.notice.text.contains("Recovery"),"Recovery notice missing")
 	await tick(2)
 	await capture("recovered")
 	await tick(200)
@@ -261,7 +261,7 @@ func run() -> void:
 	for target: Vector3 in [Vector3(-2.5,0,9),Vector3(-2.5,0,2),Vector3(0,0,2),Vector3(0,0,-4),Vector3(0,0.6,-8),Vector3(0,1.2,-11),Vector3(0,1.2,-15),Vector3(3.8,1.2,-15),Vector3(3.8,1.2,-20),Vector3(0,1.2,-23)]:
 		await walk_to(target)
 	check(endpoint_events == 1 and progress.stage == RouteProgress.Stage.RETURNING,"Endpoint not registered")
-	check(scene.instructions.text.contains("Volte à marca azul") and scene.notice.visible,"Endpoint feedback missing")
+	check(scene.instructions.text.contains("Return to the blue starting marker") and scene.notice.visible,"Endpoint feedback missing")
 	await capture("endpoint")
 
 	# Recovery during the return leg: corridor (route_2) → end pad (route_3).
@@ -280,8 +280,8 @@ func run() -> void:
 	check(completions.size() == 1 and progress.stage == RouteProgress.Stage.COMPLETED,"Completion not registered")
 	if completions.size() == 1:
 		check(completions[0] > 10.0 and is_equal_approx(completions[0],progress.elapsed),"Completion time implausible: %s" % completions[0])
-		check(scene.notice.visible and scene.notice.text.contains("CONCLUÍDO") and scene.notice.text.contains(scene.format_time(completions[0])),"Completion notice missing")
-	check(scene.instructions.text.contains("Percurso complete") and overlay.label.text.contains("Percurso complete"),"Completion objective/readout missing")
+		check(scene.notice.visible and scene.notice.text.contains("COMPLETE") and scene.notice.text.contains(scene.format_time(completions[0])),"Completion notice missing")
+	check(scene.instructions.text.contains("Route complete") and overlay.label.text.contains("Route complete"),"Completion objective/readout missing")
 	var final_clock: float = progress.elapsed
 	await tick(200)
 	check(progress.elapsed == final_clock and scene.notice.visible and completions.size() == 1,"Completed state not stable")
@@ -293,7 +293,7 @@ func run() -> void:
 	await tap(KEY_DOWN)
 	press(KEY_ENTER)
 	check(restarts == 2 and not paused and progress.stage == RouteProgress.Stage.OUTBOUND and progress.elapsed == 0.0,"Restart after completion failed")
-	check(not scene.notice.visible and scene.instructions.text.contains("alcance a marca dourada") and presentation_matches(shots[0]),"Restart left completion feedback")
+	check(not scene.notice.visible and scene.instructions.text.contains("reach the gold marker") and presentation_matches(shots[0]),"Restart left completion feedback")
 	await tick(5)
 	await capture("restarted")
 	check(scene.format_time(83.26) == "1:23,3" and scene.format_time(5.0) == "0:05,0","Time format incorrect")

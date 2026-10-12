@@ -58,6 +58,11 @@ O Godot criou metadados `.import` e texturas extraídas durante a importação. 
 - Modelo instalado no exterior e na sala, com altura visual/colisão de 1,8 m para a geometria autorada. Os ensaios originais mantêm a ampliação de 2,4 m. Não foi alterada a escala do asset-fonte.
 - Animações são procedurais de protótipo: sem captura de movimento, IK de pés ou mão presa à maçaneta. Detalhes/testes em `docs/DYLAN_ANIMATION.md`.
 
+## Esquivas Mixamo — 12/10/2026
+
+- Exportadas da conta do usuário sobre o rig `dylan_mixamo`, FBX Binary, 30 fps, sem skin: `dylan_protagonist/mixamo/roll_stand.fbx` (Stand To Roll → `dodge_forward`), `dodge_back.fbx` (Dodging Back → `dodge_back`) e `dodge_right.fbx` (Dodging Right → `dodge_right`, espelhado em `dodge_left`). O `dodge_right.fbx` anterior, vindo de um espelho público no GitHub, foi substituído.
+- `.import` com `root_scale=100`, como as demais capturas; não há mais retarget. `dylan_clips.res` regenerado (806.946 bytes, SHA-256 `980B331FF2F14C00D9B50C9BB59D98ED7A38E1259B74651B56187A3677E5730B`). Hashes, janelas e capturas descartadas em `docs/DODGE_AND_GAMEPAD.md`.
+
 ## Captura de movimento Mixamo — 11/10/2026
 
 Substituição das animações procedurais por captura de movimento. O GLB-fonte **não** foi editado: seu SHA-256 segue `AEDBDF9C15EF225481FFA4630963C7F636702A071EB5CA5CC077B72CBE2816B1`. Ele deixou de ser instanciado em `player_dylan.tscn`, mas permanece como origem da malha e do inventário.
