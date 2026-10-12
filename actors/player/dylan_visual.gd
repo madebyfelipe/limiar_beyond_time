@@ -13,6 +13,7 @@ const NATIVE_SPEED := {&"walk": 1.48, &"run": 2.73, &"walk_back": 0.61}
 const NATIVE_TURN := 0.887
 ## Below this cosine the body is travelling backwards rather than forwards.
 const BACKWARD_COSINE := -0.4
+const DODGE_CLIPS: Array[StringName] = [&"dodge_forward", &"dodge_back", &"dodge_left", &"dodge_right"]
 @export_range(0.5, 3.0) var target_height: float = 2.4
 @onready var model: Node3D = $Model
 @onready var skeleton: Skeleton3D = $Model/Skeleton3D
@@ -63,14 +64,15 @@ func _process(delta: float) -> void:
 	if interaction_active:
 		return
 	if player.dodge_left > 0.0:
-		# The right sidestep is oriented into the committed world-space escape.
-		# Rotating the visual never changes the collision body or travel vector.
-		if locomotion != &"dodge_right" and locomotion != &"dodge_left":
-			_dodge_clip = &"dodge_left" if player.facing().cross(Vector3.UP).dot(player.dodge_direction) < -0.1 else &"dodge_right"
+		# One capture per escape relative to the body: roll forward, hop back,
+		# sidestep left or right. Each is then aligned with the committed
+		# world-space direction; rotating the visual never changes the collision
+		# body or travel vector.
+		if not DODGE_CLIPS.has(locomotion):
+			_dodge_clip = _dodge_clip_for(player.dodge_direction, player.facing())
 			locomotion = _dodge_clip
 			animator.play(locomotion, 0.04)
-		# Mixamo's right dodge leans toward local -X (the capture faces +Z).
-		model.global_rotation.y = atan2(-player.dodge_direction.z, player.dodge_direction.x) + (PI if _dodge_clip == &"dodge_right" else 0.0)
+		model.global_rotation.y = _dodge_heading(_dodge_clip, player.dodge_direction)
 		animator.speed_scale = 1.0
 		animator.seek(CLIPS.get_animation(_dodge_clip).length * (1.0 - player.dodge_left / player.config.dodge_duration), true)
 		return
@@ -85,6 +87,25 @@ func _process(delta: float) -> void:
 	elif not animator.is_playing():
 		animator.play(next, 0.16)
 	animator.speed_scale = _rate_for(next, speed)
+
+func _dodge_clip_for(direction: Vector3, forward: Vector3) -> StringName:
+	var along: float = forward.dot(direction)
+	var side: float = forward.cross(Vector3.UP).dot(direction)
+	if absf(along) >= absf(side):
+		return &"dodge_forward" if along > 0.0 else &"dodge_back"
+	return &"dodge_right" if side > 0.0 else &"dodge_left"
+
+## Model yaw that points the capture's own travel at the escape. The captures
+## face +Z: the roll travels +Z, the hop -Z, the right sidestep -X, the left +X.
+func _dodge_heading(clip: StringName, direction: Vector3) -> float:
+	match clip:
+		&"dodge_forward":
+			return atan2(direction.x, direction.z)
+		&"dodge_back":
+			return atan2(-direction.x, -direction.z)
+		&"dodge_right":
+			return atan2(-direction.z, direction.x) + PI
+	return atan2(-direction.z, direction.x)
 
 func _aiming() -> bool:
 	return player.can_use_weapon() and player.weapon != null and player.weapon.aiming and not interaction_active
