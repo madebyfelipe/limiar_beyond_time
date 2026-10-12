@@ -1,5 +1,12 @@
 # Limitações e pendências
 
+## Atualização — colisor do poste e salvamento, 11/10/2026
+
+- **O poste de luz deixou de ter colisor**, a pedido do usuário. Isso substitui a decisão anterior da mesma data de corrigir só a arte; o material de `pole_fix/` continua válido e não foi descartado.
+- Resolve apenas metade do problema descrito em `calibration/exterior/EXTERIOR_GEOMETRY.md`: **não existe mais poste invisível** para bater no canto sudeste do pátio. O poste continua sendo oclusor de profundidade, então **o recorte do personagem por um "poste" que mostra neve permanece** até a arte da vista 2 ser corrigida. Guardado por duas asserções em `check_exterior.gd`, validadas contra o colisor reposto (56 colisores, 2 falhas; sem ele, 55 e nenhuma).
+- **A sala de salvamento agora salva.** Terminal na mesa por **E**, registro em `user://save.cfg`, retomada ao abrir a sala. Campos, limites e verificação em `SAVE_SYSTEM.md`. As menções abaixo a "a sala ainda não salva progresso" são históricas.
+- Um registro só, sem slots, sem tela de título e sem menu de carregar: o jogo ainda abre cada cena por um `.cmd`. O registro guarda sala, posição e orientação — não há inventário nem roteiro para guardar ainda.
+
 ## Atualização — filtro PSX/CRT, 11/10/2026
 
 - F4 alterna Original/PSX/PSX + CRT; padrão PSX, compartilhado com a porta e mantido durante a sessão. Detalhes em `RETRO_FILTER.md`.

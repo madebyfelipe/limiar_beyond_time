@@ -1,5 +1,17 @@
 # Relatório de testes — percurso técnico (T09)
 
+## Salvamento e colisor do poste — Windows, 11/10/2026
+
+Godot `4.7.2.stable.official.ed1daf0bf`, Forward+/Vulkan, NVIDIA RTX 4050 Laptop GPU. Executor completo: **32 probes, 0 falhas, saída 0**, já com o probe novo. O soak de dez minutos e as oito regressões gráficas passaram junto; o gate de desempenho continua `NÃO MEDIDO` em headless, como sempre.
+
+`check_save_persistence.gd` (`salvamento`, novo no executor): **124 ticks, 0 falhas**. Alcance do terminal, repetição de tecla que não duplica a gravação, ida e volta de posição/orientação/contador/horário, confirmação na tela, retomada em sessão nova, chegada pela porta ignorando o registro, e três registros que não devem ser obedecidos — de outra sala, de formato desconhecido e apontando para cena inexistente. Usa `user://save_probe.cfg`: a suíte nunca lê nem sobrescreve o salvamento de quem joga na máquina.
+
+Como da outra vez, a aprovação de primeira não foi aceita como prova. Três defeitos reintroduzidos de propósito: `resume()` que nunca restaura reprova em 4 asserções; sem guarda de cena, o registro do exterior derruba o jogador para `y = −2,04` dentro da sala (2 falhas); sem guarda de formato, 1 falha. Com o código correto, 0 falhas nas duas execuções seguintes. A data mostrada na tela foi conferida à parte, porque nenhuma asserção verifica formato de data: `REGISTRO 1 · 11/10/2026 21:51` contra `2026-10-11T21:51` do sistema, fuso −180 min.
+
+Um erro meu no próprio probe merece registro, porque é do tipo que passa escondido: o primeiro teste de "E fora do alcance do terminal" foi feito no spawn da sala, que **é** o ponto de aproximação da porta. A asserção passava — nenhum registro era gravado — mas por motivo errado: E abria a porta e tirava o controle do jogador, e é por isso que as asserções seguintes reprovavam. O teste passou para o meio da sala e ganhou duas asserções que pegam exatamente esse engano (`E in the middle of the room opened the door` e `The player lost control without interacting with anything`).
+
+`check_exterior.gd` ganhou duas asserções pelo colisor removido do poste: nenhum corpo estático chamado `LightPole` e a cápsula do jogador livre na base do poste. Headless: **4100 ticks, 97,85 m, 55 colisores, 0 falhas**; gráfico: 4110 ticks, 97,91 m, mesmos 55 colisores. Repondo o colisor no `exterior_source.tscn`, a execução dá **56 colisores e 2 falhas**, as duas novas — a asserção foi verificada contra o defeito, não só contra o acerto.
+
 ## Captura de movimento, enquadramento e controles — Windows, 11/10/2026
 
 Godot `4.7.2.stable.official.ed1daf0bf`, Forward+/Vulkan, NVIDIA RTX 4050 Laptop GPU. Executor completo: **31 probes, 0 falhas, saída 0**, já com os dois probes novos.
