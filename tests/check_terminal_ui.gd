@@ -128,9 +128,13 @@ func run() -> void:
 	await tick()
 	var pause: PauseMenu = room.operation.pause_menu
 	check(pause.visible and paused and pause.resume_button.has_focus(), "Pause menu failed after terminal")
+	# The control scheme lives on the gameplay page, behind its own row.
 	var mode: int = ControlScheme.mode
+	click(pause.gameplay_button)
+	check(pause._is_gameplay_page_open(), "Gameplay page did not open from the menu")
 	click(pause.scheme_button)
 	check(ControlScheme.mode != mode, "Control scheme button stopped working")
+	pause._close_gameplay_page()
 	# The presentation row opens a page of its own; the stepper lives there.
 	var step: int = RetroFilter.pixel_step
 	click(pause.filter_button)

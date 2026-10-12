@@ -1,7 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 [ext_resource type="PackedScene" path="res://actors/player/player.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://assets/models/dylan_protagonist/mixamo/dylan_rig_idle.fbx" id="2"]
 [ext_resource type="Script" path="res://actors/player/dylan_visual.gd" id="3"]
+[ext_resource type="Script" path="res://systems/combat/player_weapon.gd" id="4"]
+[ext_resource type="Resource" path="res://resources/combat/pistol.tres" id="5"]
 [sub_resource type="CapsuleShape3D" id="DylanCollision"]
 radius = 0.3
 height = 2.4
@@ -18,3 +20,6 @@ script = ExtResource("3")
 [node name="Model" parent="Visual/DylanVisual" instance=ExtResource("2")]
 [node name="DirectionIndicator" parent="."]
 visible = false
+[node name="Weapon" type="Node3D" parent="."]
+script = ExtResource("4")
+definition = ExtResource("5")

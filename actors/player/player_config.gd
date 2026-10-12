@@ -18,3 +18,8 @@ extends Resource
 ## Backing up is a fraction of the walking speed, close to the 0,61 m/s the
 ## backward capture carries.
 @export_range(0.1, 1.0) var tank_reverse_factor: float = 0.45
+## With the gun up Dylan walks, never runs, at this fraction of his walk.
+@export_range(0.1, 1.0) var aim_move_factor: float = 0.7
+## How fast the body swings onto the aim. Faster than steering, so the gun
+## arrives on a target in a fraction of a second, as in the games it follows.
+@export_range(1.0, 40.0) var aim_turn_speed: float = 9.0

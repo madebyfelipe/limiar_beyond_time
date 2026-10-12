@@ -30,6 +30,7 @@ const PROBES: Array[Dictionary] = [
 	{"name": "terminal-ui", "script": "res://tests/check_terminal_ui.gd", "args": HEADLESS_FIXED, "summary": "TERMINAL_UI failures=0"},
 	{"name": "terminal-ui-grafico", "script": "res://tests/check_terminal_ui.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "TERMINAL_UI failures=0"},
 	{"name": "operacao-cenarios", "script": "res://tests/check_level_operation.gd", "args": HEADLESS_FIXED, "summary": "OPERATION levels"},
+	{"name": "combate", "script": "res://tests/check_combat.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "cena-principal", "script": "", "args": ["--headless", "--quit-after", "30"], "summary": ""},
 	{"name": "robustez-10min", "script": "res://tests/check_soak.gd", "args": HEADLESS_FIXED, "summary": "T10 soak minutes=10.0"},
 	# One lap of the route takes most of 45 s; on a loaded machine physics falls
