@@ -5,15 +5,15 @@ extends RefCounted
 ## ControlScheme does for the input preference, and the file below carries it
 ## between sessions.
 ##
-## The record is deliberately small: where the player stood and which room they
-## stood in. Nothing else in the game is stateful yet, and storing fields the
-## game cannot restore would be a save that lies.
+## The record is deliberately small: which room the player stood in, where, and
+## how far the objective had got. Storing fields the game cannot restore would
+## be a save that lies, so a field only appears here once something restores it.
 
 ## Bumped whenever a stored field changes meaning. A file from another format is
 ## ignored outright instead of being half-read into a broken game.
-const FORMAT := 1
+const FORMAT := 2
 const DEFAULT_PATH := "user://save.cfg"
-const PROBE_PATH := "user://save_probe.cfg"
+const PROBE_PATH := "res://.local/save_probe.cfg"
 const SECTION := "progress"
 
 ## Probes run through --script and get a file of their own, so the suite never
@@ -41,18 +41,24 @@ static func read() -> Dictionary:
 		"facing": float(file.get_value(SECTION, "facing", 0.0)),
 		"saves": int(file.get_value(SECTION, "saves", 1)),
 		"saved_at": int(file.get_value(SECTION, "saved_at", 0)),
+		"stage": int(file.get_value(SECTION, "stage", MissionState.Stage.ROAD)),
+		# Optional extension: existing format-2 saves restore the starter stock.
+		"supplies": file.get_value(SECTION, "supplies", {}),
 	}
 
-## Records where the player is standing. Returns the stored record, or an empty
-## dictionary when the file could not be written, so the terminal can say so
-## instead of pretending the progress is safe.
-static func write(scene: String, position: Vector3, facing: float) -> Dictionary:
+## Records where the player is standing, and how far the objective had got.
+## Returns the stored record, or an empty dictionary when the file could not be
+## written, so the terminal can say so instead of pretending the progress is
+## safe.
+static func write(scene: String, position: Vector3, facing: float, stage: int) -> Dictionary:
 	var record := {
 		"scene": scene,
 		"position": position,
 		"facing": facing,
 		"saves": int(read().get("saves", 0)) + 1,
 		"saved_at": int(Time.get_unix_time_from_system()),
+		"stage": stage,
+		"supplies": SupplyStock.snapshot(),
 	}
 	var file := ConfigFile.new()
 	file.set_value(SECTION, "format", FORMAT)
@@ -66,14 +72,18 @@ static func clear() -> void:
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
 
-## Puts the player back where they saved. Returns false when the scene has to
-## use its own spawn instead: no record, or a record made in another room.
+## Puts the player back where they saved, with the objective they had reached.
+## Returns false when the scene has to use its own spawn instead: no record, or
+## a record made in another room — opening that room was a deliberate start, so
+## it begins from its documented beginning.
 static func resume(player: PlayerController, scene: String) -> bool:
 	var record: Dictionary = read()
 	if record.is_empty() or String(record["scene"]) != scene:
 		return false
 	player.reset_to(Transform3D(Basis.IDENTITY, record["position"] as Vector3))
 	player.visual.rotation.y = float(record["facing"])
+	MissionState.restore(int(record["stage"]))
+	SupplyStock.restore(record.get("supplies", {}))
 	return true
 
 ## "11/10/2026 14:03", in local time, for the terminal to show.

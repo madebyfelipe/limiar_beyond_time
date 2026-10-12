@@ -6,6 +6,9 @@ const ART_DIR := "res://assets/backgrounds/env_1/exterior_authored/"
 const ART_FILES := ["art_cam01_v01.png","art_cam02_v02.png","art_cam03_v01.png"]
 const ZONE_CENTERS := [Vector3(0,2,22),Vector3(-2,2,7),Vector3(-5,2,3.5)]
 const ZONE_SIZES := [Vector3(7,6,16),Vector3(22,6,16),Vector3(8,6,10)]
+## North of the raised barrier the player is still on the road; south of it the
+## yard objective has been reached. The barrier itself sits at z = 10.
+const GATE_Z := 9.0
 @onready var world: Node3D = $Frame/Composition/Actors/WorldViewport/World
 @onready var background: TextureRect = $Frame/Composition/Background
 @onready var player: PlayerController = $Frame/Composition/Actors/WorldViewport/World/Player
@@ -17,8 +20,10 @@ var director: CameraDirector
 var presentation: PresentationController
 var art_available: bool = true
 var doorway: DoorInteraction
+var operation: LevelOperation
 
 func _ready() -> void:
+	instructions.visible = OS.get_cmdline_args().has("--debug-instructions")
 	world.get_node("Capsule").hide()
 	world.get_node("Light").hide()
 	background.hide()
@@ -106,11 +111,42 @@ func _ready() -> void:
 	doorway.facing = 0.0
 	doorway.target_scene = "res://environments/save_room.tscn"
 	add_child(doorway)
+	operation = LevelOperation.new()
+	operation.name = "Operation"
+	operation.player = player
+	operation.director = director
+	operation.frame = $Frame/Composition
+	operation.restart_requested.connect(restart)
+	add_child(operation)
+	_update_label()
 
 func arrive_from_door() -> void:
 	player.reset_to(Transform3D(Basis.IDENTITY, Vector3(-4.45, 0.66, 3.85)))
 	player.visual.rotation.y = PI
 	director.reset_to(shots[2])
+	operation.mark_safe()
+	_update_label()
+
+## Esc → Reiniciar, and R. A fresh attempt of the Fase 1 content: the actor, the
+## camera and the objective go back to the start. The stored record is not
+## touched, because restarting an attempt is not erasing a save.
+func restart() -> void:
+	player.reset_to_start()
+	director.reset_to(shots[0])
+	MissionState.reset()
+	operation.mark_safe()
+	operation.hide_notice()
+	_update_label()
+
+func _physics_process(_delta: float) -> void:
+	if MissionState.stage == MissionState.Stage.ROAD and player.global_position.z < GATE_Z:
+		_advance(MissionState.Stage.YARD)
+
+func _advance(stage: MissionState.Stage) -> void:
+	if not MissionState.reach(stage):
+		return
+	operation.show_notice("Objetivo: %s" % MissionState.objective(), 3.0)
+	_update_label()
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -120,10 +156,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			ControlScheme.toggle()
 			_update_label()
 		elif event.physical_keycode == KEY_R:
-			player.reset_to_start()
-			director.reset_to(shots[0])
-		elif event.physical_keycode == KEY_ESCAPE:
-			get_tree().quit()
+			restart()
 
 func set_art_mode(enabled: bool) -> void:
 	if enabled and not art_available:
@@ -135,5 +168,5 @@ func _update_label() -> void:
 	var shot_name: String = String(presentation.current_shot.definition.shot_id) if presentation.current_shot else ""
 	var movement: String = "setas giram e andam" if ControlScheme.is_tank() else "WASD/setas mover"
 	instructions.text = "EXTERIOR · %s · %s
-%s · Shift correr · E abrir porta · B arte/geometria · F4 filtro · T controles (%s) · R reiniciar · Esc sair
-Siga a estrada, passe a cancela e suba até a porta da guarita." % [shot_name,"ARTE CANDIDATA — alinhamento em revisão" if presentation.art_mode else "GEOMETRIA 3D",movement,ControlScheme.label()]
+%s · Shift correr · E abrir porta · B arte/geometria · F4 filtro · T controles (%s) · F3 diagnóstico · R reiniciar · Esc pausa
+%s" % [shot_name,"ARTE CANDIDATA — alinhamento em revisão" if presentation.art_mode else "GEOMETRIA 3D",movement,ControlScheme.label(),MissionState.objective()]

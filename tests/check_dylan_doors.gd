@@ -105,9 +105,10 @@ func travel(room: Node, expected: String, number: int) -> void:
 		return
 	var transition: Node = root.get_node("DoorTransition")
 	# The first stage precedes the test's connection.
-	check(transition.retro_filter.effect.material.get_shader_parameter("crt_enabled"), "Door cinematic did not inherit CRT mode")
+	check(RetroFilter.is_effect_on(RetroFilter.Effect.CURVE), "Door cinematic did not inherit the chosen presentation")
+	check(float(transition.retro_filter.effect.material.get_shader_parameter("curve")) > 0.0, "Door cinematic lost the preset's curvature")
 	key(KEY_F4)
-	check(transition.retro_filter.selected_mode == 2, "Filter changed while cinematic input was locked")
+	check(RetroFilter.is_effect_on(RetroFilter.Effect.CURVE), "Presentation changed while cinematic input was locked")
 	stages.append(transition.stage)
 	transition.stage_changed.connect(on_stage)
 	check(not source.control_enabled, "Player movement remained enabled during the cinematic")
@@ -124,7 +125,7 @@ func travel(room: Node, expected: String, number: int) -> void:
 	check(current_scene.scene_file_path == expected, "Incorrect room after doorway transition")
 	check(current_scene.player.control_enabled, "Control was not restored after arrival")
 	check(not root.has_node("DoorTransition"), "Transition layer leaked after arrival")
-	check(current_scene.get_node("Frame/Composition/RetroFilter").effect.material.get_shader_parameter("crt_enabled"), "Arrival lost CRT mode")
+	check(float(current_scene.get_node("FilterLayer/RetroFilter").effect.material.get_shader_parameter("curve")) > 0.0, "Arrival lost the chosen preset")
 	check(stages == [&"gesture", &"fade_out", &"latch", &"opening", &"crossing", &"loading", &"fade_in", &"complete"], "Missing cinematic stages: " + str(stages))
 	await capture("arrival-%d" % number)
 
@@ -147,7 +148,7 @@ func run() -> void:
 	for point: Vector3 in PATH:
 		await walk_to(exterior.player, point)
 	await capture("exterior-door")
-	exterior.get_node("Frame/Composition/RetroFilter").set_mode(2)
+	RetroFilter.set_effect(exterior.get_node("FilterLayer/RetroFilter"), RetroFilter.Effect.CURVE, true)
 	await travel(exterior, "res://environments/save_room.tscn", 0)
 	var inside: Node = current_scene
 	check(inside.player.position.distance_to(Vector3(-2.4,0,0.55)) < 0.15, "Interior arrival outside entrance")

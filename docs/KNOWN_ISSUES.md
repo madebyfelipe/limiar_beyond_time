@@ -1,5 +1,15 @@
 # Limitações e pendências
 
+## Atualização — operação, objetivos, menu e presets, 11/10/2026
+
+- **Esc abre o menu de pausa no exterior e na guarita.** Antes fechava o jogo na hora. Junto vieram F3 e rede de queda nesses cenários, fechando a pendência de prioridade 2 "levar a operação básica aos cenários novos". Ver `LEVEL_OPERATION.md`.
+- **Objetivo da Fase 1 em quatro etapas**, que atravessa a porta e entra no registro de salvamento. `SaveGame` subiu para `FORMAT 2`: arquivos do formato 1 são ignorados inteiros, e quem já tinha salvo precisa salvar de novo.
+- **Menu redesenhado no idioma do Dino Crisis 2**: painel angular translúcido, cantos em colchete desenhados em código, maiúsculas espaçadas e barra de seleção. É o idioma visual, não uma réplica, e não usa nenhum recurso do jogo original.
+- **Quatro presets de apresentação** no lugar do ciclo Original/PSX/PSX+CRT: Original, PSX, PSX + linhas e TV de tubo. F4 e o menu percorrem a mesma tabela, e a escolha agora sobrevive entre sessões. Medidas e limites em `RETRO_PRESETS.md`.
+- Corrigido antes de entrar: o terminal gravava a etapa **anterior** à do próprio salvamento. Quem salvasse e fechasse o jogo voltaria com o objetivo "registre o progresso no terminal", parado na frente do terminal recém-usado.
+- Corrigido de passagem: `ControlScheme.set_mode` gravava em `user://settings.cfg` mesmo rodando por `--script`, então uma execução da suíte trocava a preferência de controle de quem joga na máquina. Agora probes não leem **nem gravam** esse arquivo.
+- **Não feito**: a cena principal do projeto continua sendo o percurso técnico T07 e o preset de exportação continua selecionando os recursos dele. Trocar a entrada para o exterior muda o que o benchmark e o soak medem e exige os templates de exportação, que não estão instalados nesta cópia.
+
 ## Atualização — colisor do poste e salvamento, 11/10/2026
 
 - **O poste de luz deixou de ter colisor**, a pedido do usuário. Isso substitui a decisão anterior da mesma data de corrigir só a arte; o material de `pole_fix/` continua válido e não foi descartado.

@@ -38,6 +38,11 @@ static func ensure_loaded() -> void:
 static func set_mode(next: Mode) -> void:
 	_loaded = true
 	mode = next
+	# A probe already ignores the stored value; it must not write one either, or
+	# running the suite would silently change the preference of whoever plays
+	# on this machine.
+	if OS.get_cmdline_args().has("--script"):
+		return
 	var file := ConfigFile.new()
 	file.load(SETTINGS_PATH)
 	file.set_value(SECTION, KEY, int(mode))

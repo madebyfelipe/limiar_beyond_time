@@ -1,18 +1,24 @@
 class_name TerminalInteraction
 extends ApproachPrompt
-## The guardhouse save terminal. E records where the player stands, so the next
-## session resumes in this room instead of at the door.
+## E opens the terminal; its SAVE button records position, objective and stock.
 
 signal saved(record: Dictionary)
 
 @export var scene_path: String
 var notice: Label
+var menu: TerminalMenu
 
 func prompt_text() -> String:
-	return "E · Salvar progresso no terminal"
+	return "E · Terminal SAVE / SHOP"
 
 func _ready() -> void:
 	super()
+	layer = 20
+	menu = TerminalMenu.new()
+	menu.name = "TerminalMenu"
+	add_child(menu)
+	menu.save_requested.connect(save_progress)
+	menu.closed.connect(func() -> void: busy = false)
 	notice = label(-118, -78)
 	notice.add_theme_color_override("font_color", Color("9fd9a8"))
 	notice.modulate.a = 0.0
@@ -20,16 +26,31 @@ func _ready() -> void:
 func interact() -> void:
 	if not can_interact():
 		return
-	var record: Dictionary = SaveGame.write(scene_path, player.global_position, player.visual.rotation.y)
+	busy = true
+	prompt.hide()
+	menu.open()
+
+func save_progress() -> void:
+	if not busy or not menu.visible:
+		return
+	# Using the terminal is itself the Fase 1 objective, so the stage this press
+	# reaches has to be in the record this press writes, not one press behind.
+	# The live objective only moves once the file accepted it.
+	var record: Dictionary = SaveGame.write(scene_path, player.global_position, player.visual.rotation.y, MissionState.Stage.DONE)
 	if record.is_empty():
 		announce("TERMINAL SEM RESPOSTA — progresso não salvo")
+		menu.message.text = "FALHA AO GRAVAR · PROGRESSO NÃO SALVO."
 		return
+	MissionState.reach(MissionState.Stage.DONE)
 	saved.emit(record)
 	announce("PROGRESSO SALVO · registro %d · %s" % [record["saves"], SaveGame.stamp(record)])
+	menu.refresh_record()
+	menu.message.text = "PROGRESSO E ESTOQUE SALVOS · REGISTRO %d" % record["saves"]
 
 ## Shows a line over the prompt and lets it fade, the way a terminal would
 ## acknowledge and then go quiet again.
 func announce(text: String) -> void:
+	notice.visible = not menu.visible
 	notice.text = text
 	notice.modulate.a = 1.0
 	var fade := create_tween()

@@ -19,18 +19,26 @@ anotada em `PROJECT_AUDIT.md` (item 2) e nas fichas da sala.
 
 | Campo | Conteúdo |
 | --- | --- |
-| `format` | 1. Um arquivo de outro formato é **ignorado inteiro**, não lido pela metade. |
+| `format` | 2. Um arquivo de outro formato é **ignorado inteiro**, não lido pela metade. |
 | `scene` | A sala onde se salvou. Um registro de outra cena não reposiciona esta. |
 | `position` | Onde o jogador estava, em metros. |
 | `facing` | Guinada do corpo, em radianos. |
 | `saves` | Contador, mostrado como "REGISTRO n" na confirmação e na lista de teclas. |
 | `saved_at` | Horário Unix da gravação, exibido em hora local. |
+| `stage` | Etapa do objetivo da Fase 1, acrescentada no `FORMAT 2`. Ver `LEVEL_OPERATION.md`. |
+| `supplies` | Créditos, cartuchos, kits e aquisição da pistola. Campo opcional do formato 2; registros anteriores recebem o estoque inicial. |
 
-O registro é deliberadamente pequeno: **onde** o jogador estava e **em que sala**.
-Nada mais no jogo tem estado hoje — não há inventário, portas trancadas, itens
-coletados nem progresso de roteiro — e gravar campos que o jogo não sabe restaurar
-seria um salvamento que mente. Quando esses sistemas existirem, `FORMAT` sobe e os
-campos entram junto.
+O registro é deliberadamente pequeno: **onde** o jogador estava, **em que sala** e
+**até onde o objetivo tinha ido**. Gravar campos que o jogo não sabe restaurar
+seria um salvamento que mente, então um campo só aparece aqui quando alguma coisa
+o restaura. Foi o que aconteceu com `stage`: o objetivo da Fase 1 entrou no mesmo
+dia e `FORMAT` subiu de 1 para 2, como esta ficha previa. O terminal agora restaura
+também o estoque de suprimentos da SHOP, por meio de `SupplyStock`. Portas trancadas,
+itens coletados, disparo e consumo de kits continuam fora do protótipo.
+
+A etapa é **argumento** de `SaveGame.write()`, não leitura do estado global. A
+primeira versão lia o estático e gravava a etapa anterior à do próprio salvamento;
+o relato está em `LEVEL_OPERATION.md`.
 
 ## Ponto de interação
 
@@ -42,9 +50,11 @@ Dylan fica à esquerda do monitor, e não centrado nele.
 
 ## Como se comporta
 
-- **Salvar**: andar até a mesa, **E**. A confirmação aparece sobre o aviso da tecla e
-  some sozinha. Se o arquivo não puder ser escrito, a mensagem diz isso em vez de
-  fingir que o progresso está seguro.
+- **Salvar**: andar até a mesa, **E** abre o terminal, **SAVE** grava. Abrir o menu
+  não grava. O terminal confirma o registro e o estoque; se o arquivo não puder
+  ser escrito, mostra a falha e não avança o objetivo.
+- **SHOP**: compras descontam créditos e acrescentam estoque; usar **SAVE** depois
+  das compras para persistir. **BACK/Esc** volta ao terminal; **EXIT/Esc** fecha.
 - **Retomar**: abrir `executar-sala.cmd` com um registro gravado começa na posição e
   orientação salvas, e a lista de teclas mostra "· retomado". Sem registro, a sala
   usa o spawn da porta e avisa "SEM REGISTRO".
@@ -59,6 +69,8 @@ Dylan fica à esquerda do monitor, e não centrado nele.
   ainda abre cada cena por um `.cmd` próprio, e a retomada acontece ao abrir a sala.
 - Não há tempo de jogo acumulado no registro. Faltaria um relógio que sobreviva à
   troca de cena, e nenhuma tela mostra esse número hoje.
+- A etapa só é restaurada quando o registro pertence à sala que está abrindo. Abrir
+  o exterior é recomeçar pela estrada, de propósito: não há tela de carregar.
 - O arquivo é texto simples em `user://`, sem assinatura: é editável à mão. Para um
   protótipo isso é conveniente, não seguro.
 
@@ -70,7 +82,7 @@ de alcance não grava), repetição de tecla não duplica a gravação, ida e vo
 posição/orientação/contador/horário, confirmação na tela, retomada em sessão nova,
 chegada pela porta ignorando o registro, e três registros que **não** devem ser
 obedecidos: de outra sala, de formato desconhecido e apontando para uma cena
-inexistente. Usa `user://save_probe.cfg` — nenhum probe lê ou sobrescreve o
+inexistente. Usa `res://.local/save_probe.cfg` — nenhum probe lê ou sobrescreve o
 salvamento de quem joga na máquina.
 
 As asserções foram provadas contra o próprio defeito, não só pela aprovação:

@@ -57,6 +57,8 @@ Usar cenas pequenas, referências explícitas no Inspector e sinais. Não criar 
 
 Autorização específica de 11/10/2026: o usuário pediu continuidade até T07, escolheu fundos de estudo com perspectiva consistente e autorizou revisão independente da T06 por subagente. Essa autorização permite concluir T06 e T07 na mesma solicitação, preservando os critérios abaixo e os renders ENV_1 para refinamento. Não abrange T08.
 
+Autorização de 11/10/2026, sessão local: o usuário pediu "prossiga com o projeto para novas features", sem nomear a tarefa. Foi seguida a ordem sugerida pelo próprio `PROJECT_AUDIT.md`, implementando a pendência de prioridade 2 "levar a operação básica aos cenários novos" com objetivos da Fase 1, e em seguida os pedidos diretos de menu e presets de filtro. Essa autorização dispensa a regra de "uma tarefa por solicitação" acima para esses itens; não abrange trocar a cena principal do projeto, exportar build nem o backlog posterior à Fase 1.
+
 Autorização seguinte (sessão em nuvem iniciada em 11/10/2026): o usuário pediu retomar a última tarefa pendente da lista e continuar o máximo possível sem consultas, pois estaria ausente por cerca de cinco horas. Essa autorização permite executar T08, T09 e T10 em sequência, mantendo dependências, critérios de aceite, revisão técnica e inspeção visual de cada tarefa. Não abrange o backlog posterior à Fase 1 (combate, animais, missões) nem aprovação de ENV_1.
 
 ### T00 — Preparar projeto e registro de decisões

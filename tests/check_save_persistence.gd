@@ -24,11 +24,13 @@ func tick(count: int = 1) -> void:
 
 func key(code: Key, echo: bool = false) -> void:
 	var event := InputEventKey.new()
+	event.keycode = code
 	event.physical_keycode = code
 	event.pressed = true
 	event.echo = echo
 	Input.parse_input_event(event)
 	event = InputEventKey.new()
+	event.keycode = code
 	event.physical_keycode = code
 	event.pressed = false
 	Input.parse_input_event(event)
@@ -90,6 +92,12 @@ func run() -> void:
 	key(KEY_E)
 	await tick(4)
 	var record: Dictionary = SaveGame.read()
+	check(terminal.menu.visible and paused, "E did not open the terminal")
+	check(record.is_empty(), "Opening the menu wrote a save before SAVE")
+	key(KEY_ENTER)
+	await tick(4)
+	record = SaveGame.read()
+	terminal.menu.close()
 	check(not record.is_empty(), "E at the terminal wrote no record")
 	check(String(record.get("scene", "")) == ROOM, "The record names '%s' instead of the save room" % record.get("scene", ""))
 	check((record.get("position", Vector3.ZERO) as Vector3).distance_to(standing) < 0.01, "The record stored %v instead of where the player stood, %v" % [record.get("position", Vector3.ZERO), standing])
@@ -104,6 +112,10 @@ func run() -> void:
 	key(KEY_E)
 	await tick(4)
 	record = SaveGame.read()
+	key(KEY_ENTER)
+	await tick(4)
+	record = SaveGame.read()
+	terminal.menu.close()
 	check(int(record.get("saves", 0)) == 2, "The second save was numbered %d" % record.get("saves", 0))
 	check(absf(float(record.get("facing", 0.0)) + PI / 2) < 0.01, "The second save kept the old facing")
 	var saved_at: Vector3 = record.get("position", Vector3.ZERO) as Vector3
@@ -145,6 +157,9 @@ func run() -> void:
 	await tick(6)
 	key(KEY_E)
 	await tick(4)
+	key(KEY_ENTER)
+	await tick(4)
+	room.terminal.menu.close()
 	check(int(SaveGame.read().get("saves", 0)) == 1, "Saving over an untrusted record did not restart the count")
 	room.free()
 

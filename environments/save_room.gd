@@ -18,10 +18,12 @@ var art_mode: bool = false
 var overview: bool = false
 var doorway: DoorInteraction
 var terminal: TerminalInteraction
+var operation: LevelOperation
 ## True when this session started from a stored record instead of the spawn.
 var resumed: bool = false
 
 func _ready() -> void:
+	label.visible = OS.get_cmdline_args().has("--debug-instructions")
 	$Frame/Composition/Actors/WorldViewport/World/Capsule.hide()
 	background.hide()
 	var environment_node: WorldEnvironment = world.get_node("Environment")
@@ -63,16 +65,42 @@ func _ready() -> void:
 	terminal.approach = TERMINAL_APPROACH
 	terminal.radius = 0.8
 	terminal.scene_path = SCENE_PATH
-	terminal.saved.connect(func(_record: Dictionary) -> void: _update_label())
+	terminal.saved.connect(_on_saved)
 	add_child(terminal)
-	# Saving happens here, so this is the room a stored record sends you back to.
+	operation = LevelOperation.new()
+	operation.name = "Operation"
+	operation.player = player
+	operation.frame = $Frame/Composition
+	operation.restart_requested.connect(restart)
+	add_child(operation)
+	# Saving happens here, so this is the room a stored record sends you back to,
+	# with the objective it had reached.
 	resumed = SaveGame.resume(player, SCENE_PATH)
+	operation.mark_safe()
 	_update_label()
 
 func arrive_from_door() -> void:
 	resumed = false
 	player.reset_to_start()
 	player.visual.rotation.y = -PI / 2
+	operation.mark_safe()
+	# Being inside is the objective that the yard pointed at.
+	if MissionState.reach(MissionState.Stage.TERMINAL):
+		operation.show_notice("Objetivo: %s" % MissionState.objective(), 3.0)
+	_update_label()
+
+## Esc → Reiniciar, and R. Back to the door with the objective reset; the stored
+## record is left alone, because restarting an attempt is not erasing a save.
+func restart() -> void:
+	resumed = false
+	player.reset_to_start()
+	MissionState.reset()
+	operation.mark_safe()
+	operation.hide_notice()
+	_update_label()
+
+func _on_saved(_record: Dictionary) -> void:
+	operation.show_notice(MissionState.objective(), 4.0)
 	_update_label()
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -80,16 +108,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if event.physical_keycode == KEY_B:
 			set_art_mode(not art_mode)
 		elif event.physical_keycode == KEY_R:
-			resumed = false
-			player.reset_to_start()
-			_update_label()
+			restart()
 		elif event.physical_keycode == KEY_C:
 			set_overview(not overview)
 		elif event.physical_keycode == KEY_T:
 			ControlScheme.toggle()
 			_update_label()
-		elif event.physical_keycode == KEY_ESCAPE:
-			get_tree().quit()
 
 func set_art_mode(enabled: bool) -> void:
 	if enabled and not ResourceLoader.exists(ART):
@@ -111,8 +135,9 @@ func set_art_mode(enabled: bool) -> void:
 func _update_label() -> void:
 	var movement: String = "setas giram e andam" if ControlScheme.is_tank() else "WASD/setas mover"
 	label.text = "SALA — %s
-%s · E porta ou terminal · B arte/geometria · C visão técnica/interior · F4 filtro · T controles (%s) · R reiniciar · Esc sair
-%s" % [("ARTE CANDIDATA — alinhamento em revisão" if art_mode else ("GEOMETRIA · visão técnica" if overview else "GEOMETRIA · interior")),movement,ControlScheme.label(),_save_line()]
+%s · E porta ou terminal · B arte/geometria · C visão técnica/interior · F4 filtro · T controles (%s) · F3 diagnóstico · R reiniciar · Esc pausa
+%s
+%s" % [("ARTE CANDIDATA — alinhamento em revisão" if art_mode else ("GEOMETRIA · visão técnica" if overview else "GEOMETRIA · interior")),movement,ControlScheme.label(),MissionState.objective(),_save_line()]
 
 ## What the stored record says, so resuming is visible instead of surprising.
 func _save_line() -> String:
