@@ -100,4 +100,8 @@ fov = 50.0
 position = Vector3(0, 0.9, 0)
 mesh = SubResource("Mesh_capsule")
 
-[node name="RetroFilter" parent="Frame/Composition" instance=ExtResource("2_retro")]
+[node name="FilterLayer" type="CanvasLayer" parent="."]
+layer = 60
+
+[node name="RetroFilter" parent="FilterLayer" node_paths=PackedStringArray("follow") instance=ExtResource("2_retro")]
+follow = NodePath("../../Frame/Composition")

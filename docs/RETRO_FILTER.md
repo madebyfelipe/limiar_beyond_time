@@ -1,5 +1,10 @@
 # Apresentação PSX / CRT
 
+> **Atualização de 11/10/2026:** o ciclo Original/PSX/PSX+CRT descrito aqui foi
+> substituído por quatro presets nomeados, selecionáveis também pelo menu de
+> pausa, com curvatura de tubo e grade de abertura novas. Esta ficha permanece
+> como registro do filtro anterior; o atual está em `RETRO_PRESETS.md`.
+
 Implementada em 11/10/2026. Abra `executar-exterior.cmd` ou `executar-sala.cmd`. O modo inicial é **PSX**. **F4** percorre PSX → PSX + CRT → Original; um aviso aparece por 2,5 segundos. A escolha dura a sessão e acompanha o exterior, a sala e a porta. Durante a sequência da porta, a entrada fica bloqueada e o modo escolhido é preservado.
 
 | Modo | Apresentação |
