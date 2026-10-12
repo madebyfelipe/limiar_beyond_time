@@ -16,10 +16,11 @@ func _ready() -> void:
 	prompt = label(-78, -30)
 	prompt.text = prompt_text()
 	prompt.hide()
+	GamepadControls.shared.changed.connect(func() -> void: prompt.text = prompt_text())
 
 ## Overridden by each interaction to name what E does there.
 func prompt_text() -> String:
-	return "E"
+	return GamepadControls.shared.interact_label()
 
 ## A bottom-anchored line in the shared prompt style.
 func label(top: float, bottom: float) -> Label:
@@ -37,7 +38,7 @@ func label(top: float, bottom: float) -> Label:
 	return result
 
 func can_interact() -> bool:
-	if busy or not player.control_enabled or get_tree().paused or get_tree().root.has_node("DoorTransition"):
+	if busy or not player.can_use_weapon() or get_tree().paused or get_tree().root.has_node("DoorTransition"):
 		return false
 	var offset: Vector3 = player.global_position - approach
 	return absf(offset.y) < 0.25 and Vector2(offset.x, offset.z).length() <= radius
@@ -45,7 +46,7 @@ func can_interact() -> bool:
 func _process(_delta: float) -> void:
 	prompt.visible = can_interact()
 
-func _unhandled_key_input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact") and not event.is_echo() and can_interact():
 		get_viewport().set_input_as_handled()
 		interact()

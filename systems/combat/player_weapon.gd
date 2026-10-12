@@ -20,6 +20,7 @@ signal target_changed(target: Hurtbox)
 
 const DEFAULT_DEFINITION := preload("res://resources/combat/pistol.tres")
 const WORLD_MASK := 1
+const AIM_CURSOR = preload("res://assets/ui/aim_cursor.svg")
 ## Shots and sight lines leave from the chest: this fraction of the body's
 ## collision height, 1,2 m on the 1,8 m Dylan of the levels and 1,6 m on the
 ## 2,4 m rig of the studies. The ray starts on the body axis, not at the hand,
@@ -35,6 +36,8 @@ const LOCK_FIRE_TOLERANCE := 0.2
 ## Radius, in viewport pixels, of the circle the free reticle swings on. Mouse
 ## movement is measured against it, so it sets how far a flick turns Dylan.
 const FREE_RADIUS := 220.0
+## Selection tolerance relative to viewport height, independent of resolution.
+const LOCK_PICK_RADIUS := 0.04
 
 @export var definition: WeaponDefinition
 @export var player: PlayerController
@@ -46,6 +49,9 @@ const FREE_RADIUS := 220.0
 static var magazine: int = -1
 
 var aiming: bool = false
+## Capture the aim's input source until L2/right mouse is released. A resting
+## mouse must not drive a gamepad aim, including after a camera cut.
+var gamepad_aim: bool = false
 ## Desired body yaw while aiming, in the convention of player.visual.rotation.
 var heading: float = 0.0
 var pitch: float = 0.0
@@ -69,6 +75,12 @@ var _tracer: MeshInstance3D
 var _tracer_mesh := ImmediateMesh.new()
 var _tracer_left: float = 0.0
 var _flash: OmniLight3D
+var _aim_requires_release: bool = false
+var _fire_requires_release: bool = false
+var _active_mode: AimSettings.Modern
+var _active_tank: bool
+var _stick_cycle_ready: bool = true
+var custom_cursor_active: bool = false
 
 func _ready() -> void:
 	# Ahead of the body, so the controller reads this frame's aim.
@@ -84,6 +96,8 @@ func _ready() -> void:
 		muzzle_height = CHEST_FRACTION * (collision.shape as CapsuleShape3D).height
 	AimSettings.ensure_loaded()
 	ControlScheme.ensure_loaded()
+	_active_mode = AimSettings.modern
+	_active_tank = ControlScheme.is_tank()
 	_marker = _overlay_mesh(_marker_mesh)
 	_tracer = _overlay_mesh(_tracer_mesh)
 	_flash = OmniLight3D.new()
@@ -103,8 +117,7 @@ func _overlay_mesh(mesh: ImmediateMesh) -> MeshInstance3D:
 
 ## Loaded, ready to fire and lowered: what a restart hands back.
 func reset_state() -> void:
-	if aiming:
-		_lower()
+	interrupt_input()
 	magazine = definition.magazine
 	cooldown = 0.0
 	reload_left = 0.0
@@ -128,14 +141,42 @@ func is_reloading() -> bool:
 func muzzle() -> Vector3:
 	return player.global_position + Vector3.UP * muzzle_height
 
+## A held mouse button from a menu or a door must not resume the gun.
+func interrupt_input() -> void:
+	_aim_requires_release = Input.is_action_pressed(&"aim")
+	_fire_requires_release = Input.is_action_pressed(&"fire")
+	_lower()
+	if _marker_mesh != null:
+		_marker_mesh.clear_surfaces()
+
+func interrupt_combat() -> void:
+	# Reload transfers ammunition only on completion, so cancelling is atomic.
+	reload_left = 0.0
+	interrupt_input()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED and is_node_ready():
+		interrupt_input()
+
+func uses_locked_aim() -> bool:
+	return not ControlScheme.is_tank() and (AimSettings.pad_target_lock if gamepad_aim else AimSettings.modern == AimSettings.Modern.LOCKED)
+
 func _physics_process(delta: float) -> void:
+	if _active_mode != AimSettings.modern or _active_tank != ControlScheme.is_tank():
+		interrupt_input()
+		_active_mode = AimSettings.modern
+		_active_tank = ControlScheme.is_tank()
+	if not Input.is_action_pressed(&"aim"):
+		_aim_requires_release = false
+	if not Input.is_action_pressed(&"fire"):
+		_fire_requires_release = false
 	cooldown = maxf(cooldown - delta, 0.0)
 	if reload_left > 0.0:
 		reload_left -= delta
 		if reload_left <= 0.0:
 			_finish_reload()
-	var able: bool = player.control_enabled and is_armed()
-	var want: bool = able and Input.is_action_pressed(&"aim")
+	var able: bool = player.can_use_weapon() and is_armed() and not Input.is_action_just_pressed("dodge")
+	var want: bool = able and not _aim_requires_release and Input.is_action_pressed(&"aim")
 	if want and not aiming:
 		_raise()
 	elif not want and aiming:
@@ -147,13 +188,19 @@ func _physics_process(delta: float) -> void:
 			_aim_tank(delta)
 		else:
 			_aim_modern()
-		if Input.is_action_just_pressed(&"fire"):
+		var trigger: bool = Input.is_action_pressed(&"fire") if uses_locked_aim() or gamepad_aim else Input.is_action_just_pressed(&"fire")
+		if trigger and not _fire_requires_release:
 			fire()
 	_draw_marker()
 	_fade_tracer(delta)
 
 func _raise() -> void:
 	aiming = true
+	gamepad_aim = GamepadControls.shared.gamepad_active
+	_stick_cycle_ready = true
+	custom_cursor_active = not gamepad_aim and not ControlScheme.is_tank() and AimSettings.modern != AimSettings.Modern.FREE
+	if custom_cursor_active and DisplayServer.get_name() != "headless":
+		Input.set_custom_mouse_cursor(AIM_CURSOR, Input.CURSOR_ARROW, Vector2(24, 24))
 	heading = player.visual.rotation.y
 	pitch = 0.0
 	turn_input = 0.0
@@ -161,13 +208,28 @@ func _raise() -> void:
 	if ControlScheme.is_tank():
 		if AimSettings.tank_auto_target:
 			_set_target(_acquire(null))
-	elif AimSettings.modern == AimSettings.Modern.FREE:
+	elif uses_locked_aim() and gamepad_aim and player.camera != null:
+		# A pad has no pointer: start on the nearest visible target, then L1/R1
+		# cycle in screen order. Walls and offscreen targets remain excluded.
+		var found: Array[Hurtbox] = locked_candidates(player.camera)
+		var nearest: Hurtbox = null
+		for candidate: Hurtbox in found:
+			if nearest == null or muzzle().distance_squared_to(candidate.aim_point()) < muzzle().distance_squared_to(nearest.aim_point()):
+				nearest = candidate
+		_set_target(nearest)
+	elif AimSettings.modern == AimSettings.Modern.FREE and not gamepad_aim:
 		_window_anchor = get_tree().root.get_mouse_position()
 		if not _scripted():
 			Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	elif uses_locked_aim() and player.camera != null:
+		_set_target(_pick_locked(player.camera))
 
 func _lower() -> void:
+	if custom_cursor_active and DisplayServer.get_name() != "headless":
+		Input.set_custom_mouse_cursor(null)
+	custom_cursor_active = false
 	aiming = false
+	gamepad_aim = false
 	pitch = 0.0
 	turn_input = 0.0
 	_set_target(null)
@@ -186,6 +248,10 @@ func _scripted() -> bool:
 func _aim_tank(delta: float) -> void:
 	var turn: float = Input.get_axis(&"move_right", &"move_left")
 	var tilt: float = Input.get_axis(&"move_down", &"move_up")
+	var stick: Vector2 = GamepadControls.shared.aim_vector() if gamepad_aim else Vector2.ZERO
+	if not stick.is_zero_approx():
+		turn = -stick.x
+		tilt = -stick.y
 	turn_input = turn if absf(turn) > 0.1 else 0.0
 	# Taking the gun by hand drops the lock, as it does in the games this copies.
 	if absf(turn) > 0.1 or absf(tilt) > 0.1:
@@ -196,6 +262,8 @@ func _aim_tank(delta: float) -> void:
 	if AimSettings.tank_auto_target:
 		if Input.is_action_just_pressed(&"next_target"):
 			_set_target(_acquire(target))
+		elif Input.is_action_just_pressed(&"lock_previous_target"):
+			_set_target(_acquire(target, -1))
 		elif target != null and not target.is_alive():
 			# The one in front went down: the gun moves to the next one in sight.
 			_set_target(_acquire(null))
@@ -211,8 +279,22 @@ func _aim_modern() -> void:
 	var camera: Camera3D = player.camera
 	if camera == null or not camera.is_inside_tree():
 		return
-	if AimSettings.modern == AimSettings.Modern.FREE:
+	if AimSettings.modern == AimSettings.Modern.FREE and not gamepad_aim:
 		_aim_free(camera)
+		return
+	if uses_locked_aim():
+		_aim_locked(camera)
+		return
+	_aim_cursor(camera)
+	if not gamepad_aim and AimSettings.modern == AimSettings.Modern.ASSISTED:
+		var pulled: Hurtbox = _assist_candidate()
+		if pulled != null:
+			_set_target(pulled)
+			_face(pulled.aim_point())
+
+func _aim_cursor(camera: Camera3D) -> void:
+	if gamepad_aim:
+		_aim_gamepad(camera)
 		return
 	var screen: Vector2 = pointer_override if pointer_override != null else AimSolver.pointer(camera)
 	_set_target(null)
@@ -228,11 +310,75 @@ func _aim_modern() -> void:
 			to.y = 0.0
 			if to.length() > 0.05:
 				heading = AimSolver.yaw_of(to)
-	if AimSettings.modern == AimSettings.Modern.ASSISTED:
-		var pulled: Hurtbox = _assist_candidate()
-		if pulled != null:
-			_set_target(pulled)
-			_face(pulled.aim_point())
+
+func _locked_valid() -> bool:
+	return is_instance_valid(target) and target.is_inside_tree() and target.targetable and target.is_alive() and muzzle().distance_to(target.aim_point()) <= definition.reach
+
+func _aim_locked(camera: Camera3D) -> void:
+	if gamepad_aim:
+		var stick := GamepadControls.shared.aim_vector()
+		if absf(stick.x) < 0.25:
+			_stick_cycle_ready = true
+		elif absf(stick.x) > 0.55 and _stick_cycle_ready:
+			_stick_cycle_ready = false
+			_cycle_locked(camera, 1 if stick.x > 0.0 else -1)
+	# Obstruction and camera cuts keep the lock; death/removal/range do not.
+	if target != null and not _locked_valid():
+		_set_target(null)
+		_fire_requires_release = Input.is_action_pressed(&"fire")
+	if Input.is_action_just_pressed(&"lock_next_target") or Input.is_action_just_pressed(&"next_target"):
+		_cycle_locked(camera, 1)
+	elif Input.is_action_just_pressed(&"lock_previous_target"):
+		_cycle_locked(camera, -1)
+	if _locked_valid():
+		_face(target.aim_point())
+	else:
+		_aim_cursor(camera)
+
+## Only acquire boards the player and the camera can actually see.
+func locked_candidates(camera: Camera3D) -> Array[Hurtbox]:
+	var found: Array[Hurtbox] = []
+	var rect: Rect2 = camera.get_viewport().get_visible_rect()
+	for candidate: Hurtbox in visible_targets():
+		var point: Vector3 = candidate.aim_point()
+		if not candidate.targetable or camera.is_position_behind(point) or not rect.has_point(camera.unproject_position(point)):
+			continue
+		var exclude: Array[RID] = [player.get_rid()]
+		if candidate.body != null:
+			exclude.append(candidate.body.get_rid())
+		if _ray(camera.global_position, point, WORLD_MASK, exclude).is_empty():
+			found.append(candidate)
+	found.sort_custom(func(a: Hurtbox, b: Hurtbox) -> bool:
+		return camera.unproject_position(a.aim_point()).x < camera.unproject_position(b.aim_point()).x)
+	return found
+
+func _pick_locked(camera: Camera3D) -> Hurtbox:
+	var screen: Vector2 = pointer_override if pointer_override != null else AimSolver.pointer(camera)
+	var rect: Rect2 = camera.get_viewport().get_visible_rect()
+	if not rect.has_point(screen):
+		return null
+	var found: Array[Hurtbox] = locked_candidates(camera)
+	var under: Dictionary = _ray(camera.project_ray_origin(screen), camera.project_ray_origin(screen) + camera.project_ray_normal(screen) * 200.0, WORLD_MASK | Hurtbox.LAYER)
+	if not under.is_empty() and under.collider is Hurtbox and found.has(under.collider):
+		return under.collider as Hurtbox
+	var best: Hurtbox = null
+	var distance: float = rect.size.y * LOCK_PICK_RADIUS
+	for candidate: Hurtbox in found:
+		var near: float = screen.distance_to(camera.unproject_position(candidate.aim_point()))
+		if near < distance:
+			distance = near
+			best = candidate
+	return best
+
+func _cycle_locked(camera: Camera3D, step: int) -> void:
+	var found: Array[Hurtbox] = locked_candidates(camera)
+	if found.is_empty():
+		return
+	var index: int = found.find(target)
+	_set_target(found[posmod(index + step, found.size())] if index >= 0 else (found[0] if step > 0 else found[-1]))
+
+func lock_blocked() -> bool:
+	return uses_locked_aim() and _locked_valid() and not can_see(target)
 
 ## The heading lives in world space and the mouse only nudges it, so a camera
 ## cut leaves the gun where it was and walking carries it along with Dylan.
@@ -247,6 +393,9 @@ func _aim_free(camera: Camera3D) -> void:
 		# runs into the window edge however far the reticle has turned.
 		if not _scripted() and motion != Vector2.ZERO:
 			get_tree().root.warp_mouse(_window_anchor)
+	motion *= float(GeneralSettings.get_value("mouse_sensitivity"))
+	if GeneralSettings.get_value("mouse_invert_y"):
+		motion.y = -motion.y
 	pitch = 0.0
 	if motion.length() < 0.01:
 		return
@@ -254,6 +403,23 @@ func _aim_free(camera: Camera3D) -> void:
 	var origin: Vector2 = camera.unproject_position(feet)
 	var ring: Vector2 = AimSolver.screen_heading(camera, feet, heading) * FREE_RADIUS
 	var point: Variant = AimSolver.ground_point(camera, origin + ring + motion, feet.y)
+	if point != null:
+		var to: Vector3 = (point as Vector3) - feet
+		to.y = 0.0
+		if to.length() > 0.01:
+			heading = AimSolver.yaw_of(to)
+
+## The right stick describes a direction on screen, projected onto the floor
+## around Dylan. Neutral keeps the last world heading through camera cuts.
+func _aim_gamepad(camera: Camera3D) -> void:
+	_set_target(null)
+	pitch = 0.0
+	var stick: Vector2 = GamepadControls.shared.aim_vector()
+	if stick.is_zero_approx():
+		return
+	var feet: Vector3 = player.global_position
+	var screen: Vector2 = camera.unproject_position(feet) + stick.normalized() * FREE_RADIUS
+	var point: Variant = AimSolver.ground_point(camera, screen, feet.y)
 	if point != null:
 		var to: Vector3 = (point as Vector3) - feet
 		to.y = 0.0
@@ -280,7 +446,7 @@ func _face(point: Vector3) -> void:
 	pitch = AimSolver.pitch_of(to)
 
 func _set_target(next: Hurtbox) -> void:
-	if next == target:
+	if (target == null and next == null) or (is_instance_valid(target) and next == target):
 		return
 	target = next
 	target_changed.emit(target)
@@ -309,12 +475,12 @@ func can_see(candidate: Hurtbox) -> bool:
 	return _ray(muzzle(), candidate.aim_point(), WORLD_MASK, exclude).is_empty()
 
 ## Nearest visible target, or the one after `after` when cycling.
-func _acquire(after: Hurtbox) -> Hurtbox:
+func _acquire(after: Hurtbox, step: int = 1) -> Hurtbox:
 	var found: Array[Hurtbox] = visible_targets()
 	if found.is_empty():
 		return null
 	var index: int = found.find(after)
-	return found[(index + 1) % found.size()] if index >= 0 else found[0]
+	return found[posmod(index + step, found.size())] if index >= 0 else (found[0] if step > 0 else found[-1])
 
 func _ray(from: Vector3, to: Vector3, mask: int, exclude: Array[RID] = []) -> Dictionary:
 	if exclude.is_empty():
@@ -329,14 +495,14 @@ func _ray(from: Vector3, to: Vector3, mask: int, exclude: Array[RID] = []) -> Di
 ## otherwise straight along the body with the gun's tilt.
 func shot_direction() -> Vector3:
 	var body_yaw: float = player.visual.rotation.y
-	if target != null:
+	if is_instance_valid(target) and target.is_inside_tree() and target.is_alive():
 		var to: Vector3 = target.aim_point() - muzzle()
 		if absf(angle_difference(body_yaw, AimSolver.yaw_of(to))) < LOCK_FIRE_TOLERANCE:
 			return to.normalized()
 	return AimSolver.direction(body_yaw, pitch)
 
 func fire() -> bool:
-	if not aiming or reload_left > 0.0 or cooldown > 0.0:
+	if not player.can_use_weapon() or not aiming or reload_left > 0.0 or cooldown > 0.0:
 		return false
 	if magazine <= 0:
 		# Pulling the trigger on an empty gun reloads it, when there is anything
@@ -359,7 +525,7 @@ func fire() -> bool:
 	return true
 
 func reload() -> bool:
-	if reload_left > 0.0 or magazine >= definition.magazine or reserve() <= 0:
+	if not player.can_use_weapon() or not is_armed() or reload_left > 0.0 or magazine >= definition.magazine or reserve() <= 0:
 		return false
 	reload_left = definition.reload_time
 	return true
@@ -374,7 +540,7 @@ func _finish_reload() -> void:
 
 # --- Feedback -----------------------------------------------------------------
 
-## A ring where the gun would hit right now: red over a target, amber on
+## A reticle where the gun would hit right now: red over a target, mint on
 ## anything else, so a wall in the way shows before the trigger is pulled.
 func _draw_marker() -> void:
 	_marker_mesh.clear_surfaces()
@@ -388,14 +554,17 @@ func _draw_marker() -> void:
 	var on_target: bool = not hit.is_empty() and hit.collider is Hurtbox
 	var right: Vector3 = camera.global_basis.x
 	var up: Vector3 = camera.global_basis.y
-	var radius: float = 0.12 + 0.012 * camera.global_position.distance_to(point)
-	var material := _line_material(Color(1.0, 0.25, 0.2) if on_target else Color(1.0, 0.82, 0.3))
+	var radius: float = 0.07 + 0.007 * camera.global_position.distance_to(point)
+	var material := _line_material(Color(1.0, 0.3, 0.25) if on_target else Color(0.66, 0.95, 0.88))
 	_marker_mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
 	for step: int in range(16):
 		var a: float = TAU * step / 16.0
 		var b: float = TAU * (step + 1) / 16.0
 		_marker_mesh.surface_add_vertex(point + (right * cos(a) + up * sin(a)) * radius)
 		_marker_mesh.surface_add_vertex(point + (right * cos(b) + up * sin(b)) * radius)
+	for axis: Vector3 in [right, -right, up, -up]:
+		_marker_mesh.surface_add_vertex(point + axis * radius * 1.35)
+		_marker_mesh.surface_add_vertex(point + axis * radius * 1.9)
 	_marker_mesh.surface_end()
 
 func _show_tracer(end: Vector3) -> void:

@@ -138,7 +138,7 @@ func run() -> void:
 	await tap(KEY_F3)
 	check(overlay.visible,"F3 did not show diagnostics")
 	await tick(3)
-	for fragment: String in ["FPS","Posição","Enquadramento route_1","Referência livre","Percurso ida","Simulação ativa"]:
+	for fragment: String in ["FPS","Posição","Enquadramento route_1","Referência livre","Percurso ida","Simulação active"]:
 		check(overlay.label.text.contains(fragment),"Diagnostics missing '%s': %s" % [fragment,overlay.label.text])
 	await capture("f3")
 
@@ -146,7 +146,7 @@ func run() -> void:
 	await tap(KEY_ESCAPE)
 	check(paused and menu.visible and menu.resume_button.has_focus(),"Esc did not open focused pause menu")
 	await tick(5)
-	check(overlay.label.text.contains("Simulação pausada"),"Diagnostics stopped updating while paused")
+	check(overlay.label.text.contains("Simulação paused"),"Diagnostics stopped updating while paused")
 	await tap(KEY_F3)
 	check(not overlay.visible,"F3 inoperable while paused")
 	await tap(KEY_F3)
@@ -281,7 +281,7 @@ func run() -> void:
 	if completions.size() == 1:
 		check(completions[0] > 10.0 and is_equal_approx(completions[0],progress.elapsed),"Completion time implausible: %s" % completions[0])
 		check(scene.notice.visible and scene.notice.text.contains("CONCLUÍDO") and scene.notice.text.contains(scene.format_time(completions[0])),"Completion notice missing")
-	check(scene.instructions.text.contains("Percurso concluído") and overlay.label.text.contains("Percurso concluído"),"Completion objective/readout missing")
+	check(scene.instructions.text.contains("Percurso complete") and overlay.label.text.contains("Percurso complete"),"Completion objective/readout missing")
 	var final_clock: float = progress.elapsed
 	await tick(200)
 	check(progress.elapsed == final_clock and scene.notice.visible and completions.size() == 1,"Completed state not stable")

@@ -86,7 +86,7 @@ func arrive_from_door() -> void:
 	operation.mark_safe()
 	# Being inside is the objective that the yard pointed at.
 	if MissionState.reach(MissionState.Stage.TERMINAL):
-		operation.show_notice("Objetivo: %s" % MissionState.objective(), 3.0)
+		operation.show_notice("Objective: %s" % MissionState.objective(), 3.0)
 	_update_label()
 
 ## Esc → Reiniciar, and R. Back to the door with the objective reset; the stored
@@ -104,11 +104,14 @@ func _on_saved(_record: Dictionary) -> void:
 	_update_label()
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if InputBindings.is_custom_event(event):
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_B:
 			set_art_mode(not art_mode)
 		elif event.physical_keycode == KEY_R:
-			restart()
+			if player.weapon == null or (not player.weapon.aiming and not player.weapon.is_reloading()):
+				restart()
 		elif event.physical_keycode == KEY_C:
 			set_overview(not overview)
 		elif event.physical_keycode == KEY_T:
@@ -133,18 +136,18 @@ func set_art_mode(enabled: bool) -> void:
 	_update_label()
 
 func _update_label() -> void:
-	var movement: String = "setas giram e andam" if ControlScheme.is_tank() else "WASD/setas mover"
-	label.text = "SALA — %s
-%s · E porta ou terminal · B arte/geometria · C visão técnica/interior · F4 filtro · T controles (%s) · F3 diagnóstico · R reiniciar · Esc pausa
+	var movement: String = "arrows turn and move" if ControlScheme.is_tank() else "WASD/arrows move"
+	label.text = "ROOM — %s
+%s · E door or terminal · B art/geometry · C overview/interior · F4 filter · T controls (%s) · F3 diagnostics · R restart · Esc pause
 %s
-%s" % [("ARTE CANDIDATA — alinhamento em revisão" if art_mode else ("GEOMETRIA · visão técnica" if overview else "GEOMETRIA · interior")),movement,ControlScheme.label(),MissionState.objective(),_save_line()]
+%s" % [("CANDIDATE ART — alignment under review" if art_mode else ("GEOMETRY · overview" if overview else "GEOMETRY · interior")),movement,ControlScheme.label(),MissionState.objective(),_save_line()]
 
 ## What the stored record says, so resuming is visible instead of surprising.
 func _save_line() -> String:
 	var record: Dictionary = SaveGame.read()
 	if record.is_empty():
-		return "SEM REGISTRO — salve no terminal da mesa"
-	return "REGISTRO %d · %s%s" % [record["saves"], SaveGame.stamp(record), " · retomado" if resumed else ""]
+		return "NO SAVE — use the desk terminal"
+	return "RECORD %d · %s%s" % [record["saves"], SaveGame.stamp(record), " · resumed" if resumed else ""]
 
 func set_overview(enabled: bool) -> void:
 	if enabled and art_mode:

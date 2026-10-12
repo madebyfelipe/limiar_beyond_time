@@ -44,13 +44,14 @@ static func read() -> Dictionary:
 		"stage": int(file.get_value(SECTION, "stage", MissionState.Stage.ROAD)),
 		# Optional extension: existing format-2 saves restore the starter stock.
 		"supplies": file.get_value(SECTION, "supplies", {}),
+		"vitality": float(file.get_value(SECTION, "vitality", 100.0)),
 	}
 
 ## Records where the player is standing, and how far the objective had got.
 ## Returns the stored record, or an empty dictionary when the file could not be
 ## written, so the terminal can say so instead of pretending the progress is
 ## safe.
-static func write(scene: String, position: Vector3, facing: float, stage: int) -> Dictionary:
+static func write(scene: String, position: Vector3, facing: float, stage: int, vitality: float = 100.0) -> Dictionary:
 	var record := {
 		"scene": scene,
 		"position": position,
@@ -59,6 +60,7 @@ static func write(scene: String, position: Vector3, facing: float, stage: int) -
 		"saved_at": int(Time.get_unix_time_from_system()),
 		"stage": stage,
 		"supplies": SupplyStock.snapshot(),
+		"vitality": clampf(vitality, 1.0, 100.0),
 	}
 	var file := ConfigFile.new()
 	file.set_value(SECTION, "format", FORMAT)
@@ -84,6 +86,7 @@ static func resume(player: PlayerController, scene: String) -> bool:
 	player.visual.rotation.y = float(record["facing"])
 	MissionState.restore(int(record["stage"]))
 	SupplyStock.restore(record.get("supplies", {}))
+	player.restore_vitality(float(record.get("vitality", 100.0)))
 	return true
 
 ## "11/10/2026 14:03", in local time, for the terminal to show.

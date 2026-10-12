@@ -1,11 +1,11 @@
 class_name SupplyStock
 extends RefCounted
 ## Terminal supplies. Purchases change real stock; SAVE records it with progress.
-## Combat/use of these supplies is outside the current exploration prototype.
+## Dylan consumes medical kits; the weapon reloads from the ammunition stock.
 const ITEMS: Array[Dictionary] = [
-	{"name": "AMMO", "price": 300, "description": "30 CARTUCHOS", "kind": "ammo"},
-	{"name": "MED KIT", "price": 500, "description": "1 KIT MÉDICO", "kind": "med_kits"},
-	{"name": "WEAPON", "price": 1800, "description": "PISTOLA", "kind": "weapon"},
+	{"name": "AMMO", "price": 300, "description": "30 ROUNDS", "kind": "ammo"},
+	{"name": "MED KIT", "price": 500, "description": "1 MED KIT", "kind": "med_kits"},
+	{"name": "WEAPON", "price": 1800, "description": "PISTOL", "kind": "weapon"},
 ]
 static var credits: int = 2400
 static var ammo: int = 90
@@ -53,7 +53,7 @@ static func buy(index: int) -> bool:
 
 static func quantity(index: int) -> String:
 	match index:
-		0: return "%d CARTUCHOS" % ammo
+		0: return "%d ROUNDS" % ammo
 		1: return "%d KITS" % med_kits
-		2: return "ADQUIRIDA" if weapon else "NÃO ADQUIRIDA"
+		2: return "OWNED" if weapon else "NOT OWNED"
 	return ""

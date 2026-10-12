@@ -5,7 +5,7 @@
 
 - **Pistola jogável** nos dois esquemas, com mira automática estilo RE/Dino Crisis no tanque e três modos de mira selecionáveis no esquema câmera. Ver `COMBAT.md`.
 - **Pose de mira procedural, não capturada.** Faltam do Mixamo: `aim_idle`, `strafe_left`, `strafe_right`, caminhada mirada, disparo e recarga. Até lá, andar de lado mirando usa o clipe de caminhada para frente e as pernas não acompanham o deslize. O seletor já procura esses nomes; basta adicioná-los a `tools/build_dylan_animations.gd`.
-- Sem inimigos: só os alvos do estande usam `Health`/`Hurtbox`. Sem dano ao jogador, esquiva, som de disparo ou marca de impacto. Gamepad sem mapeamento.
+- Combat, damage, death, dodge, medical kits and gamepad controls are implemented. Dodge uses retargeted Mixamo captures with a mirrored left variant; death remains procedural. Gunshot audio and impact decals remain absent. See `COMBAT.md` and `DODGE_AND_GAMEPAD.md`.
 - O carregador não entra no salvamento (a reserva entra, via `SupplyStock`).
 - **Suavização da pixelização** (mais próximo / bilinear) na página de apresentação. Ver `RETRO_PRESETS.md`.
 - Corrigido: o botão "APRESENTAÇÃO" do menu principal esticava além da moldura com resumos longos; as linhas-resumo agora cortam com reticências.

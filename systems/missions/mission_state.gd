@@ -17,10 +17,10 @@ enum Stage {
 }
 
 const OBJECTIVES := {
-	Stage.ROAD: "Siga a estrada nevada até a cancela.",
-	Stage.YARD: "Atravesse o pátio e suba até a porta da guarita.",
-	Stage.TERMINAL: "Registre o progresso no terminal da mesa.",
-	Stage.DONE: "Objetivo cumprido. O terminal guardou o progresso.",
+	Stage.ROAD: "Follow the snowy road to the gate.",
+	Stage.YARD: "Cross the yard and climb to the guardhouse door.",
+	Stage.TERMINAL: "Save your progress at the desk terminal.",
+	Stage.DONE: "Objective complete. Progress saved at the terminal.",
 }
 
 static var stage: Stage = Stage.ROAD

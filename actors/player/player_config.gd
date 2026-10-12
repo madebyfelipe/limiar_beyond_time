@@ -23,3 +23,11 @@ extends Resource
 ## How fast the body swings onto the aim. Faster than steering, so the gun
 ## arrives on a target in a fraction of a second, as in the games it follows.
 @export_range(1.0, 40.0) var aim_turn_speed: float = 9.0
+
+@export var dodge_speed: float = 7.0
+@export var dodge_duration: float = 0.32
+@export var dodge_invulnerability: float = 0.24
+@export var dodge_cooldown: float = 0.85
+@export var hit_invulnerability: float = 0.65
+@export var hit_stun: float = 0.18
+@export var med_kit_healing: float = 50.0

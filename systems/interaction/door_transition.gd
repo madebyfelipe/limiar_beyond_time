@@ -147,6 +147,8 @@ func begin(destination: PackedScene, returning_outside: bool, source_player: Pla
 		return
 	playing = true
 	controlled_player = source_player
+	var carried_vitality: float = source_player.vitality
+	var carried_supplies: Dictionary = SupplyStock.snapshot()
 	_stage(&"gesture")
 	await get_tree().create_timer(0.72).timeout
 	var screen: Control = get_child(0)
@@ -190,6 +192,8 @@ func begin(destination: PackedScene, returning_outside: bool, source_player: Pla
 	var room: Node = get_tree().current_scene
 	room.arrive_from_door()
 	controlled_player = room.player
+	controlled_player.restore_vitality(carried_vitality)
+	SupplyStock.restore(carried_supplies)
 	controlled_player.set_control_enabled(false)
 	cinema_frame.hide()
 	screen.get_child(0).hide()

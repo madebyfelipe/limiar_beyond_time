@@ -3,7 +3,7 @@ extends Resource
 ## Numbers of one firearm. Behaviour lives in PlayerWeapon; a second gun is a
 ## second resource, not a second script.
 
-@export var display_name: String = "PISTOLA"
+@export var display_name: String = "PISTOL"
 @export_range(0.0, 1000.0) var damage: float = 25.0
 ## Seconds between shots: the trigger is pulled once per press, never held.
 @export_range(0.05, 3.0) var fire_interval: float = 0.32

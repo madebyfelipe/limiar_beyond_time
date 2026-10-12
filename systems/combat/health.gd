@@ -26,3 +26,10 @@ func apply(amount: float) -> void:
 func restore() -> void:
 	current = maximum
 	changed.emit(current, maximum)
+
+func heal(amount: float) -> bool:
+	if not alive() or amount <= 0.0 or current >= maximum:
+		return false
+	current = minf(current + amount, maximum)
+	changed.emit(current, maximum)
+	return true

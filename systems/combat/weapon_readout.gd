@@ -24,7 +24,7 @@ func _process(_delta: float) -> void:
 	visible = weapon != null and weapon.is_armed()
 	if not visible:
 		return
-	var stock: String = "TREINO" if weapon.practice else str(weapon.reserve())
+	var stock: String = "PRACTICE" if weapon.practice else str(weapon.reserve())
 	text = "%s  %d | %s" % [weapon.definition.display_name, PlayerWeapon.magazine, stock]
 	if weapon.is_reloading():
-		text = "RECARREGANDO  " + text
+		text = "RELOADING  " + text

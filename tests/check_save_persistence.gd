@@ -106,7 +106,7 @@ func run() -> void:
 	check(int(record.get("saves", 0)) == 1, "The first save was numbered %d" % record.get("saves", 0))
 	check(int(record.get("saved_at", 0)) > 1_700_000_000, "The record carries no plausible timestamp")
 	check(terminal.notice.modulate.a > 0.9, "Saving gave the player no on-screen acknowledgement")
-	check(room.label.text.contains("REGISTRO 1"), "The room's key list does not show the stored record")
+	check(room.label.text.contains("RECORD 1"), "The room's key list does not show the stored record")
 	# Saving again counts up rather than starting over.
 	player.visual.rotation.y = -PI / 2
 	await tick(4)
@@ -129,7 +129,7 @@ func run() -> void:
 	check(room.resumed, "The room did not resume from the stored record")
 	check(room.player.global_position.distance_to(saved_at) < 0.1, "Resumed at %v instead of the stored %v" % [room.player.global_position, saved_at])
 	check(absf(angle_difference(room.player.visual.rotation.y, saved_facing)) < 0.02, "Resumed facing %f instead of the stored %f" % [room.player.visual.rotation.y, saved_facing])
-	check(room.label.text.contains("retomado"), "A resumed session does not say so on screen")
+	check(room.label.text.contains("resumed"), "A resumed session does not say so on screen")
 	# Walking in through the door means standing at the door, not at the record.
 	room.arrive_from_door()
 	await tick(4)
@@ -153,7 +153,7 @@ func run() -> void:
 	room = await open_room()
 	check(not room.resumed, "An untrusted record resumed the room")
 	check(room.player.global_position.distance_to(SPAWN) < 0.2, "An untrusted record moved the player to %v" % room.player.global_position)
-	check(room.label.text.contains("SEM REGISTRO"), "With no trustworthy record the room should say so")
+	check(room.label.text.contains("NO SAVE"), "With no trustworthy record the room should say so")
 	# And the terminal overwrites it with something valid.
 	room.player.reset_to(Transform3D(Basis.IDENTITY, room.TERMINAL_APPROACH + Vector3.UP * 0.06))
 	await tick(6)

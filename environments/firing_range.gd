@@ -1,6 +1,6 @@
 extends Control
 ## Firing range: a lit yard with silhouettes, one fixed camera and the pistol
-## on loan, for trying both control schemes and the three modern aim modes
+## on loan, for trying both control schemes and the four modern aim modes
 ## without buying the gun at the terminal. The layout doubles as the combat
 ## probe's fixture, so every distance below is a check in check_combat.gd.
 ##
@@ -57,7 +57,7 @@ func _ready() -> void:
 	add_child(operation)
 	operation.restart_requested.connect(restart)
 	restart()
-	operation.show_notice("Estande de tiro. Botão direito ou Ctrl ergue a arma; esquerdo ou Espaço dispara; R recarrega; Tab troca de alvo no modo tanque.", 6.0)
+	operation.show_notice("Right mouse aims; left mouse fires; R reloads. Esc > Gameplay selects aim mode. Target lock: point and hold right mouse; wheel cycles targets.", 8.0)
 
 func _block(center: Vector3, size: Vector3, color: Color) -> StaticBody3D:
 	var body := StaticBody3D.new()
@@ -81,6 +81,7 @@ func _block(center: Vector3, size: Vector3, color: Color) -> StaticBody3D:
 
 ## Boards stand back up and Dylan returns to the line, gun lowered and loaded.
 func restart() -> void:
+	player.reset_combat()
 	for board: PracticeTarget in targets.values():
 		board.reset()
 	player.reset_to(Transform3D(Basis.IDENTITY, START))

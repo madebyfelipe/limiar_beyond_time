@@ -1,6 +1,6 @@
 extends SceneTree
 ## Weapons on the firing range: the tank scheme's Resident Evil auto-aim and
-## the modern scheme's three aim modes, shots as 3D rays that walls stop,
+## the modern scheme's four aim modes, shots as 3D rays that walls stop,
 ## damage and death, reloading from the real stock, the stance that puts the
 ## gun where the shot goes, and the gameplay page that picks all of it.
 
@@ -22,7 +22,7 @@ func tick(count: int = 1) -> void:
 		await physics_frame
 
 func release_all() -> void:
-	for action: String in ["move_left", "move_right", "move_up", "move_down", "run", "aim", "fire", "reload", "next_target"]:
+	for action: String in ["move_left", "move_right", "move_up", "move_down", "run", "aim", "fire", "reload", "next_target", "lock_next_target", "lock_previous_target"]:
 		Input.action_release(action)
 
 ## One press of an action. A scripted press reads as "just pressed" only on
@@ -54,6 +54,191 @@ func fresh(scheme: ControlScheme.Mode) -> void:
 func _init() -> void:
 	create_timer(120).timeout.connect(func() -> void: quit(124))
 	call_deferred("run")
+
+func wheel(button: MouseButton) -> void:
+	var event := InputEventMouseButton.new()
+	event.button_index = button
+	event.pressed = true
+	Input.parse_input_event(event)
+	await tick(2)
+	event = InputEventMouseButton.new()
+	event.button_index = button
+	event.pressed = false
+	Input.parse_input_event(event)
+	await tick(2)
+
+func capture_locked(name: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	await process_frame
+	await RenderingServer.frame_post_draw
+	DirAccess.make_dir_recursive_absolute("res://.local")
+	check(root.get_texture().get_image().save_png("res://.local/lock-%s.png" % name) == OK, "Lock capture failed")
+
+func check_locked(camera: Camera3D) -> void:
+	AimSettings.modern = AimSettings.Modern.LOCKED
+	await fresh(ControlScheme.Mode.CAMERA_RELATIVE)
+	weapon.pointer_override = camera.unproject_position(board(&"hidden").hurtbox.aim_point())
+	Input.action_press("aim")
+	await tick(2)
+	check(weapon.target == null, "Locked aim acquired through a wall")
+	release_all()
+	await tick(2)
+	weapon.pointer_override = camera.unproject_position(board(&"left").hurtbox.aim_point()) + Vector2(0, 3)
+	Input.action_press("aim")
+	await tick(30)
+	check(weapon.target == board(&"left").hurtbox, "Locked aim did not select near the mouse")
+	weapon.pointer_override = camera.unproject_position(board(&"low").hurtbox.aim_point())
+	await tick(4)
+	check(weapon.target == board(&"left").hurtbox, "Moving the pointer replaced the lock")
+	await capture_locked("selected")
+	# The actual wheel bindings, including inverse cycling and wraparound.
+	var order: Array[Hurtbox] = weapon.locked_candidates(camera)
+	var index: int = order.find(weapon.target)
+	await wheel(MOUSE_BUTTON_WHEEL_DOWN)
+	check(weapon.target == order[(index + 1) % order.size()], "Wheel down did not choose the next screen target")
+	await wheel(MOUSE_BUTTON_WHEEL_UP)
+	check(weapon.target == board(&"left").hurtbox, "Wheel up did not reverse the selection")
+	await wheel(MOUSE_BUTTON_WHEEL_UP)
+	check(weapon.target == order[-1], "Wheel selection did not wrap")
+	await wheel(MOUSE_BUTTON_WHEEL_DOWN)
+	var at: Vector3 = board(&"left").position
+	board(&"left").position.x -= 0.5
+	Input.action_press("move_right")
+	await tick(30)
+	Input.action_release("move_right")
+	check(weapon.target == board(&"left").hurtbox, "Walking lost the lock")
+	check(absf(angle_difference(weapon.heading, yaw_to(board(&"left").hurtbox.aim_point()))) < 0.01, "The lock did not track a moving target")
+	board(&"left").position = at
+	# Cut to a view facing away: the identity and world heading survive.
+	var side := Camera3D.new()
+	range_scene.world.add_child(side)
+	side.position = Vector3(9, 6, -2)
+	side.look_at(Vector3(12, 6, -2))
+	side.make_current()
+	player.camera = side
+	await tick(5)
+	check(weapon.target == board(&"left").hurtbox, "Camera cut changed the locked target")
+	check(absf(angle_difference(weapon.heading, yaw_to(board(&"left").hurtbox.aim_point()))) < 0.01, "Camera cut rotated the locked aim")
+	if DisplayServer.get_name() != "headless":
+		await process_frame
+		await RenderingServer.frame_post_draw
+		var indicator: Control = range_scene.operation.frame.get_node("LockIndicator")
+		check(indicator.marker_offscreen, "Offscreen target has no edge indicator")
+		await capture_locked("offscreen")
+	player.camera = camera
+	camera.make_current()
+	side.queue_free()
+	# A new wall blocks the bullet while preserving selection.
+	var cover: StaticBody3D = range_scene._block((weapon.muzzle() + board(&"left").hurtbox.aim_point()) * 0.5, Vector3(1.4, 3, 1.4), Color.GRAY)
+	await tick(30)
+	check(weapon.target == board(&"left").hurtbox and weapon.lock_blocked(), "Temporary cover released the lock or did not warn")
+	var hp: float = board(&"left").health.current
+	check(weapon.fire() and weapon.last_shot.get("collider") == cover, "Locked shot ignored temporary cover")
+	check(board(&"left").health.current == hp, "Blocked lock damaged the target")
+	await capture_locked("blocked")
+	cover.queue_free()
+	await tick(25)
+	# Held fire stops after release and death does not select a new enemy.
+	board(&"left").health.current = 1000
+	var loaded: int = PlayerWeapon.magazine
+	Input.action_press("fire")
+	await tick(65)
+	check(PlayerWeapon.magazine == loaded - 4, "Held fire did not respect the 0.32s cadence: %d shots" % (loaded - PlayerWeapon.magazine))
+	Input.action_release("fire")
+	await tick(30)
+	check(PlayerWeapon.magazine == loaded - 4, "Released trigger kept firing")
+	Input.action_press("fire")
+	await tick(2)
+	board(&"left").health.apply(1000)
+	await tick(3)
+	loaded = PlayerWeapon.magazine
+	await tick(30)
+	check(weapon.target == null and PlayerWeapon.magazine == loaded, "Target death replaced the lock or kept consuming ammo")
+	# Holding aim/trigger through pause and control changes requires release.
+	range_scene.operation.pause_menu.open()
+	await tick(2)
+	check(not weapon.aiming, "Pause left the locked gun raised")
+	range_scene.operation.pause_menu.close()
+	await tick(30)
+	check(not weapon.aiming and PlayerWeapon.magazine == loaded, "Pause resumed held buttons")
+	release_all()
+	await fresh(ControlScheme.Mode.CAMERA_RELATIVE)
+	weapon.pointer_override = camera.unproject_position(board(&"left").hurtbox.aim_point())
+	Input.action_press("aim")
+	await tick(2)
+	player.set_control_enabled(false)
+	player.set_control_enabled(true)
+	await tick(3)
+	check(not weapon.aiming, "A short control interruption resumed a held aim")
+	release_all()
+	await tick(2)
+	Input.action_press("aim")
+	await tick(3)
+	check(weapon.target == board(&"left").hurtbox, "Release and press did not restore aiming")
+	# A removed/freed target must not be dereferenced or replaced.
+	var temporary := PracticeTarget.new()
+	temporary.position = Vector3(-4, 0, -6)
+	range_scene.world.add_child(temporary)
+	await tick(2)
+	weapon._set_target(temporary.hurtbox)
+	temporary.queue_free()
+	await tick(3)
+	check(weapon.target == null, "Freed target stayed selected")
+	weapon._set_target(board(&"left").hurtbox)
+	board(&"left").position = Vector3(-3, 0, -60)
+	await tick(2)
+	check(weapon.target == null, "Out-of-range target stayed selected")
+	board(&"left").position = at
+	AimSettings.modern = AimSettings.Modern.CURSOR
+	await tick(3)
+	check(not weapon.aiming, "Changing aim mode kept the gun raised")
+	release_all()
+	# Existing modes retain one shot per press even with the trigger held.
+	await fresh(ControlScheme.Mode.CAMERA_RELATIVE)
+	weapon.pointer_override = camera.unproject_position(board(&"left").hurtbox.aim_point())
+	Input.action_press("aim")
+	await tick(30)
+	loaded = PlayerWeapon.magazine
+	Input.action_press("fire")
+	await tick(65)
+	check(PlayerWeapon.magazine == loaded - 1, "Held fire leaked into cursor mode")
+	release_all()
+	AimSettings.modern = AimSettings.Modern.LOCKED
+	await fresh(ControlScheme.Mode.CAMERA_RELATIVE)
+	weapon.pointer_override = Vector2(-100, -100)
+	Input.action_press("aim")
+	await tick(2)
+	check(weapon.target == null, "Pointer outside the viewport selected a target")
+	weapon.practice = false
+	SupplyStock.weapon = true
+	SupplyStock.ammo = 3
+	PlayerWeapon.magazine = 0
+	Input.action_press("fire")
+	await tick(2)
+	check(weapon.is_reloading(), "Held trigger on empty did not start reload")
+	await tick(175)
+	check(SupplyStock.ammo == 0 and PlayerWeapon.magazine == 0 and not weapon.is_reloading(), "Held fire/reload created ammo or reloaded without stock")
+	release_all()
+	SupplyStock.reset()
+	weapon.practice = true
+	# Roundtrip the actual settings file using an explicitly isolated path.
+	DirAccess.make_dir_recursive_absolute("res://.local")
+	AimSettings.settings_path = "res://.local/lock-settings-probe.cfg"
+	var config := ConfigFile.new()
+	config.set_value("other", "keep", 42)
+	check(config.save(AimSettings.settings_path) == OK, "Could not create isolated aim settings")
+	AimSettings.set_modern(AimSettings.Modern.LOCKED)
+	AimSettings.modern = AimSettings.Modern.FREE
+	AimSettings._loaded = false
+	AimSettings.ensure_loaded()
+	check(AimSettings.modern == AimSettings.Modern.LOCKED, "Locked option did not survive a settings reload")
+	config.load(AimSettings.settings_path)
+	check(config.get_value("other", "keep") == 42, "Saving aim erased another settings section")
+	DirAccess.remove_absolute(AimSettings.settings_path)
+	AimSettings.settings_path = AimSettings.SETTINGS_PATH
+	AimSettings.modern = AimSettings.Modern.FREE
+	await tick(2)
 
 func run() -> void:
 	range_scene = load("res://environments/firing_range.tscn").instantiate()
@@ -204,6 +389,15 @@ func run() -> void:
 	print("COMBAT forearm_vs_shot_deg=%.2f" % arm_error)
 	check(arm_error < 12.0, "The right forearm points %.1f deg away from the shot" % arm_error)
 	check(visual.pistol.visible, "No pistol in Dylan's hand while aiming")
+	var prop: MeshInstance3D = visual.pistol.find_child("PistolMesh", true, false) as MeshInstance3D
+	check(prop != null and prop.mesh != null, "The authored pistol GLB did not reach Dylan's hand")
+	check(visual.muzzle != null and weapon.muzzle_marker == visual.muzzle, "The tracer has no imported muzzle marker")
+	var prop_scale: float = visual.target_height / 1.8
+	check((-visual.pistol.global_basis.z).normalized().dot(weapon.shot_direction()) > 0.999, "The imported pistol faces away from the shot")
+	if visual.muzzle != null:
+		var tip_offset: Vector3 = visual.muzzle.global_position - visual.pistol.global_position
+		check(absf(tip_offset.dot(weapon.shot_direction()) - 0.173 * prop_scale) < 0.002, "The tracer origin is not at the modeled muzzle")
+	check(visual.pistol.global_position.distance_to(arm[1]) < 0.06 * prop_scale if arm.size() == 2 else false, "The pistol grip is detached from the aiming hand")
 	release_all()
 	await tick(30)
 	check(not visual.pistol.visible and visual.aim_pose.influence == 0.0, "The stance stayed on after lowering the gun")
@@ -286,6 +480,7 @@ func run() -> void:
 	release_all()
 
 	# --- Losing control lowers the gun ---
+	await check_locked(camera)
 	await fresh(ControlScheme.Mode.TANK)
 	Input.action_press("aim")
 	await tick(2)
@@ -305,11 +500,25 @@ func run() -> void:
 	menu.gameplay_button.pressed.emit()
 	check(menu._is_gameplay_page_open(), "The gameplay page did not open")
 	var seen: Array = []
-	for i: int in range(3):
+	for i: int in range(4):
 		seen.append(AimSettings.modern)
 		menu.modern_aim_button.pressed.emit()
-	check(seen.size() == 3 and seen[0] != seen[1] and seen[1] != seen[2] and seen[0] != seen[2], "The aim row did not offer all three modern modes: %s" % [seen])
+	var unique: Dictionary = {}
+	for mode: int in seen:
+		unique[mode] = true
+	check(unique.size() == 4 and seen.has(AimSettings.Modern.LOCKED), "The aim row did not offer all four modern modes: %s" % [seen])
 	check(AimSettings.modern == seen[0], "The aim row did not wrap around")
+	AimSettings.set_modern(AimSettings.Modern.LOCKED)
+	menu._update_gameplay_page()
+	check(menu.modern_aim_button.value.contains("TARGET LOCK") and menu.aim_help.text.to_lower().contains("wheel"), "Menu does not explain locked mouse controls")
+	await capture_locked("menu")
+	if DisplayServer.get_name() != "headless":
+		var old_size: Vector2i = root.size
+		root.size = Vector2i(1280, 960)
+		await tick(4)
+		await capture_locked("menu-4x3")
+		root.size = old_size
+		await tick(4)
 	var auto: bool = AimSettings.tank_auto_target
 	menu.tank_aim_button.pressed.emit()
 	check(AimSettings.tank_auto_target != auto, "The auto-target row did nothing")

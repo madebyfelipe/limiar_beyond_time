@@ -37,6 +37,16 @@ func build(texture: Texture2D, opaque: bool = true) -> void:
 	backdrop.size = design_size
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(backdrop)
+	if texture != null and texture.resource_path.ends_with("pause_menu_skin_v02.png"):
+		# Localized live lettering covers the Portuguese baked into the old skin.
+		var cover := ColorRect.new()
+		cover.position = Vector2(390, 88)
+		cover.size = Vector2(890, 142)
+		cover.color = Color("071318")
+		cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		canvas.add_child(cover)
+		var title := label_at("PAUSED", Rect2(390, 88, 890, 52), 36)
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	resized.connect(fit)
 	fit()
 
@@ -79,3 +89,13 @@ func focus_ring(buttons: Array[Button]) -> void:
 		buttons[index].focus_neighbor_bottom = buttons[index].get_path_to(after)
 		buttons[index].focus_previous = buttons[index].get_path_to(before)
 		buttons[index].focus_next = buttons[index].get_path_to(after)
+
+func option_at(title: String, box: Rect2, change: Callable, point_size: int = 28) -> RetroOption:
+	var result := RetroOption.new()
+	result.text = title
+	result.position = box.position
+	result.size = box.size
+	result.add_theme_font_size_override("font_size", point_size)
+	canvas.add_child(result)
+	result.stepped.connect(change)
+	return result

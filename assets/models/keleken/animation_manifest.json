@@ -1,0 +1,71 @@
+{
+  "height_m": 2.4,
+  "forward_godot": "-Z",
+  "fps": 30,
+  "bones": [
+    "root",
+    "pelvis",
+    "spine",
+    "chest",
+    "neck_01",
+    "neck_02",
+    "neck_03",
+    "neck_04",
+    "head",
+    "jaw",
+    "tail_01",
+    "tail_02",
+    "thigh.L",
+    "shin.L",
+    "tarsus.L",
+    "toes.L",
+    "wing_01.L",
+    "wing_02.L",
+    "thigh.R",
+    "shin.R",
+    "tarsus.R",
+    "toes.R",
+    "wing_01.R",
+    "wing_02.R"
+  ],
+  "origin": "Original authored prototype; baked IK. No third-party motion clips.",
+  "source_sha256": "1748ed72afc6b5e1f85c2df601afa2a0d5c1790418f0bd3c0655b65b53ee8376",
+  "clips": {
+    "idle": {
+      "frames": 192,
+      "loop": true
+    },
+    "walk": {
+      "frames": 36,
+      "loop": true,
+      "speed": 1.0,
+      "stance": 0.6,
+      "lift": 0.14
+    },
+    "run": {
+      "frames": 24,
+      "loop": true,
+      "speed": 2.8,
+      "stance": 0.42,
+      "lift": 0.34
+    },
+    "look": {
+      "frames": 72,
+      "loop": true
+    },
+    "alert": {
+      "frames": 36,
+      "loop": false
+    },
+    "attack_beak": {
+      "frames": 30,
+      "loop": false,
+      "hit_start": 0.42,
+      "hit_end": 0.58
+    },
+    "recover": {
+      "frames": 30,
+      "loop": false
+    }
+  }
+}

@@ -4,6 +4,12 @@ Salve os modelos de trabalho neste diretório. Prefira `.glb` para importação 
 
 Para cada asset, registre origem, licença, unidade/escala, orientação, animações e status de aprovação. Um arquivo presente nesta pasta não é automaticamente aprovado para uso canônico ou distribuição.
 
+## Pistola original — 12/10/2026
+
+- `weapons/pistol/pistol_lowpoly.glb`: geometria autorada por código no Blender, sem malhas de terceiros; 756 triângulos, uma malha e seis materiais. Referência visual gerada com imagegen integrada, sem uso dela como textura.
+- Fonte editável `weapons/pistol/source/pistol.blend` e gerador `tools/build_pistol.py`. Metros, frente −Z, cima +Y, origem na empunhadura; nó `Muzzle` para o traçador. Sem rig ou animação.
+- Substitui a caixa provisória no Dylan dos cenários/estande. Testes headless e gráficos de combate passaram; prévias inspecionadas. Protótipo original, sem aprovação canônica implícita. Detalhes em `weapons/pistol/README.md`.
+
 ## Arquivo encontrado antes da T00
 
 - Caminho: `keleken/model_base.glb` (grafia original preservada).
@@ -21,6 +27,22 @@ Para cada asset, registre origem, licença, unidade/escala, orientação, anima�
 - Uso na T00: nenhum; preservado, sem instância na cena ou inclusão na exportação.
 
 O Godot criou metadados `.import` e texturas extraídas durante a importação. Esses arquivos auxiliares não representam edição dos GLBs originais.
+
+## Inspeção Keleken — 12/10/2026
+
+- Inspecionado `keleken/model_base.glb` sem edição: hash permanece `1748ED72AFC6B5E1F85C2DF601AFA2A0D5C1790418F0BD3C0655B65B53EE8376`.
+- GLB declara gerador `https://tripo3d.ai`; origem da conta, licença e aprovação continuam não verificadas.
+- Uma malha/material, 4.425 vértices exportados e 3.030 triângulos, UV e JPEG embutido. Não há skin, pesos, ossos nem clipes; confirmado também pela importação no Godot.
+- Caixa importada: X 1,253988 × Y 1,200000 × Z 0,542331; base Y −0,619632; frente +X conferida visualmente. Esses valores não definem a escala física canônica.
+- A pesquisa original não implementou rig. Na solicitação seguinte foi criada a cópia animada e integrada uma instância de estudo no exterior, conforme abaixo.
+
+## Rig e animação Keleken — 12/10/2026
+
+- Derivado `keleken/keleken_animated.glb`, fonte editável `keleken/source/keleken_rig.blend` e gerador `tools/rig_keleken.py`. O GLB original permanece intacto.
+- Rig customizado na API do Blender, 24 ossos de deformação, pesos de até quatro influências, textura original e sete clipes baked a 30 fps: idle, walk, run, look, alert, attack_beak e recover.
+- Os clipes são autorados por código, sem biblioteca externa ou mocap. Revisão após feedback: olhares rápidos, inclinações da cabeça, movimento do pescoço e passada mais curta/baixa. Procedência da malha e licença continuam não verificadas.
+- Escala de estudo 2,4 m, base Y≈0, frente −Z. Instância no exterior com wander limitado à estrada; sem IA de ataque. Cena isolada em `executar-keleken.cmd`.
+- Fonte Blender fica sob `.gdignore`. Detalhes, medidas, comandos, limites e evidências em `docs/KELEKEN_ANIMATION.md` e `docs/evidence/keleken`.
 
 ## Integração Dylan — 11/10/2026
 

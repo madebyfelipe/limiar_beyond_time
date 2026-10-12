@@ -1,0 +1,18 @@
+{
+  "name": "LIMIAR service pistol",
+  "triangles": 756,
+  "mesh_parts": 1,
+  "authored_parts": 43,
+  "materials": 6,
+  "units": "meters",
+  "godot_forward": "-Z",
+  "godot_up": "+Y",
+  "origin": "grip",
+  "muzzle_godot": [
+    0,
+    0.06,
+    -0.173
+  ],
+  "source": "tools/build_pistol.py",
+  "status": "original prototype visual; no internal mechanism"
+}

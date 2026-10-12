@@ -143,6 +143,10 @@ func run() -> void:
 	root.size = Vector2i(1920,1080)
 	scene = load("res://environments/exterior.tscn").instantiate()
 	root.add_child(scene)
+	# This probe measures authored geometry and camera continuity. Combat has
+	# its own probe; an active enemy would interrupt these unattended walks.
+	scene.keleken.combat_enabled = false
+	scene.keleken.collision_layer = 0
 	player = scene.player
 	check(scene.shots.size() == 3 and scene.colliders.get_child_count() >= 40,"Spatial source or cameras incomplete")
 	# The painted plate puts the pole tens of pixels off the geometry, so it is a

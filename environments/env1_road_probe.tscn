@@ -32,6 +32,6 @@ theme_override_font_sizes/font_size = 24
 theme_override_colors/font_shadow_color = Color(0,0,0,1)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
-text = "ENV_1 / ensaio local com o render original\nWASD / setas: mover · Shift: correr · G: mostrar faixa de ensaio\nEscala e chão provisórios. Ligação com as outras vistas em calibração."
+text = "ENV_1 / local study with original render\nWASD / arrows: move · Shift: run · G: show strip for study\nTemporary scale and floor. View connections under calibration."
 mouse_filter = 2
 [editable path="Frame/Composition/Actors/WorldViewport/World"]

@@ -78,18 +78,18 @@ func _refresh() -> void:
 		_marker_signature = definition.reference_world.duplicate()
 		_make_markers()
 	var errors: PackedFloat32Array = errors_1080p()
-	caption.text = "%s | cápsula 1,8 m | grade %.2f m | %s\n" % [definition.shot_id,grid_spacing,definition.calibration_status]
+	caption.text = "%s | capsule 1.8 m | grid %.2f m | %s\n" % [definition.shot_id,grid_spacing,definition.calibration_status]
 	if errors.is_empty():
-		caption.text += "Correspondências 3D pendentes; erro de calibração não determinado."
+		caption.text += "3D correspondences pending; calibration error undetermined."
 	else:
 		var maximum: float = 0
 		for index: int in range(errors.size()):
 			if not definition.is_anchor(index):
 				maximum = maxf(maximum,errors[index])
-		caption.text += "Erro máximo da hipótese: %.2f px em 1080p (meta ≤ 8 px)." % maximum
+		caption.text += "Maximum hypothesis error: %.2f px at 1080p (target <= 8 px)." % maximum
 		if definition.anchor_count() > 0:
-			caption.text += " %d âncoras de plano excluídas do máximo." % definition.anchor_count()
-	caption.text += "\n1/2/3: trocar vista | G: grade | M: marcadores | prévia estática"
+			caption.text += " %d plane anchors excluded from maximum." % definition.anchor_count()
+	caption.text += "\n1/2/3: change view | G: grid | M: markers | static preview"
 
 func _material(color: Color) -> StandardMaterial3D:
 	var material: StandardMaterial3D = StandardMaterial3D.new()
