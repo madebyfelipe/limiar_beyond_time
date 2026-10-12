@@ -121,6 +121,11 @@ func run() -> void:
 		recovery_states.append([player.global_position,player.velocity,scene.director.current_shot]))
 	scene.restarted.connect(func() -> void: restarts += 1)
 	var shots: Array[ShotRig] = scene.shots
+	# Real focus changes on the desktop -- another probe window, the person at
+	# the machine -- would pause the walk and the falls below at random. Focus
+	# pausing is switched on only for the section that tests it, with notices
+	# sent by the probe itself.
+	menu.pause_on_focus_loss = false
 	await tick(20)
 
 	# Initial state and process modes.
@@ -219,6 +224,7 @@ func run() -> void:
 	check(player.global_position.distance_to(player.spawn_transform.origin) < 1.0,"Actor drifted after restart")
 
 	# Focus loss pauses; focus return does not resume.
+	menu.pause_on_focus_loss = true
 	root.propagate_notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	check(paused and menu.visible,"Application focus loss did not pause")
 	root.propagate_notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
@@ -235,7 +241,6 @@ func run() -> void:
 	menu.pause_on_focus_loss = false
 	root.propagate_notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	check(not paused,"Disabled focus pause still paused")
-	menu.pause_on_focus_loss = true
 
 	# Recovery during the outbound leg: corridor (route_2) → start pad (route_1).
 	await walk_to(Vector3(-2.5,0,9))
