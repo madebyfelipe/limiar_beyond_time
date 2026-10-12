@@ -26,6 +26,7 @@ const PROBES: Array[Dictionary] = [
 	{"name": "dylan-portas", "script": "res://tests/check_dylan_doors.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "controles-tanque", "script": "res://tests/check_tank_controls.gd", "args": HEADLESS_FIXED, "summary": "TANK controls"},
 	{"name": "contato-pes", "script": "res://tests/check_foot_contact.gd", "args": HEADLESS_FIXED, "summary": "FOOT contact"},
+	{"name": "salvamento", "script": "res://tests/check_save_persistence.gd", "args": HEADLESS_FIXED, "summary": "SAVE persistence"},
 	{"name": "cena-principal", "script": "", "args": ["--headless", "--quit-after", "30"], "summary": ""},
 	{"name": "robustez-10min", "script": "res://tests/check_soak.gd", "args": HEADLESS_FIXED, "summary": "T10 soak minutes=10.0"},
 	{"name": "benchmark-funcional", "script": "", "args": ["--headless"], "extra": ["--benchmark", "--warmup=0", "--duration=45"], "summary": "execução funcional OK"},

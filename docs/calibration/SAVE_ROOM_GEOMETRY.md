@@ -1,6 +1,8 @@
 # Sala da guarita — geometria antes da arte
 
-Atualização de 11/10/2026: a sala agora recebe Dylan animado de 1,8 m, abre com a arte aplicada e se conecta ao exterior por **E** junto à porta, com transição de abertura em 3D. Os resultados anteriores com cápsula permanecem históricos. Não foi implementada persistência de salvamento. Ver `../DYLAN_ANIMATION.md`.
+Atualização de 11/10/2026: a sala agora recebe Dylan animado de 1,8 m, abre com a arte aplicada e se conecta ao exterior por **E** junto à porta, com transição de abertura em 3D. Os resultados anteriores com cápsula permanecem históricos. Ver `../DYLAN_ANIMATION.md`.
+
+Atualização posterior da mesma data: **a sala salva progresso**. O terminal da mesa grava por **E** em `(−0,05; 0; −1,25)` — ponto livre mais próximo do teclado medido contra os colisores da própria sala, já que a cadeira é sólida — e abrir a sala com um registro gravado retoma a posição e a orientação salvas. As frases abaixo sobre ausência de persistência são históricas. Ficha em `../SAVE_SYSTEM.md`.
 
 Data: 11/10/2026. Fluxo autorizado: geometria simples → câmera → teste de circulação → captura 3D → arte com imagegen. A câmera foi aproximada a pedido do usuário antes da última geração.
 
@@ -9,7 +11,7 @@ Data: 11/10/2026. Fluxo autorizado: geometria simples → câmera → teste de c
 - Fonte espacial editável: `environments/save_room_source.tscn`, autorada por `tools/author_save_room.gd`.
 - Cena de inspeção jogável: `environments/save_room.tscn`; abrir com `executar-sala.cmd` ou F6.
 - Sala de trabalho: 6 × 5 m, paredes de 3,1 m; cápsula de 1,8 m. São medidas propostas para o interior, ainda sem alinhamento com a geometria externa ENV_1.
-- Porta, piso, quatro limites físicos, mesa, cadeira, armário, estante/cabinete e baú. Dez corpos estáticos copiados da mesma fonte espacial. Não existe persistência de salvamento neste estudo.
+- Porta, piso, quatro limites físicos, mesa, cadeira, armário, estante/cabinete e baú. Dez corpos estáticos copiados da mesma fonte espacial.
 - Câmera de interior: posição (2,8; 2,9; 2,35), alvo (−0,5; 0,9; −0,7), FOV vertical de 45°. Pose exata em `resources/save_room/shot_01.tres` e `assets/backgrounds/env_1/save_room/camera.json`.
 - Captura 3D autoritativa de 1920×1080: `assets/backgrounds/env_1/save_room/geometry_cam01.png`. Sem bordas externas da sala; piso e paredes ocupam o quadro.
 - Arte derivada dessa captura, gerada pela ferramenta integrada image_gen: `assets/backgrounds/env_1/save_room/art_cam01_close_v01.png`. Imagem anterior com a câmera ampla: `art_cam01_v01.png`.

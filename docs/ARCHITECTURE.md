@@ -8,7 +8,9 @@
 
 - `dylan_visual.gd` gera uma biblioteca AnimationPlayer com idle, walk, run e door_interact. Tracks de rotação usam os ossos reais e convertem os eixos pelos ancestrais já posados; a malha, skin e GLB permanecem intactos. Velocidade real do corpo seleciona e regula a locomoção, com blend de 0,16 s. Nenhum root motion interfere na física.
 - Exterior e sala instanciam `player_dylan.tscn`, com altura visual/colisão locais de 1,8 m. O padrão de 2,4 m continua nos ensaios originais. `target_height` controla apenas a apresentação; ao alterar escala de uma cena, atualizar também sua colisão e validar enquadramento.
-- `DoorInteraction` é um componente local: referência ao jogador, ponto de aproximação, orientação e caminho do destino. A ação E exige distância horizontal ≤0,85 m e diferença de altura <0,25 m. Gesto e viagem bloqueiam movimento e novas interações.
+- `ApproachPrompt` é a base das interações locais: jogador, ponto de aproximação, raio e o aviso na tela, visível exatamente enquanto E faria algo. Uma só definição de "estar perto" — distância horizontal dentro do raio e diferença de altura <0,25 m — serve porta e terminal.
+- `DoorInteraction` estende essa base com orientação e caminho do destino (raio padrão 0,85 m). Gesto e viagem bloqueiam movimento e novas interações.
+- `TerminalInteraction` estende a mesma base (raio 0,8 m) e grava o registro por `SaveGame`, confirmando na tela. `SaveGame` é estático, sem autoload, como `ControlScheme`; a sala retoma dele ao abrir e uma guarda de cena impede que um registro de outro ambiente reposicione o jogador. Campos e limites em `SAVE_SYSTEM.md`.
 - `door_transition.gd` é uma CanvasLayer temporária no root, com mundo 3D próprio e composição 16:9. Sobrevive à troca de cena, anima maçaneta/folha/câmera, troca o ambiente sob preto e chama `arrive_from_door()` no destino. Depois restaura controle e se libera. Sem autoload ou gerenciador global. As portas pintadas e seus colisores ficam intactos.
 - A cena principal/preset técnicos permanecem T07/T10. O fluxo conectado está disponível em `executar-exterior.cmd` e `executar-sala.cmd`.
 

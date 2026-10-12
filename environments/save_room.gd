@@ -3,6 +3,10 @@ extends Control
 const SOURCE := preload("res://environments/save_room_source.tscn")
 const SHOT := preload("res://resources/save_room/shot_01.tres")
 const ART := "res://assets/backgrounds/env_1/save_room/art_cam01_close_v01.png"
+const SCENE_PATH := "res://environments/save_room.tscn"
+## Closest spot the 1,8 m capsule can stand to the keyboard, measured against
+## the room's own colliders; the chair keeps it just west of the monitor.
+const TERMINAL_APPROACH := Vector3(-0.05, 0.0, -1.25)
 @onready var world: Node3D = $Frame/Composition/Actors/WorldViewport/World
 @onready var background: TextureRect = $Frame/Composition/Background
 @onready var camera: Camera3D = $Frame/Composition/Actors/WorldViewport/World/Camera
@@ -13,6 +17,9 @@ var colliders: Node3D
 var art_mode: bool = false
 var overview: bool = false
 var doorway: DoorInteraction
+var terminal: TerminalInteraction
+## True when this session started from a stored record instead of the spawn.
+var resumed: bool = false
 
 func _ready() -> void:
 	$Frame/Composition/Actors/WorldViewport/World/Capsule.hide()
@@ -51,17 +58,31 @@ func _ready() -> void:
 	doorway.target_scene = "res://environments/exterior.tscn"
 	doorway.returning_outside = true
 	add_child(doorway)
+	terminal = TerminalInteraction.new()
+	terminal.player = player
+	terminal.approach = TERMINAL_APPROACH
+	terminal.radius = 0.8
+	terminal.scene_path = SCENE_PATH
+	terminal.saved.connect(func(_record: Dictionary) -> void: _update_label())
+	add_child(terminal)
+	# Saving happens here, so this is the room a stored record sends you back to.
+	resumed = SaveGame.resume(player, SCENE_PATH)
+	_update_label()
 
 func arrive_from_door() -> void:
+	resumed = false
 	player.reset_to_start()
 	player.visual.rotation.y = -PI / 2
+	_update_label()
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_B:
 			set_art_mode(not art_mode)
 		elif event.physical_keycode == KEY_R:
+			resumed = false
 			player.reset_to_start()
+			_update_label()
 		elif event.physical_keycode == KEY_C:
 			set_overview(not overview)
 		elif event.physical_keycode == KEY_T:
@@ -90,7 +111,15 @@ func set_art_mode(enabled: bool) -> void:
 func _update_label() -> void:
 	var movement: String = "setas giram e andam" if ControlScheme.is_tank() else "WASD/setas mover"
 	label.text = "SALA — %s
-%s · E abrir porta · B arte/geometria · C visão técnica/interior · F4 filtro · T controles (%s) · R reiniciar · Esc sair" % [("ARTE CANDIDATA — alinhamento em revisão" if art_mode else ("GEOMETRIA · visão técnica" if overview else "GEOMETRIA · interior")),movement,ControlScheme.label()]
+%s · E porta ou terminal · B arte/geometria · C visão técnica/interior · F4 filtro · T controles (%s) · R reiniciar · Esc sair
+%s" % [("ARTE CANDIDATA — alinhamento em revisão" if art_mode else ("GEOMETRIA · visão técnica" if overview else "GEOMETRIA · interior")),movement,ControlScheme.label(),_save_line()]
+
+## What the stored record says, so resuming is visible instead of surprising.
+func _save_line() -> String:
+	var record: Dictionary = SaveGame.read()
+	if record.is_empty():
+		return "SEM REGISTRO — salve no terminal da mesa"
+	return "REGISTRO %d · %s%s" % [record["saves"], SaveGame.stamp(record), " · retomado" if resumed else ""]
 
 func set_overview(enabled: bool) -> void:
 	if enabled and art_mode:

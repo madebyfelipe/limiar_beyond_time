@@ -70,7 +70,7 @@ Continua sem IK de pés em degraus e sem a mão presa à maçaneta: a mão faz o
 6. Troca do ambiente sob preto, posicionamento na entrada e fade de chegada por 0,3 s.
 7. Retorno do controle e liberação da camada, câmera, malhas e áudio temporários.
 
-A saída usa abertura no sentido oposto e restaura a câmera próxima da guarita. Não há autoload. O terminal da sala permanece sem salvamento persistente.
+A saída usa abertura no sentido oposto e restaura a câmera próxima da guarita. Não há autoload. O terminal da sala passou a salvar progresso na mesma data; ver `SAVE_SYSTEM.md`.
 
 Os sons `assets/audio/door_latch.wav` e `door_creak.wav` foram sintetizados deterministicamente por `tools/author_door_audio.py`, sem samples externos. Headless não reproduz áudio; execução gráfica usa AudioStreamPlayer.
 
