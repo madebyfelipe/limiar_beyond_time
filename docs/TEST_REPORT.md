@@ -1,5 +1,28 @@
 # Relatório de testes — percurso técnico (T09)
 
+## Apresentação montável e operação nos cenários — Windows, 11/10/2026
+
+Godot `4.7.2.stable.official.ed1daf0bf`, Forward+/Vulkan, NVIDIA RTX 4050 Laptop GPU.
+
+**Esta seção não registra uma suíte completa verde.** A última execução completa deu **33 probes, 2 falhas**, e é anterior a boa parte do que foi entregue depois. As duas falhas vieram de uma segunda sessão de agente escrevendo no mesmo diretório ao mesmo tempo, não de defeito do código: `exterior-grafico` reprovou com `Parse Error: Could not find type "RetroScreen"` enquanto essa classe estava sendo escrita, e `filtro-retro` reprovou porque o HUD novo passou a ser desenhado dentro da composição 16:9, que é a área amostrada pelo filtro. Antes disso, uma execução inteira **morreu em silêncio no probe 21**, com código 0 e sem linha de resumo — comportamento de processo encerrado, compatível com duas instâncias do Godot competindo; reexecutada, passou. Registro completo em `../HANDOFF.md`.
+
+Verificados individualmente contra o estado final: `filtro-retro` (gráfico), `operacao-cenarios` (172 ticks), `salvamento` (136 ticks), `dylan-portas` (1164 ticks), `exterior-geometria` (4100 ticks, 55 colisores), `sala-geometria` (2415 ticks) e `unidades` — todos com 0 falhas. A suíte inteira precisa ser reexecutada duas vezes quando houver uma mão só no repositório.
+
+`check_retro_filter.gd` foi reescrito para o modelo montável: cada nível de pixelização renderiza diferente dos outros, **cada efeito muda a tela sozinho** (cinco verificações, uma por interruptor), desligar tudo restaura a composição byte a byte, o pixel virtual continua inteiro nos níveis médio e PSX em 1280 × 720, 1920 × 1080 e 1280 × 960, as barras pretas seguem intactas, as escolhas sobrevivem à troca de cena e a página do menu dirige o mesmo modelo.
+
+Duas medições que viraram correção de produto, não de teste:
+
+| Medida | Antes | Depois |
+| --- | --- | --- |
+| Degrau de brilho entre linhas vizinhas, com varredura ligada | 0,0068 (contra 0,0072 sem efeito — **invisível**) | 0,0777, 10,8 × a base |
+| Pixels sem imagem com a tela de tubo ligada | 11 851, uma moldura preta | 60, contra 44 da base — **sem moldura** |
+
+A varredura era invisível porque 360 bandas numa janela de 720 linhas dão um pixel por banda e a reamostragem as devolve como cinza chapado; o limite caiu para 240. E a métrica anterior do probe contava pixels alterados entre linhas, que uma cena nevada já satura em ~50% — passou a medir linhas inteiras escurecendo juntas.
+
+`check_level_operation.gd` (`operacao-cenarios`, novo): **172 ticks, 0 falhas**. Esc pausa em vez de sair nas duas cenas e congela o ator com tecla pressionada; F3 liga/desliga e nomeia o enquadramento ativo; perda de foco pausa; a rede devolve o ator de 40 m abaixo do chão ao ponto firme; o objetivo começa na estrada, avança na cancela, **não retrocede** ao voltar, avança ao entrar e ao salvar, vai para o registro e volta dele numa sessão nova; reiniciar pelo R e pelo menu zera ator, câmera e objetivo sem apagar o registro.
+
+Um defeito que esse probe pegou antes de entrar: o terminal gravava a etapa **anterior** à do próprio salvamento, então salvar e fechar o jogo devolvia o objetivo "registre o progresso no terminal" com o jogador parado na frente do terminal recém-usado.
+
 ## Salvamento e colisor do poste — Windows, 11/10/2026
 
 Godot `4.7.2.stable.official.ed1daf0bf`, Forward+/Vulkan, NVIDIA RTX 4050 Laptop GPU. Executor completo: **32 probes, 0 falhas, saída 0**, já com o probe novo. O soak de dez minutos e as oito regressões gráficas passaram junto; o gate de desempenho continua `NÃO MEDIDO` em headless, como sempre.
