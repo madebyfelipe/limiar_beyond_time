@@ -18,14 +18,20 @@ pausa, F3, objetivos e recuperação presentes no percurso."
 ## O objetivo
 
 `systems/missions/mission_state.gd`. Estático, sem autoload, como `ControlScheme`
-e `SaveGame`. Quatro etapas:
+e `SaveGame`. Seis etapas, agrupadas em fases por `systems/missions/phase.gd`
+(ver `PERIMETER.md`):
 
-| Etapa | Texto | Avança quando |
-| --- | --- | --- |
-| `ROAD` | Siga a estrada nevada até a cancela. | — |
-| `YARD` | Atravesse o pátio e suba até a porta da guarita. | O jogador passa de `z = 9`, ao sul da cancela |
-| `TERMINAL` | Registre o progresso no terminal da mesa. | Ele entra na guarita pela porta |
-| `DONE` | Objetivo cumprido. O terminal guardou o progresso. | Ele usa o terminal |
+| Etapa | Fase | Texto | Avança quando |
+| --- | --- | --- | --- |
+| `ROAD` | 1 | Siga a estrada nevada até a cancela. | — |
+| `YARD` | 1 | Atravesse o pátio e suba até a porta da guarita. | O jogador passa de `z = 9`, ao sul da cancela |
+| `TERMINAL` | 1 | Registre o progresso no terminal da mesa. | Ele entra na guarita pela porta |
+| `DONE` | 1 | Progresso salvo. Saia do pátio pelo portão norte. | Ele usa o terminal |
+| `PERIMETER` | 2 | Siga a trilha do perímetro até o galpão do relé. | Ele atravessa o portão norte |
+| `RELAY` | 2 | Galpão do relé alcançado. O conteúdo autoral termina aqui. | Ele passa de `z = −24` na trilha |
+
+As etapas são gravadas no arquivo de salvamento: novas entram **no fim** do
+enum e nenhuma muda de lugar, ou um registro antigo retomaria em outro objetivo.
 
 **Só anda para a frente.** Voltar para o norte da cancela não desfaz a etapa:
 quem já leu aquele objetivo o cumpriu, e a linha retroceder leria como perda de

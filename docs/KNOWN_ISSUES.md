@@ -1,6 +1,25 @@
 # Limitações e pendências
 
 
+## Atualização — Fase 2 e estrutura de fase, 12/10/2026
+
+- **Trilha do perímetro é só geometria.** Os três enquadramentos novos não têm
+  placa pintada, e o rótulo na tela diz isso. Ver `PERIMETER.md`.
+- **O exterior ganhou um quarto enquadramento** (`exterior_4`, pátio norte até o
+  portão) também sem placa. A arte do exterior passou a ser avaliada **por
+  enquadramento**: as três placas originais continuam ativas, em vez de o
+  cenário inteiro cair para geometria por causa da quarta.
+- **Sem salvamento na Fase 2.** O único terminal continua na guarita; quem
+  morrer na trilha volta ao registro anterior. Não há áudio na trilha.
+- **O conteúdo termina na porta lacrada do relé.** `RELAY` é fim de conteúdo, não
+  fim de missão: não há extração, documento nem rádio depois dela.
+- **Aberto, anterior a esta sessão: o probe `operacao` (T08) falha com 12 erros.**
+  A interface do percurso técnico e o diagnóstico F3 foram traduzidos para o
+  inglês, e `tests/check_operation.gd` ainda espera os textos em português
+  ("Posição", "Enquadramento", "Esc: pausa", "Percurso complete"). Nenhum
+  arquivo envolvido foi tocado pela Fase 2; é preciso decidir entre devolver a
+  interface ao português ou atualizar o probe.
+
 ## Atualização — armas, mira e suavização, 11/10/2026
 
 - **Pistola jogável** nos dois esquemas, com mira automática estilo RE/Dino Crisis no tanque e três modos de mira selecionáveis no esquema câmera. Ver `COMBAT.md`.

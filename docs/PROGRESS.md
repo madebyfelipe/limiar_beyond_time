@@ -1,5 +1,17 @@
 # Progresso — LIMIAR Recon
 
+## Fase 2 — trilha do perímetro e estrutura de fase — 12/10/2026
+
+- Pedido: "gerar uma estrutura de fase nova para continuidade pra guarita, e mover o keleken para lá".
+- Estrutura: `systems/missions/phase.gd` declara a cadeia de fases (cena de entrada, etapa que libera, etapa inicial e etapa final) e `Phase.rewind()` reinicia uma fase sem desfazer as anteriores. `MissionState` ganhou `PERIMETER` e `RELAY` **no fim** do enum, preservando registros salvos. `systems/interaction/phase_gate.gd` é a porta que só abre quando a fase seguinte foi liberada e diz na tela quando está trancada.
+- Cenário: `tools/author_perimeter.gd` autora `environments/perimeter_source.tscn`, três câmeras em `resources/perimeter/` e as capturas de geometria em `assets/backgrounds/perimeter/`. Corredor do portão ao galpão do relé, com cercado, cocho, pinheiro caído e porta lacrada. `environments/perimeter.gd/.tscn` monta o nível com o mesmo contrato do exterior. Atalho `executar-perimetro.cmd`.
+- Ligação: portão de serviço na cerca norte do pátio, trancado até o `save` do terminal. `DoorInteraction` passou a nomear a passagem usada (`entry_id`), e o exterior escolhe chegada e enquadramento conforme a porta. O exterior ganhou o quarto enquadramento `exterior_4` do pátio norte; a arte passou a ser avaliada por enquadramento, então as três placas originais continuam ativas.
+- Keleken: saiu do exterior e vive no cercado da trilha, com `home_position` configurável na patrulha. `check_exterior.gd` agora exige que não haja inimigo no exterior.
+- Câmeras escolhidas por varredura: cada enquadramento contém todo o volume caminhável da sua zona em 1920 × 1080 com margem, mantém Dylan entre ~110 e ~190 px e deixa banco e ombro próximos livres da linha até o meio do corpo. O probe repete a verificação de moldura a cada quadro da caminhada.
+- Validação headless, Godot 4.7.2: `perimetro` 2352 ticks e 0 falhas; `combate-inimigo`, `keleken-wander`, `exterior-geometria`, `dylan-portas`, `operacao-cenarios`, `salvamento`, `terminal-ui`, `cenas` (26 cenas) e mais 15 probes do executor, 0 falhas. Capturas de geometria das três câmeras inspecionadas.
+- Não feito: arte das placas, áudio, salvamento na trilha, conteúdo depois da porta lacrada, execução gráfica, exportação, benchmark e soak. O probe `operacao` (T08) falha por textos em português contra interface já traduzida para o inglês — anterior a esta sessão, registrado em `KNOWN_ISSUES.md`.
+- Detalhes em `PERIMETER.md`.
+
 ## Modelo original de pistola — 12/10/2026
 
 - Pedido: gerar modelo de arma. Criados conceito visual com imagegen integrada, modelo GLB autorado no Blender por `tools/build_pistol.py`, fonte `.blend`, manifesto e render de prévia em `assets/models/weapons/pistol/`.

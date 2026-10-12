@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShotDefinition" format=3]
+
+[ext_resource type="Script" path="res://systems/camera/shot_definition.gd" id="1_oqvms"]
+
+[resource]
+script = ExtResource("1_oqvms")
+shot_id = &"perimeter_1"
+camera_position = Vector3(7, 7, -11.5)
+camera_rotation_degrees = Vector3(-30.320984, 136.97493, 0)
+fov = 54.0

@@ -143,12 +143,11 @@ func run() -> void:
 	root.size = Vector2i(1920,1080)
 	scene = load("res://environments/exterior.tscn").instantiate()
 	root.add_child(scene)
-	# This probe measures authored geometry and camera continuity. Combat has
-	# its own probe; an active enemy would interrupt these unattended walks.
-	scene.keleken.combat_enabled = false
-	scene.keleken.collision_layer = 0
 	player = scene.player
-	check(scene.shots.size() == 3 and scene.colliders.get_child_count() >= 40,"Spatial source or cameras incomplete")
+	# The animal moved to the perimeter trail with Phase 2, so this probe walks
+	# the authored geometry undisturbed; combat has its own probe there.
+	check(not ("keleken" in scene),"An enemy is back in the exterior and would interrupt these walks")
+	check(scene.shots.size() == 4 and scene.colliders.get_child_count() >= 40,"Spatial source or cameras incomplete")
 	# The painted plate puts the pole tens of pixels off the geometry, so it is a
 	# visual and depth occluder only: a collider there would block empty snow.
 	check(scene.colliders.get_node_or_null("LightPole") == null,"The light pole still has a collider")

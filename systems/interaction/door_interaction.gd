@@ -5,6 +5,11 @@ extends ApproachPrompt
 @export var facing: float = 0.0
 @export var target_scene: String
 @export var returning_outside: bool = false
+## Names this doorway for the level on the other side, which may be reachable
+## through more than one of them and has to know where to put the player.
+@export var entry_id: StringName = &""
+## The doorway last used, read by the destination in `arrive_from_door()`.
+static var arrived_from: StringName = &""
 
 func prompt_text() -> String:
 	return GamepadControls.shared.interact_label() + " · " + ("Exit" if returning_outside else "Enter")
@@ -17,6 +22,7 @@ func interact() -> void:
 		push_error("Door destination could not be loaded: " + target_scene)
 		return
 	busy = true
+	arrived_from = entry_id
 	prompt.hide()
 	player.set_control_enabled(false)
 	player.velocity = Vector3.ZERO

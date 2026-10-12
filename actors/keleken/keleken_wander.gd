@@ -2,6 +2,8 @@ class_name KelekenWander
 extends Node
 ## Patrol movement. Combat takes over when the actor perceives Dylan.
 @export var bounds := Rect2(-1.55, 15.5, 3.1, 5.5)
+## Where a reset puts the animal back; inside `bounds`, on the level floor.
+@export var home_position := Vector3(1.2, .06, 18)
 @export var speed: float = 1.15
 @export var turn_speed: float = 1.8
 var actor: KelekenActor
@@ -20,7 +22,7 @@ func _ready() -> void:
 
 func reset() -> void:
 	actor.reset_combat()
-	actor.position = Vector3(1.2, .06, 18)
+	actor.position = home_position
 	actor.home = actor.global_position
 	actor.rotation.y = 0
 	actor.velocity = Vector3.ZERO

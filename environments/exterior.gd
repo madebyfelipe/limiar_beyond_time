@@ -1,14 +1,20 @@
 extends Control
 ## Authored level; original ENV_1 images and their experimental scene stay separate.
 const SOURCE := preload("res://environments/exterior_source.tscn")
-const DEFINITIONS := [preload("res://resources/exterior/shot_1.tres"),preload("res://resources/exterior/shot_2.tres"),preload("res://resources/exterior/shot_3.tres")]
+const DEFINITIONS := [preload("res://resources/exterior/shot_1.tres"),preload("res://resources/exterior/shot_2.tres"),preload("res://resources/exterior/shot_3.tres"),preload("res://resources/exterior/shot_4.tres")]
 const ART_DIR := "res://assets/backgrounds/env_1/exterior_authored/"
-const ART_FILES := ["art_cam01_v01.png","art_cam02_v02.png","art_cam03_v01.png"]
-const ZONE_CENTERS := [Vector3(0,2,22),Vector3(-2,2,7),Vector3(-5,2,3.5)]
-const ZONE_SIZES := [Vector3(7,6,16),Vector3(22,6,16),Vector3(8,6,10)]
+## One plate per framing. The north yard, added with the service gate, has no
+## plate yet: that framing shows its geometry while the other three paint.
+const ART_FILES := ["art_cam01_v01.png","art_cam02_v02.png","art_cam03_v01.png","art_cam04_v01.png"]
+const ZONE_CENTERS := [Vector3(0,2,22),Vector3(-2,2,7),Vector3(-5,2,3.5),Vector3(1,2,-4)]
+const ZONE_SIZES := [Vector3(7,6,16),Vector3(22,6,16),Vector3(8,6,10),Vector3(14,6,6)]
 ## North of the raised barrier the player is still on the road; south of it the
 ## yard objective has been reached. The barrier itself sits at z = 10.
 const GATE_Z := 9.0
+## The service gate out of the yard, where Phase 2 begins, and where the player
+## stands when coming back through it.
+const NORTH_GATE_APPROACH := Vector3(0,0,-5.9)
+const NORTH_GATE_ARRIVAL := Vector3(0,0.06,-5.6)
 @onready var world: Node3D = $Frame/Composition/Actors/WorldViewport/World
 @onready var background: TextureRect = $Frame/Composition/Background
 @onready var player: PlayerController = $Frame/Composition/Actors/WorldViewport/World/Player
@@ -18,11 +24,11 @@ var colliders: Node3D
 var shots: Array[ShotRig] = []
 var director: CameraDirector
 var presentation: PresentationController
-var art_available: bool = true
+## True once at least one framing has a plate of its own.
+var art_available: bool = false
 var doorway: DoorInteraction
+var north_gate: PhaseGate
 var operation: LevelOperation
-var keleken: KelekenActor
-var keleken_wander: KelekenWander
 
 func _ready() -> void:
 	instructions.visible = OS.get_cmdline_args().has("--debug-instructions")
@@ -58,13 +64,12 @@ func _ready() -> void:
 		collision.shape = shape
 		body.add_child(collision)
 		colliders.add_child(body)
-	for index: int in range(3):
+	for index: int in range(DEFINITIONS.size()):
 		var definition: ShotDefinition = DEFINITIONS[index].duplicate()
 		var image_path: String = ART_DIR+ART_FILES[index]
 		if ResourceLoader.exists(image_path):
 			definition.background = load(image_path)
-		else:
-			art_available = false
+			art_available = true
 		var rig := ShotRig.new()
 		rig.name = String(definition.shot_id)
 		rig.definition = definition
@@ -84,7 +89,7 @@ func _ready() -> void:
 	presentation.source = source
 	world.add_child(presentation)
 	var zones: Array[CameraZone] = []
-	for index: int in range(3):
+	for index: int in range(DEFINITIONS.size()):
 		var zone := CameraZone.new()
 		zone.position = ZONE_CENTERS[index]
 		zone.shot = shots[index]
@@ -120,19 +125,31 @@ func _ready() -> void:
 	operation.frame = $Frame/Composition
 	operation.restart_requested.connect(restart)
 	add_child(operation)
-	keleken = preload("res://actors/keleken/keleken.tscn").instantiate()
-	keleken.name = "Keleken"
-	keleken.combat_enabled = true
-	keleken.player = player
-	world.add_child(keleken)
-	keleken_wander = preload("res://actors/keleken/keleken_wander.gd").new()
-	keleken.add_child(keleken_wander)
+	# Phase 2 leaves through the north fence. It stays bolted until the terminal
+	# has the progress, so the guardhouse content closes before the trail opens.
+	north_gate = PhaseGate.new()
+	north_gate.player = player
+	north_gate.approach = NORTH_GATE_APPROACH
+	north_gate.facing = 0.0
+	north_gate.entry_id = &"yard_gate"
+	north_gate.phase_id = &"perimeter"
+	north_gate.open_hint = "North gate"
+	north_gate.locked_hint = "North gate bolted"
+	north_gate.refused.connect(func() -> void: operation.show_notice("The north gate stays bolted until your progress is recorded at the terminal.",3.0))
+	add_child(north_gate)
 	_update_label()
 
+## Two ways in: the guardhouse door, on its platform, and the north service gate
+## coming back from the perimeter trail.
 func arrive_from_door() -> void:
-	player.reset_to(Transform3D(Basis.IDENTITY, Vector3(-4.45, 0.66, 3.85)))
-	player.visual.rotation.y = PI
-	director.reset_to(shots[2])
+	if DoorInteraction.arrived_from == &"north_gate":
+		player.reset_to(Transform3D(Basis.IDENTITY, NORTH_GATE_ARRIVAL))
+		player.visual.rotation.y = PI
+		director.reset_to(shots[3])
+	else:
+		player.reset_to(Transform3D(Basis.IDENTITY, Vector3(-4.45, 0.66, 3.85)))
+		player.visual.rotation.y = PI
+		director.reset_to(shots[2])
 	operation.mark_safe()
 	_update_label()
 
@@ -141,7 +158,6 @@ func arrive_from_door() -> void:
 ## touched, because restarting an attempt is not erasing a save.
 func restart() -> void:
 	player.reset_to_start()
-	keleken_wander.reset()
 	director.reset_to(shots[0])
 	MissionState.reset()
 	operation.mark_safe()
@@ -181,5 +197,5 @@ func _update_label() -> void:
 	var shot_name: String = String(presentation.current_shot.definition.shot_id) if presentation.current_shot else ""
 	var movement: String = "arrows turn and move" if ControlScheme.is_tank() else "WASD/arrows move"
 	instructions.text = "EXTERIOR · %s · %s
-%s · Shift run · Q dodge · H med kit · E door · B art/geometry · F4 filter · T controls (%s) · F3 diagnostics · R restart · Esc pause
+%s · Shift run · Q dodge · H med kit · E door/gate · B art/geometry · F4 filter · T controls (%s) · F3 diagnostics · R restart · Esc pause
 %s" % [shot_name,"CANDIDATE ART — alignment under review" if presentation.art_mode else "3D GEOMETRY",movement,ControlScheme.label(),MissionState.objective()]

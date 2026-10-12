@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShotDefinition" format=3]
+
+[ext_resource type="Script" path="res://systems/camera/shot_definition.gd" id="1_3xlmw"]
+
+[resource]
+script = ExtResource("1_3xlmw")
+shot_id = &"exterior_4"
+camera_position = Vector3(0.5, 8, 4.5)
+camera_rotation_degrees = Vector3(-32.471188, 0, 0)
+fov = 48.0

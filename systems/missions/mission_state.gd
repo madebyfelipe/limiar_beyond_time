@@ -1,9 +1,13 @@
 class_name MissionState
 extends RefCounted
-## The Fase 1 objective, shared by the exterior and the guardhouse. Static, so
-## it survives the door transition without an autoload, as ControlScheme and
-## SaveGame already do. The terminal stores it, so a resumed session resumes the
+## The pilot objective, shared by every authored level. Static, so it survives
+## the door transitions without an autoload, as ControlScheme and SaveGame
+## already do. The terminal stores it, so a resumed session resumes the
 ## objective too and not only the position.
+##
+## Stage values are written into the save file: append new ones at the end and
+## never reorder, or a stored record would resume on a different objective.
+## `Phase` groups these stages into the playable phases they belong to.
 
 enum Stage {
 	## On the road, before the gate.
@@ -12,15 +16,22 @@ enum Stage {
 	YARD,
 	## Inside, with the terminal still unused.
 	TERMINAL,
-	## Recorded at the terminal: the Fase 1 content is done.
+	## Recorded at the terminal: the guardhouse content is done and the north
+	## service gate is released.
 	DONE,
+	## Past the gate, on the perimeter trail.
+	PERIMETER,
+	## At the relay shed, where the authored content currently stops.
+	RELAY,
 }
 
 const OBJECTIVES := {
 	Stage.ROAD: "Follow the snowy road to the gate.",
 	Stage.YARD: "Cross the yard and climb to the guardhouse door.",
 	Stage.TERMINAL: "Save your progress at the desk terminal.",
-	Stage.DONE: "Objective complete. Progress saved at the terminal.",
+	Stage.DONE: "Progress saved. Leave the yard by the north service gate.",
+	Stage.PERIMETER: "Follow the perimeter trail north to the relay shed.",
+	Stage.RELAY: "Relay shed reached. The authored content ends here.",
 }
 
 static var stage: Stage = Stage.ROAD
@@ -34,7 +45,7 @@ static func reach(next: Stage) -> bool:
 	return true
 
 static func restore(value: int) -> void:
-	stage = (value as Stage) if value >= Stage.ROAD and value <= Stage.DONE else Stage.ROAD
+	stage = (value as Stage) if value >= Stage.ROAD and value <= Stage.RELAY else Stage.ROAD
 
 static func reset() -> void:
 	stage = Stage.ROAD

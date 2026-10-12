@@ -1,9 +1,9 @@
 extends SceneTree
 ## One authored spatial source drives all exterior cameras and physics.
 const OUT := "res://assets/backgrounds/env_1/exterior_authored"
-const POSES := [Vector3(6,8,27),Vector3(9,10,16),Vector3(2,7.5,12)]
-const TARGETS := [Vector3(0,0.7,18),Vector3(-1,1,7),Vector3(-4.8,1.2,3.4)]
-const FOVS := [52.0,52.0,50.0]
+const POSES := [Vector3(6,8,27),Vector3(9,10,16),Vector3(2,7.5,12),Vector3(0.5,8,4.5)]
+const TARGETS := [Vector3(0,0.7,18),Vector3(-1,1,7),Vector3(-4.8,1.2,3.4),Vector3(0.5,1,-6.5)]
+const FOVS := [52.0,52.0,50.0,48.0]
 var source: Node3D
 
 func _initialize() -> void:
@@ -68,7 +68,15 @@ func build_source() -> void:
 			box("RailPost",Vector3(x,0.6,z),Vector3(0.16,1.2,0.16),Color("55636a"),true)
 	# The distant end and the fenced perimeter are visible physical boundaries.
 	box("RoadEndBank",Vector3(0,0.45,29),Vector3(6.5,0.9,1),Color("d0dbe0"),true)
-	box("NorthPerimeter",Vector3(0,1,-7),Vector3(24,2,0.15),Color("536570"),true)
+	# The north fence carries the service gate the perimeter trail starts from.
+	for x: float in [-7.3,7.3]:
+		box("NorthPerimeter",Vector3(x,1,-7),Vector3(9.4,2,0.15),Color("536570"),true)
+	for x: float in [-2.6,2.6]:
+		box("NorthGatePost",Vector3(x,1.05,-7),Vector3(0.3,2.1,0.3),Color("505e63"),true)
+	box("NorthGateLeaf",Vector3(0,0.98,-7),Vector3(4.95,1.86,0.12),Color("6d7b6a"),true)
+	for y: float in [0.45,1.5]:
+		box("NorthGateRail",Vector3(0,y,-6.92),Vector3(4.9,0.1,0.06),Color("8a9480"))
+	box("NorthGateSign",Vector3(1.6,1.6,-6.9),Vector3(0.8,0.5,0.04),Color("c7b672"))
 	box("WestPerimeter",Vector3(-11,1,1.5),Vector3(0.15,2,17),Color("536570"),true)
 	box("EastPerimeter",Vector3(6,1,1.5),Vector3(0.15,2,17),Color("536570"),true)
 	box("SouthPerimeterLeft",Vector3(-7.5,1,10),Vector3(9.4,2,0.15),Color("536570"),true)
@@ -121,29 +129,39 @@ func build_source() -> void:
 	assert(ResourceSaver.save(packed,"res://environments/exterior_source.tscn") == OK)
 
 func run() -> void:
-	if DisplayServer.get_name() == "headless":
-		push_error("Exterior capture requires graphical rendering")
-		quit(1)
-		return
-	root.size = Vector2i(1920,1080)
-	RenderingServer.set_default_clear_color(Color("243544"))
-	DirAccess.make_dir_recursive_absolute(OUT)
+	# Captures need a renderer; the geometry source and the shot definitions do
+	# not, so a headless run can regenerate the spatial source on its own.
+	var graphical: bool = DisplayServer.get_name() != "headless"
+	if graphical:
+		root.size = Vector2i(1920,1080)
+		RenderingServer.set_default_clear_color(Color("243544"))
+		DirAccess.make_dir_recursive_absolute(OUT)
 	DirAccess.make_dir_recursive_absolute("res://resources/exterior")
 	build_source()
 	var camera := Camera3D.new()
 	root.add_child(camera)
 	camera.make_current()
 	var manifest: Array[Dictionary] = []
-	for index: int in range(3):
+	for index: int in range(POSES.size()):
 		camera.position = POSES[index]
 		camera.look_at(TARGETS[index])
 		camera.fov = FOVS[index]
 		var shot := ShotDefinition.new()
+		var shot_path: String = "res://resources/exterior/shot_%d.tres" % (index+1)
+		# The projective crop of a framing is tuned by hand against its plate.
+		# Authoring the camera again must not throw that decision away.
+		if ResourceLoader.exists(shot_path):
+			var previous: ShotDefinition = load(shot_path)
+			shot.zoom = previous.zoom
+			shot.focus = previous.focus
 		shot.shot_id = StringName("exterior_%d" % (index+1))
 		shot.camera_position = camera.position
 		shot.camera_rotation_degrees = camera.rotation_degrees
 		shot.fov = camera.fov
-		assert(ResourceSaver.save(shot,"res://resources/exterior/shot_%d.tres" % (index+1)) == OK)
+		assert(ResourceSaver.save(shot,shot_path) == OK)
+		# Captures and landmark pixels only mean anything at the captured size.
+		if not graphical:
+			continue
 		for frame: int in range(8):
 			await process_frame
 		await RenderingServer.frame_post_draw
@@ -154,7 +172,8 @@ func run() -> void:
 			var pixel: Vector2 = camera.unproject_position(at)
 			landmarks[label] = {"world":[at.x,at.y,at.z],"pixel":[pixel.x,pixel.y],"behind_camera":camera.is_position_behind(at)}
 		manifest.append({"shot":index+1,"position":[camera.position.x,camera.position.y,camera.position.z],"rotation_degrees":[camera.rotation_degrees.x,camera.rotation_degrees.y,camera.rotation_degrees.z],"fov":camera.fov,"landmarks":landmarks})
-	var file := FileAccess.open(OUT+"/cameras.json",FileAccess.WRITE)
-	file.store_string(JSON.stringify({"units":"meters","image_size":[1920,1080],"interior_origin":[-5,0.6,0],"interior_rotation_y_degrees":90,"shots":manifest},"\t"))
-	print("EXTERIOR authored one spatial source + three fixed cameras + captures")
+	if graphical:
+		var file := FileAccess.open(OUT+"/cameras.json",FileAccess.WRITE)
+		file.store_string(JSON.stringify({"units":"meters","image_size":[1920,1080],"interior_origin":[-5,0.6,0],"interior_rotation_y_degrees":90,"shots":manifest},"\t"))
+	print("EXTERIOR authored one spatial source + %d fixed cameras%s" % [POSES.size()," + captures" if graphical else " (geometry only, no renderer)"])
 	quit()

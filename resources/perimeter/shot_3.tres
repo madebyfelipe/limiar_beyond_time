@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShotDefinition" format=3]
+
+[ext_resource type="Script" path="res://systems/camera/shot_definition.gd" id="1_ih5u2"]
+
+[resource]
+script = ExtResource("1_ih5u2")
+shot_id = &"perimeter_3"
+camera_position = Vector3(7.4, 7, -17)
+camera_rotation_degrees = Vector3(-29.656933, 46.59114, 0)
+fov = 52.0

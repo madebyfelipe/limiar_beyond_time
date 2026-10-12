@@ -1,7 +1,8 @@
 extends SceneTree
-## Exercise the exterior's actual enemy, player, physics, weapon and HUD.
+## Exercise the perimeter trail's actual enemy, player, physics, weapon and HUD.
+## The animal lives in Phase 2 now, so this probe drives that level.
 var failures := 0
-var exterior: Node
+var trail: Node
 var player: PlayerController
 var enemy: KelekenActor
 
@@ -29,13 +30,17 @@ func capture(name: String) -> void:
 	await RenderingServer.frame_post_draw
 	check(root.get_texture().get_image().save_png("res://.local/combat-%s.png" % name) == OK, "Could not capture combat HUD")
 
+## The pen stretch of the trail, with the animal facing the way in from the
+## yard gate: south is +z, so a player "in front" stands at a greater z.
+const ENEMY_AT := Vector3(0, 0.06, -14)
+
 func fresh(distance: float = 1.4) -> void:
 	release()
-	exterior.restart()
-	exterior.keleken_wander.set_physics_process(false)
-	enemy.position = Vector3(0, 0.06, 19)
-	enemy.rotation.y = 0.0
-	player.reset_to(Transform3D(Basis.IDENTITY, Vector3(0, 0.06, 19 - distance)))
+	trail.restart()
+	trail.keleken_wander.set_physics_process(false)
+	enemy.position = ENEMY_AT
+	enemy.rotation.y = PI
+	player.reset_to(Transform3D(Basis.IDENTITY, ENEMY_AT + Vector3(0, 0, distance)))
 	await tick(3)
 
 func run() -> void:
@@ -54,25 +59,25 @@ func run() -> void:
 	SaveGame.path = "res://.local/enemy_combat_save.cfg"
 	SaveGame.clear()
 	SupplyStock.reset()
-	exterior = load("res://environments/exterior.tscn").instantiate()
-	root.add_child(exterior)
-	player = exterior.player
-	enemy = exterior.keleken
+	trail = load("res://environments/perimeter.tscn").instantiate()
+	root.add_child(trail)
+	player = trail.player
+	enemy = trail.keleken
 	ControlScheme.set_mode(ControlScheme.Mode.TANK)
 	await tick(8)
 	await fresh(5.0)
 	check(enemy.sees_player(), "Player in front was not perceived")
-	player.position.z = 24.0
+	player.position.z = -19.5
 	check(not enemy.sees_player(), "Field of view detected a distant player behind")
-	player.position.z = 20.5
+	player.position.z = -15.8
 	check(enemy.sees_player(), "Close player behind was not perceived")
-	player.position.z = 29.0
+	player.position.z = -4.5
 	check(not enemy.sees_player(), "Player outside perception range was perceived")
 
 	# Occlusion must block both awareness and attack damage.
 	await fresh()
 	var wall := StaticBody3D.new()
-	wall.position = Vector3(0, 1.5, 18.3)
+	wall.position = Vector3(0, 1.5, -13.3)
 	var collision := CollisionShape3D.new()
 	var box := BoxShape3D.new()
 	box.size = Vector3(3, 3, 0.15)
@@ -92,7 +97,9 @@ func run() -> void:
 	check(enemy.global_position.distance_to(player.global_position) < before - 1.0, "Enemy did not pursue after alerting")
 	check(enemy.state in [KelekenActor.State.CHASE, KelekenActor.State.ATTACK], "Enemy did not leave patrol")
 	# Lost sight/range expires its memory instead of tracking forever.
-	player.position.z = 30.0
+	# Far up the trail, past the pen: the animal walks to where it last saw
+	# Dylan and finds nothing within its perception there.
+	player.position.z = -21.5
 	await tick(210)
 	check(enemy.state in [KelekenActor.State.RETURN, KelekenActor.State.PATROL], "Enemy did not abandon a lost target")
 
@@ -129,15 +136,15 @@ func run() -> void:
 	check(player.start_dodge(), "Dodge cooldown did not recover")
 	await tick(30)
 	# Camera controls use the camera reference for evasion. Collision still
-	# stops the burst at a snowbank rather than teleporting through it.
+	# stops the burst at a trail bank rather than teleporting through it.
 	ControlScheme.set_mode(ControlScheme.Mode.CAMERA_RELATIVE)
 	player.reset_combat()
-	player.reset_to(Transform3D(Basis.IDENTITY, Vector3(2.2, 0.06, 20)))
+	player.reset_to(Transform3D(Basis.IDENTITY, Vector3(2.2, 0.06, -6)))
 	Input.action_press("move_right")
 	check(player.start_dodge(), "Camera-relative dodge did not start")
 	Input.action_release("move_right")
 	await tick(25)
-	check(player.position.x < 2.5, "Dodge passed through the road boundary")
+	check(player.position.x < 2.5, "Dodge passed through the trail boundary")
 	check(player.dodge_left == 0.0, "Camera-relative dodge did not end")
 	ControlScheme.set_mode(ControlScheme.Mode.TANK)
 	player.reset_combat()
@@ -166,7 +173,8 @@ func run() -> void:
 	enemy.combat_enabled = true
 	await fresh()
 	player.weapon.practice = true
-	player.visual.rotation.y = PI
+	# The animal stands up the trail, to the north: that is where Dylan aims.
+	player.visual.rotation.y = 0.0
 	Input.action_press("aim")
 	await tick(18)
 	check(player.weapon.target == enemy.hurtbox, "Auto-aim did not select the enemy")
@@ -186,29 +194,29 @@ func run() -> void:
 	check(player.is_dead() and not player.control_enabled and player.vitality == 0.0, "Lethal damage did not disable Dylan")
 	check(not player.weapon.aiming and not player.start_dodge() and not player.use_med_kit(), "Dead player accepted combat input")
 	check(not player.weapon.fire() and not player.weapon.reload(), "Dead player fired or reloaded")
-	check(exterior.operation.hud.death_message.visible, "Death offered no restart feedback")
+	check(trail.operation.hud.death_message.visible, "Death offered no restart feedback")
 	await capture("death")
 	var death_position := player.position
 	Input.action_press("move_up")
 	await tick(20)
 	check(Vector2(player.position.x - death_position.x, player.position.z - death_position.z).length() < 0.01, "Dead Dylan moved")
-	exterior.restart()
+	trail.restart()
 	await tick(3)
 	check(player.vitality == 100.0 and player.control_enabled and not player.is_dead(), "Restart did not revive Dylan")
 	check(enemy.state == KelekenActor.State.PATROL and enemy.health.alive() and enemy.hurtbox.collision_layer == Hurtbox.LAYER, "Restart did not revive Keleken")
-	check(not exterior.operation.hud.death_message.visible, "Restart kept the death screen")
+	check(not trail.operation.hud.death_message.visible, "Restart kept the death screen")
 
 	player.restore_vitality(45.0)
 	SupplyStock.med_kits = 3
-	var record := SaveGame.write("res://environments/exterior.tscn", player.position, 0.0, MissionState.Stage.ROAD, player.vitality)
+	var record := SaveGame.write("res://environments/perimeter.tscn", player.position, 0.0, MissionState.Stage.PERIMETER, player.vitality)
 	check(not record.is_empty(), "Combat state could not be saved")
 	player.restore_vitality(100.0)
 	SupplyStock.med_kits = 0
-	check(SaveGame.resume(player, "res://environments/exterior.tscn"), "Combat save could not resume")
+	check(SaveGame.resume(player, "res://environments/perimeter.tscn"), "Combat save could not resume")
 	check(player.vitality == 45.0 and SupplyStock.med_kits == 3, "Resume did not restore health and medical inventory")
 	SaveGame.clear()
 	release()
-	exterior.queue_free()
+	trail.queue_free()
 	await process_frame
 	print("ENEMY_COMBAT failures=%d" % failures)
 	quit(1 if failures else 0)

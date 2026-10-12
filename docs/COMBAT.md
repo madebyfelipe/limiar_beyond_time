@@ -16,9 +16,14 @@ Primeira fatia do item **P1 — Combate** do `PLAN.md`: uma arma, mira para câm
 fixa, munição, recarga, dano e saúde. Em 12/10/2026, o combate do exterior foi
 completado com IA do Keleken, dano/morte do Dylan, esquiva e uso de kits.
 
-## Combate no exterior — 12/10/2026
+## Combate na trilha do perímetro — 12/10/2026
 
-Abra `executar-exterior.cmd`. O Keleken patrulha a estrada, detecta Dylan a até
+Abra `executar-perimetro.cmd` (ou chegue pela continuidade: terminal da guarita,
+`save`, portão norte). O combate nasceu no exterior e **mudou para a Fase 2**
+junto com o Keleken; a estrada do exterior ficou sem inimigo. Estrutura de fase,
+cenário e câmeras em `PERIMETER.md`.
+
+O Keleken patrulha o cercado da trilha, detecta Dylan a até
 8 m dentro de um cone de 120° ou a 2,5 m por proximidade, sempre respeitando
 paredes e altura. Após 0,45 s de alerta, persegue a 2,8 m/s. Perder a visão por
 3 s faz o inimigo retornar ao ponto de patrulha.
@@ -41,7 +46,7 @@ Ao morrer, movimento, arma, esquiva e cura são desativados; a tela indica
 
 **H / R3 / RS** consome um kit para recuperar até 50 HP. Vida cheia, ausência
 de kits, morte, pausa e interação bloqueiam o uso sem gastar estoque. Compre
-na guarita com `buy medkit`. O HUD mostra quantidade e atalhos remapeados;
+na guarita com `buy medkit`, antes de sair pelo portão. O HUD mostra quantidade e atalhos remapeados;
 os dois comandos podem ser configurados nas telas de controles. R3/RS passa
 a ser cura; o diagnóstico mantém F3 e o touchpad do PS4.
 

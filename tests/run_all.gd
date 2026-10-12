@@ -25,6 +25,7 @@ const PROBES: Array[Dictionary] = [
 	{"name": "env1-continuidade", "script": "res://tests/check_env1_continuity.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "sala-geometria", "script": "res://tests/check_save_room.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "exterior-geometria", "script": "res://tests/check_exterior.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
+	{"name": "perimetro", "script": "res://tests/check_perimeter.gd", "args": HEADLESS_FIXED, "summary": "PERIMETER ticks="},
 	{"name": "dylan-portas", "script": "res://tests/check_dylan_doors.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "controles-tanque", "script": "res://tests/check_tank_controls.gd", "args": HEADLESS_FIXED, "summary": "TANK controls"},
 	{"name": "gamepad", "script": "res://tests/check_gamepad.gd", "args": HEADLESS_FIXED, "summary": "GAMEPAD failures=0"},
@@ -56,6 +57,7 @@ const PROBES: Array[Dictionary] = [
 	{"name": "operacao-grafica", "script": "res://tests/check_operation.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "T08 failures=0"},
 	{"name": "sala-grafica", "script": "res://tests/check_save_room.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": " failures=0"},
 	{"name": "exterior-grafico", "script": "res://tests/check_exterior.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": " failures=0"},
+	{"name": "perimetro-grafico", "script": "res://tests/check_perimeter.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "PERIMETER ticks="},
 	{"name": "dylan-portas-grafico", "script": "res://tests/check_dylan_doors.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": " failures=0"},
 	{"name": "filtro-retro", "script": "res://tests/check_retro_filter.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "RETRO failures=0"},
 ]
