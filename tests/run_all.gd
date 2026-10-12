@@ -32,7 +32,9 @@ const PROBES: Array[Dictionary] = [
 	{"name": "operacao-cenarios", "script": "res://tests/check_level_operation.gd", "args": HEADLESS_FIXED, "summary": "OPERATION levels"},
 	{"name": "cena-principal", "script": "", "args": ["--headless", "--quit-after", "30"], "summary": ""},
 	{"name": "robustez-10min", "script": "res://tests/check_soak.gd", "args": HEADLESS_FIXED, "summary": "T10 soak minutes=10.0"},
-	{"name": "benchmark-funcional", "script": "", "args": ["--headless"], "extra": ["--benchmark", "--warmup=0", "--duration=45"], "summary": "execução funcional OK"},
+	# One lap of the route takes most of 45 s; on a loaded machine physics falls
+	# behind the wall clock and the only lap missed the window once. 75 s leaves room.
+	{"name": "benchmark-funcional", "script": "", "args": ["--headless"], "extra": ["--benchmark", "--warmup=0", "--duration=75"], "summary": "execução funcional OK"},
 	{"name": "composicao", "script": "res://tests/check_composition.gd", "args": [], "graphical": true, "summary": "T01 failures=0"},
 	{"name": "oclusao", "script": "res://tests/check_occlusion.gd", "args": [], "graphical": true, "summary": "T02 failures=0"},
 	{"name": "distancia-30", "script": "res://tests/check_distance.gd", "args": ["--disable-vsync", "--max-fps", "30"], "graphical": true, "summary": "ticks=120"},
