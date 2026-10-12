@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("1_ve55u")
 source_dimensions = Vector2i(1920, 1080)
-calibration_status = "ESTUDO TÉCNICO VALIDADO (T06)"
-scale_notes = "Estudo autoral, 1 unidade = 1 m. Fonte route_study_source.tscn. Pixels medidos por centroide da cor dos marcos no PNG; câmeras e geometria autoradas, sem ajuste automático."
+calibration_status = "VALIDATED TECHNICAL STUDY (T06)"
+scale_notes = "Estudo autoral, 1 unidade = 1 m. Fonte route_study_source.tscn. Pixels medidos por centroide da cor dos marcos no PNG; cameras e geometria autoradas, sem ajuste automático."
 reference_labels = PackedStringArray("SurveyMark08", "SurveyMark09", "SurveyMark10", "SurveyMark11", "SurveyMark12", "SurveyMark13", "SurveyMark14", "SurveyMark15")
 reference_pixels = PackedVector2Array(703, 695, 753, 743, 864, 593, 915, 634, 1104, 390, 1158, 420, 1159, 357, 1212, 385)
 reference_world = PackedVector3Array(-0.6, 0.025, -2, 0.6, 0.025, -2, -0.6, 0.025, -5, 0.6, 0.025, -5, -0.6, 1.225, -10.5, 0.6, 1.225, -10.5, -0.6, 1.225, -12, 0.6, 1.225, -12)

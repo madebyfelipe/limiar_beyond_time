@@ -3,6 +3,7 @@ extends Node3D
 ## tools/build_dylan_animations.gd. Physics remains on PlayerController.
 ## The captures face +Z and stand 0.976 tall; gameplay forward is -Z.
 const CLIPS: AnimationLibrary = preload("res://assets/models/dylan_protagonist/mixamo/dylan_clips.res")
+const PISTOL_MODEL: PackedScene = preload("res://assets/models/weapons/pistol/pistol_lowpoly.glb")
 const SOURCE_HEIGHT := 0.9761
 ## Ground speed each capture carries on its own, measured from the planted foot
 ## travelling backwards under the hips. Playback follows the real speed, so the
@@ -18,15 +19,16 @@ const BACKWARD_COSINE := -0.4
 @onready var player: PlayerController = get_parent().get_parent()
 ## How quickly the aim stance blends in and out, per second.
 const AIM_BLEND := 10.0
-## Pistol at the 1,8 m Dylan of the levels; it scales with target_height.
-const PISTOL_SIZE := Vector3(0.038, 0.1, 0.2)
+## The imported prop has its origin at the grip; the hand bone is the wrist.
+const PISTOL_HAND_OFFSET := 0.035
 var animator: AnimationPlayer
 var interaction_active: bool = false
 var locomotion: StringName = &"idle"
 var aim_pose: AimPose
-var pistol: MeshInstance3D
-var muzzle: Marker3D
+var pistol: Node3D
+var muzzle: Node3D
 var _hand: int = -1
+var _dodge_clip: StringName = &"dodge_right"
 
 func _ready() -> void:
 	model.scale = Vector3.ONE * (target_height / SOURCE_HEIGHT)
@@ -41,27 +43,38 @@ func _ready() -> void:
 	aim_pose.active = false
 	skeleton.add_child(aim_pose)
 	_hand = skeleton.find_bone("mixamorig_RightHand")
-	pistol = MeshInstance3D.new()
-	var body := BoxMesh.new()
-	body.size = PISTOL_SIZE * (target_height / 1.8)
-	var finish := StandardMaterial3D.new()
-	finish.albedo_color = Color(0.09, 0.09, 0.1)
-	finish.roughness = 0.45
-	body.material = finish
-	pistol.mesh = body
+	pistol = PISTOL_MODEL.instantiate()
+	pistol.name = "Pistol"
 	pistol.top_level = true
 	pistol.visible = false
 	add_child(pistol)
-	muzzle = Marker3D.new()
-	muzzle.position = Vector3(0.0, body.size.y * 0.3, -body.size.z * 0.5)
-	pistol.add_child(muzzle)
+	muzzle = pistol.find_child("Muzzle", true, false) as Node3D
 	# After the modifiers, so the gun sits in the hand the stance has placed.
 	skeleton.skeleton_updated.connect(_place_pistol)
 
 func _process(delta: float) -> void:
 	_update_aim(delta)
+	if player.is_dead():
+		animator.pause()
+		rotation.z = move_toward(rotation.z, -PI * 0.48, delta * 3.0)
+		return
+	rotation.z = move_toward(rotation.z, 0.0, delta * 5.0)
+	rotation.x = move_toward(rotation.x, 0.12 if player.hit_stun_left > 0.0 else 0.0, delta * 5.0)
 	if interaction_active:
 		return
+	if player.dodge_left > 0.0:
+		# The right sidestep is oriented into the committed world-space escape.
+		# Rotating the visual never changes the collision body or travel vector.
+		if locomotion != &"dodge_right" and locomotion != &"dodge_left":
+			_dodge_clip = &"dodge_left" if player.facing().cross(Vector3.UP).dot(player.dodge_direction) < -0.1 else &"dodge_right"
+			locomotion = _dodge_clip
+			animator.play(locomotion, 0.04)
+		# Mixamo's right dodge leans toward local -X (the capture faces +Z).
+		model.global_rotation.y = atan2(-player.dodge_direction.z, player.dodge_direction.x) + (PI if _dodge_clip == &"dodge_right" else 0.0)
+		animator.speed_scale = 1.0
+		animator.seek(CLIPS.get_animation(_dodge_clip).length * (1.0 - player.dodge_left / player.config.dodge_duration), true)
+		return
+	model.rotation.y = lerp_angle(model.rotation.y, PI, minf(1.0, delta * 18.0))
 	var motion := Vector2(player.get_real_velocity().x, player.get_real_velocity().z)
 	var speed: float = motion.length()
 	var forward: Vector3 = player.facing()
@@ -69,10 +82,12 @@ func _process(delta: float) -> void:
 	if next != locomotion:
 		locomotion = next
 		animator.play(next, 0.16)
+	elif not animator.is_playing():
+		animator.play(next, 0.16)
 	animator.speed_scale = _rate_for(next, speed)
 
 func _aiming() -> bool:
-	return player.weapon != null and player.weapon.aiming and not interaction_active
+	return player.can_use_weapon() and player.weapon != null and player.weapon.aiming and not interaction_active
 
 func _update_aim(delta: float) -> void:
 	var weapon: PlayerWeapon = player.weapon
@@ -92,7 +107,8 @@ func _place_pistol() -> void:
 	var hand: Vector3 = skeleton.global_transform * skeleton.get_bone_global_pose(_hand).origin
 	var along: Vector3 = aim_pose.direction.normalized()
 	var side: Vector3 = Vector3.UP if absf(along.dot(Vector3.UP)) < 0.95 else Vector3.FORWARD
-	pistol.global_transform = Transform3D(Basis.looking_at(along, side), hand + along * (pistol.mesh as BoxMesh).size.z * 0.35)
+	var prop_scale: float = target_height / 1.8
+	pistol.global_transform = Transform3D(Basis.looking_at(along, side).scaled(Vector3.ONE * prop_scale), hand + along * PISTOL_HAND_OFFSET * prop_scale)
 
 func _clip_for(motion: Vector2, speed: float, forward: Vector2) -> StringName:
 	if _aiming():

@@ -6,7 +6,7 @@ extends ShotDefinition
 # when the image has no identified spatial correspondence yet.
 @export var source_dimensions: Vector2i
 @export_multiline var scale_notes: String
-@export var calibration_status: String = "HIPÓTESE NÃO VALIDADA"
+@export var calibration_status: String = "UNVALIDATED HYPOTHESIS"
 @export var reference_labels: PackedStringArray
 @export var reference_pixels: PackedVector2Array
 @export var reference_world: PackedVector3Array

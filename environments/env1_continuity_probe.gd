@@ -79,4 +79,4 @@ func _ready() -> void:
 
 func _on_shot_changed(_previous: StringName, current: StringName) -> void:
 	camera = presentation.current_shot.camera
-	$Frame/Composition/Instructions.text = "ENV_1 / três vistas · %s\nWASD / setas: mover · Shift: correr · G: mostrar faixa\nLigação experimental; escada e escala ainda em calibração." % current
+	$Frame/Composition/Instructions.text = "ENV_1 / three views · %s\nWASD / arrows: move · Shift: run · G: show strip\nExperimental connection; stairs and scale still under calibration." % current

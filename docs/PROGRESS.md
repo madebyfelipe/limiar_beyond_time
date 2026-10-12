@@ -1,5 +1,21 @@
 # Progresso — LIMIAR Recon
 
+## Modelo original de pistola — 12/10/2026
+
+- Pedido: gerar modelo de arma. Criados conceito visual com imagegen integrada, modelo GLB autorado no Blender por `tools/build_pistol.py`, fonte `.blend`, manifesto e render de prévia em `assets/models/weapons/pistol/`.
+- Geometria: 756 triângulos, uma malha, seis materiais, sem texturas externas. Origem na empunhadura, metros, frente −Z e nó `Muzzle` na ponta visual. Sem rig ou animação no prop.
+- `dylan_visual.gd` substitui a caixa provisória pelo GLB, escala conforme a altura do personagem e acompanha a mão após a pose. Traçador usa o marcador importado; regras de acerto e munição continuam no sistema de combate.
+- Godot importou sem erros. Quatro regressões headless (cenas, portas, gamepad e combate): zero falhas. Combate gráfico: 1438 ticks, zero falhas; novas asserções conferem modelo importado, direção, ponta do cano e proximidade da mão. Render Blender e captura de empunhadura no estande inspecionados.
+- Limites: mãos/dedos continuam com pose procedural; sem clipes dedicados de tiro/recarga. Exportação ainda não validada. Detalhes e regeneração em `assets/models/weapons/pistol/README.md`.
+
+## Mira opcional de alvo travado — 11/10/2026
+
+- Referência escolhida pelo usuário: Parasite Eve II, adaptado ao mouse como opção de jogabilidade. Quarta opção MIRA (CÂMERA): ALVO TRAVADO; valores anteriores e padrão livre 360 preservados.
+- Direito seleciona e mantém; mouse não troca sozinho; roda nos dois sentidos/Tab alternam; esquerdo mantido repete na cadência; R recarrega. Trava acompanha inimigo e conserva identidade no corte; marcador separado do impacto, aviso de bloqueio e seta fora da tela.
+- Pausa, portas/terminal e troca de modo interrompem a mira. Botões mantidos precisam ser soltos antes de retomar. Morte/perda do alvo interrompe o gatilho mantido sem selecionar outro automaticamente.
+- Combate: 1430 ticks headless / 1438 gráficos, zero falhas. Cinco probes de regressão: zero falhas. Seleção, bloqueio, seta e menu 16:9/4:3 inspecionados. Conforto do mouse físico humano permanece para avaliação.
+- Detalhes em `PARASITE_EVE_2_MOUSE.md`; alvos continuam de treino, sem inimigos com IA nesta fatia.
+
 
 ## Armas e mira — 11/10/2026
 
@@ -430,6 +446,28 @@ Em 11/10/2026, o usuário autorizou explicitamente avançar a partir de T01 até
 - `check_exterior.gd` reproduzido no Linux: headless 3488 ticks / 99,41 m, gráfico 3498 ticks / 99,47 m, 0 falhas, iguais ao Windows.
 - Sobreposição geometria × arte e leitura manual ampliada: guarita, porta, janelas, escada, corrimãos, plataforma, caixas, cancela e guard rails dentro de ~5–10 px nas três vistas. O poste de luz diverge: ≈ 75 px na vista 1 e 26–50 px no fuste, ≈ 45 px na base, na vista 2. A IA o desenhou quase vertical, sem a convergência da câmera. O gate de ≤ 8 px não passa como conjunto. Correção sugerida: editar só o poste das artes 1 e 2. Detalhes, tabela e evidências em `calibration/exterior/EXTERIOR_GEOMETRY.md` e `evidence/exterior/`; ferramenta em `tools/calibration/exterior_alignment_overlay.py`.
 - Diretriz do usuário registrada em `PLAN.md` e `ARCHITECTURE.md`: exatidão geométrica só nas áreas em que o jogador interage. Reavaliado por ela, o trajeto do exterior atende; árvores, telhado e fundo ficam isentos. Pendência única: o poste de luz tem colisor numa área alcançável — remover o colisor ou corrigir a arte, por decisão do usuário.
+
+## Combate com Keleken — 12/10/2026
+
+- Pedido: completar percepção, perseguição, ataque com dano, dano/morte do Dylan,
+  esquiva e uso de kits médicos. Implementado no exterior, mantendo o estudo
+  isolado de animação sem IA.
+- `KelekenActor` integra patrulha, alerta, perseguição com linha de visão,
+  memória/desistência, bicada com preparação e dano único, reação a tiros e
+  morte; `PlayerController` integra Health, imunidade breve, morte/reinício,
+  esquiva por física e kits do `SupplyStock`. HUD mostra vida, dano, estoque,
+  atalhos e morte. Saúde e estoque são conservados nas portas e no salvamento.
+- Controles: Q / △ / Y esquiva; H / R3 / RS usa kit. Remapeáveis, com migração
+  do antigo R3 de diagnóstico para evitar conflito nos perfis padrão salvos.
+- Godot 4.7.2, executor headless: **10 probes, 0 falhas** — exterior, portas,
+  tanque, gamepad, configurações, salvamento, terminal, operação dos cenários,
+  combate de arma e novo `combate-inimigo`. O último também passou gráfico
+  em OpenGL Compatibility, RTX 4050 Laptop. Capturas conferidas em
+  `.local/combat-damage.png` e `.local/combat-death.png`; logs em `.local/tests/`.
+- Limites: esquiva/reação/morte usam clipes existentes e inclinação procedural;
+  perseguição desvia de colisores localmente, sem navegação global. Não foi
+  exportada uma build nem realizado teste com controle físico nesta alteração.
+  Regras e números em `COMBAT.md`.
 
 ## Próximas tarefas
 

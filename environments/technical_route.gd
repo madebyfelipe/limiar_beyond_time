@@ -7,9 +7,9 @@ signal restarted
 signal recovered(checkpoint: Vector3)
 
 const OBJECTIVES: PackedStringArray = [
-	"Contorne o caixote, suba a rampa e alcance a marca dourada.",
-	"Marca dourada alcançada. Volte à marca azul inicial.",
-	"Percurso concluído. Esc → Reiniciar percurso para repetir.",
+	"Go around the crate, climb the ramp and reach the gold marker.",
+	"Gold marker reached. Return to the blue starting marker.",
+	"Route complete. Esc > Restart to try again.",
 ]
 
 @export var geometry: PackedScene
@@ -166,7 +166,7 @@ func recover() -> void:
 	var pad: Vector3 = progress.checkpoint()
 	player.reset_to(Transform3D(Basis.IDENTITY, pad + Vector3(0,0.06,0)))
 	director.reset_to(shot_for(pad))
-	_show_notice("Recuperação: personagem devolvido à última marca alcançada.", 3.0)
+	_show_notice("Recovery: returned to the last reached marker.", 3.0)
 	recovered.emit(pad)
 
 ## Same rule as the director: highest-priority zone containing the actor.
@@ -188,14 +188,14 @@ static func format_time(seconds: float) -> String:
 
 func _on_endpoint_reached() -> void:
 	_update_objective()
-	_show_notice("Marca dourada alcançada. Volte à marca azul.", 3.0)
+	_show_notice("Gold marker reached. Return to the blue marker.", 3.0)
 
 func _on_route_completed(elapsed: float) -> void:
 	_update_objective()
-	_show_notice("PERCURSO TÉCNICO CONCLUÍDO · %s\nEsc → Reiniciar percurso para repetir" % format_time(elapsed))
+	_show_notice("TECHNICAL ROUTE COMPLETE · %s\nEsc > Restart to try again" % format_time(elapsed))
 
 func _update_objective() -> void:
-	instructions.text = "LIMIAR / percurso técnico\n%s\nWASD / setas: mover   ·   Shift: correr   ·   Esc: pausa   ·   F3: diagnóstico" % OBJECTIVES[progress.stage]
+	instructions.text = "LIMIAR / technical route\n%s\nWASD / arrows: move   ·   Shift: run   ·   Esc: pause   ·   F3: diagnostics" % OBJECTIVES[progress.stage]
 
 ## Seconds ≤ 0 keep the notice until restart.
 func _show_notice(text: String, seconds: float = 0.0) -> void:

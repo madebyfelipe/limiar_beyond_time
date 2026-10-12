@@ -78,7 +78,7 @@ func run() -> void:
 	var filter: RetroFilter = room.get_node("FilterLayer/RetroFilter")
 	# --- Documented defaults ---
 	check(RetroFilter.enabled, "The filter should start on")
-	check(RetroFilter.pixel_name() == "médio", "Pixelation should start at 'médio', was '%s'" % RetroFilter.pixel_name())
+	check(RetroFilter.pixel_name() == "medium", "Pixelation should start at 'medium', was '%s'" % RetroFilter.pixel_name())
 	check(RetroFilter.is_effect_on(RetroFilter.Effect.COLOR), "Reduced colour should start on")
 	for row: Dictionary in RetroFilter.EFFECTS:
 		if int(row["id"]) != RetroFilter.Effect.COLOR:

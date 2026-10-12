@@ -95,6 +95,8 @@ func travel(room: Node, expected: String, number: int) -> void:
 	check(room.doorway.can_interact(), "Door prompt not available at the doorway")
 	var source: PlayerController = room.player
 	var before: Vector3 = source.position
+	var vitality_before: float = source.vitality
+	var supplies_before := SupplyStock.snapshot()
 	key(KEY_E, true)
 	await tick(2)
 	check(not root.has_node("DoorTransition"), "Echo triggered a duplicate interaction")
@@ -124,6 +126,8 @@ func travel(room: Node, expected: String, number: int) -> void:
 	await tick(3)
 	check(current_scene.scene_file_path == expected, "Incorrect room after doorway transition")
 	check(current_scene.player.control_enabled, "Control was not restored after arrival")
+	check(current_scene.player.vitality == vitality_before, "Door travel refilled player health")
+	check(SupplyStock.snapshot() == supplies_before, "Door travel changed the medical inventory")
 	check(not root.has_node("DoorTransition"), "Transition layer leaked after arrival")
 	check(float(current_scene.get_node("FilterLayer/RetroFilter").effect.material.get_shader_parameter("curve")) > 0.0, "Arrival lost the chosen preset")
 	check(stages == [&"gesture", &"fade_out", &"latch", &"opening", &"crossing", &"loading", &"fade_in", &"complete"], "Missing cinematic stages: " + str(stages))
@@ -149,6 +153,8 @@ func run() -> void:
 		await walk_to(exterior.player, point)
 	await capture("exterior-door")
 	RetroFilter.set_effect(exterior.get_node("FilterLayer/RetroFilter"), RetroFilter.Effect.CURVE, true)
+	exterior.player.restore_vitality(55.0)
+	SupplyStock.med_kits = 2
 	await travel(exterior, "res://environments/save_room.tscn", 0)
 	var inside: Node = current_scene
 	check(inside.player.position.distance_to(Vector3(-2.4,0,0.55)) < 0.15, "Interior arrival outside entrance")

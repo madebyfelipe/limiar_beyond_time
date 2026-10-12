@@ -10,6 +10,8 @@ extends SceneTree
 const HEADLESS_FIXED: PackedStringArray = ["--headless", "--fixed-fps", "60"]
 const GRAPHICAL_FIXED: PackedStringArray = ["--fixed-fps", "60"]
 const PROBES: Array[Dictionary] = [
+	{"name": "menu-inicial", "script": "res://tests/check_main_menu.gd", "args": HEADLESS_FIXED, "summary": "MAIN_MENU failures=0"},
+	{"name": "menu-inicial-grafico", "script": "res://tests/check_main_menu.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "MAIN_MENU failures=0"},
 	{"name": "unidades", "script": "res://tests/check_units.gd", "args": HEADLESS_FIXED, "summary": "units failures=0"},
 	{"name": "cenas", "script": "res://tests/check_scenes.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "locomocao", "script": "res://tests/check_locomotion.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
@@ -25,12 +27,20 @@ const PROBES: Array[Dictionary] = [
 	{"name": "exterior-geometria", "script": "res://tests/check_exterior.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "dylan-portas", "script": "res://tests/check_dylan_doors.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "controles-tanque", "script": "res://tests/check_tank_controls.gd", "args": HEADLESS_FIXED, "summary": "TANK controls"},
+	{"name": "gamepad", "script": "res://tests/check_gamepad.gd", "args": HEADLESS_FIXED, "summary": "GAMEPAD failures=0"},
+	{"name": "gamepad-grafico", "script": "res://tests/check_gamepad.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "GAMEPAD failures=0"},
+	{"name": "configuracoes", "script": "res://tests/check_settings.gd", "args": HEADLESS_FIXED, "summary": "SETTINGS failures=0"},
+	{"name": "configuracoes-grafico", "script": "res://tests/check_settings.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "SETTINGS failures=0"},
 	{"name": "contato-pes", "script": "res://tests/check_foot_contact.gd", "args": HEADLESS_FIXED, "summary": "FOOT contact"},
+	{"name": "keleken-animacao", "script": "res://tests/check_keleken_animation.gd", "args": HEADLESS_FIXED, "summary": "KELEKEN animation bones=24 clips=7 failures=0"},
+	{"name": "keleken-wander", "script": "res://tests/check_keleken_wander.gd", "args": HEADLESS_FIXED, "summary": "KELEKEN wander failures=0"},
 	{"name": "salvamento", "script": "res://tests/check_save_persistence.gd", "args": HEADLESS_FIXED, "summary": "SAVE persistence"},
 	{"name": "terminal-ui", "script": "res://tests/check_terminal_ui.gd", "args": HEADLESS_FIXED, "summary": "TERMINAL_UI failures=0"},
 	{"name": "terminal-ui-grafico", "script": "res://tests/check_terminal_ui.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "TERMINAL_UI failures=0"},
 	{"name": "operacao-cenarios", "script": "res://tests/check_level_operation.gd", "args": HEADLESS_FIXED, "summary": "OPERATION levels"},
 	{"name": "combate", "script": "res://tests/check_combat.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
+	{"name": "combate-inimigo", "script": "res://tests/check_enemy_combat.gd", "args": HEADLESS_FIXED, "summary": "ENEMY_COMBAT failures=0"},
+	{"name": "esquiva", "script": "res://tests/check_dodge_presentation.gd", "args": HEADLESS_FIXED, "summary": "DODGE_PRESENTATION failures=0"},
 	{"name": "cena-principal", "script": "", "args": ["--headless", "--quit-after", "30"], "summary": ""},
 	{"name": "robustez-10min", "script": "res://tests/check_soak.gd", "args": HEADLESS_FIXED, "summary": "T10 soak minutes=10.0"},
 	# One lap of the route takes most of 45 s; on a loaded machine physics falls

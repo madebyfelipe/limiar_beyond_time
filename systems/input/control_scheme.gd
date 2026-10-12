@@ -57,4 +57,4 @@ static func is_tank() -> bool:
 
 ## Short label for the on-screen key list.
 static func label() -> String:
-	return "tanque" if is_tank() else "câmera"
+	return "tank" if is_tank() else "camera"

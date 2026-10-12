@@ -76,13 +76,20 @@ func _ready() -> void:
 	notice_timer.timeout.connect(notice.hide)
 	add_child(notice_timer)
 	last_safe = player.global_transform
+	player.combat_message.connect(func(text: String) -> void: show_notice(text, 2.5))
 	if player.weapon != null:
 		weapon_readout = WeaponReadout.new()
 		weapon_readout.name = "WeaponReadout"
 		weapon_readout.weapon = player.weapon
 		frame.add_child(weapon_readout)
+		var lock_indicator: Control = preload("res://systems/combat/lock_indicator.gd").new()
+		lock_indicator.name = "LockIndicator"
+		lock_indicator.weapon = player.weapon
+		frame.add_child(lock_indicator)
 
 func _physics_process(_delta: float) -> void:
+	if player.is_dead():
+		return
 	if player.global_position.y < recovery_height:
 		recover()
 	elif player.is_on_floor():
@@ -91,12 +98,13 @@ func _physics_process(_delta: float) -> void:
 ## Safety net for leaving the geometry: back to the last spot actually stood on.
 func recover() -> void:
 	player.reset_to(last_safe)
-	show_notice("Recuperação: personagem devolvido ao último ponto firme.", 3.0)
+	show_notice("Recovery: returned to the last safe position.", 3.0)
 	recovered.emit(last_safe.origin)
 
 ## Seconds ≤ 0 keep the notice until something hides it.
 func show_notice(text: String, seconds: float = 0.0) -> void:
 	notice.text = text
+	notice.modulate.a = 1.0
 	notice.show()
 	if seconds > 0.0:
 		notice_timer.start(seconds)

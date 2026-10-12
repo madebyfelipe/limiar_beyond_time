@@ -12,25 +12,25 @@ extends Control
 ## is what keeps one virtual pixel a whole number of screen pixels at the window
 ## sizes the project tests; a step that did not divide them would show seams.
 const PIXEL_STEPS: Array[Dictionary] = [
-	{"name": "desligado", "size": Vector2.ZERO},
-	{"name": "leve", "size": Vector2(1280.0, 720.0)},
-	{"name": "médio", "size": Vector2(640.0, 360.0)},
+	{"name": "off", "size": Vector2.ZERO},
+	{"name": "light", "size": Vector2(1280.0, 720.0)},
+	{"name": "medium", "size": Vector2(640.0, 360.0)},
 	{"name": "PSX", "size": Vector2(320.0, 180.0)},
 ]
 
 ## How a virtual pixel reaches the window: hard blocks or blended neighbours.
-const SCALING: Array[String] = ["mais próximo", "bilinear"]
+const SCALING: Array[String] = ["nearest", "bilinear"]
 
 enum Effect { COLOR, SCANLINES, GRILLE, CURVE, VIGNETTE }
 
 ## Each switch: the label a menu shows, the shader uniform it drives, the
 ## strength it applies, and how much light it takes away.
 const EFFECTS: Array[Dictionary] = [
-	{"id": Effect.COLOR, "name": "Cor reduzida", "dial": "quantize", "strength": 1.0, "gain": 1.0},
-	{"id": Effect.SCANLINES, "name": "Linhas de varredura", "dial": "scanline", "strength": 0.55, "gain": 1.38},
-	{"id": Effect.GRILLE, "name": "Grade de abertura", "dial": "grille", "strength": 0.32, "gain": 1.07},
-	{"id": Effect.CURVE, "name": "Tela de tubo", "dial": "curve", "strength": 0.55, "gain": 1.0},
-	{"id": Effect.VIGNETTE, "name": "Cantos escuros", "dial": "vignette", "strength": 0.26, "gain": 1.07},
+	{"id": Effect.COLOR, "name": "Reduced color", "dial": "quantize", "strength": 1.0, "gain": 1.0},
+	{"id": Effect.SCANLINES, "name": "Scanlines", "dial": "scanline", "strength": 0.55, "gain": 1.38},
+	{"id": Effect.GRILLE, "name": "Aperture grille", "dial": "grille", "strength": 0.32, "gain": 1.07},
+	{"id": Effect.CURVE, "name": "CRT curve", "dial": "curve", "strength": 0.55, "gain": 1.0},
+	{"id": Effect.VIGNETTE, "name": "Vignette", "dial": "vignette", "strength": 0.26, "gain": 1.07},
 ]
 
 ## Scanlines any finer than this stop reading as lines: at 360 bands a 720-row
@@ -43,7 +43,7 @@ const SECTION := "video"
 
 ## Master switch, on F4. Off is the untouched composition, for calibration work.
 static var enabled: bool = true
-## Index into PIXEL_STEPS. "médio" by default: the filter now also covers the
+## Index into PIXEL_STEPS. "medium" by default: the filter now also covers the
 ## interface, and 320x180 chews menu text past reading.
 static var pixel_step: int = 2
 ## Index into SCALING. Nearest by default, the look the project was tuned on.
@@ -146,7 +146,7 @@ static func pixel_name() -> String:
 static func describe() -> String:
 	ensure_loaded()
 	if not enabled:
-		return "Desligado"
+		return "Off"
 	var parts: PackedStringArray = ["Pixels: " + pixel_name()]
 	# Blending only means something while there are virtual pixels to blend.
 	if PIXEL_STEPS[pixel_step]["size"] != Vector2.ZERO and scaling != 0:

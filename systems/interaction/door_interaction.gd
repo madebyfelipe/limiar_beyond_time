@@ -7,7 +7,7 @@ extends ApproachPrompt
 @export var returning_outside: bool = false
 
 func prompt_text() -> String:
-	return "E · Abrir porta e " + ("sair" if returning_outside else "entrar")
+	return GamepadControls.shared.interact_label() + " · " + ("Exit" if returning_outside else "Enter")
 
 func interact() -> void:
 	if not can_interact():

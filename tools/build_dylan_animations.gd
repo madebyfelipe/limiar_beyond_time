@@ -19,6 +19,8 @@ const CLIPS := {
 	&"walk": {"file": "walk", "loop": true},
 	&"run": {"file": "run", "loop": true},
 	&"walk_back": {"file": "walk_back", "loop": true},
+	&"dodge_right": {"file": "dodge_right", "loop": false, "plant": true, "retarget": true},
+	&"dodge_left": {"file": "dodge_right", "loop": false, "plant": true, "retarget": true, "mirror": true},
 	# The capture walks up, opens and crosses in 6,37 s. Only the reach and the
 	# push survive, matching the 0,72 s gesture stage in door_transition.gd.
 	&"door_interact": {"file": "door_open", "loop": false, "from": 2.48, "to": 3.2, "plant": true},
@@ -37,9 +39,13 @@ func _init() -> void:
 		var scene: Node = (load(SOURCE % spec["file"]) as PackedScene).instantiate()
 		var player := scene.find_child("AnimationPlayer", true, false) as AnimationPlayer
 		var source: Animation = player.get_animation(player.get_animation_list()[0])
+		if spec.get("retarget", false):
+			source = _retarget(source, scene.find_child("Skeleton3D", true, false))
 		var clip: Animation = _window(source, spec.get("from", 0.0), spec.get("to", source.length),
 			spec.get("plant", false), spec.get("unturn", false), spec.get("stitch", 0.0))
 		clip.loop_mode = Animation.LOOP_LINEAR if spec["loop"] else Animation.LOOP_NONE
+		if spec.get("mirror", false):
+			_mirror(clip)
 		library.add_animation(name, clip)
 		print("%s: %.2fs, %d tracks" % [name, clip.length, clip.get_track_count()])
 		scene.free()
@@ -47,6 +53,56 @@ func _init() -> void:
 	var error: int = ResourceSaver.save(library, OUTPUT)
 	print("saved ", OUTPUT, " error=", error)
 	quit(error)
+
+## Reflect the capture across the sagittal plane and exchange paired bones.
+func _mirror(clip: Animation) -> void:
+	for track: int in range(clip.get_track_count()):
+		var path := String(clip.track_get_path(track))
+		path = path.replace("Left", "MirrorSide").replace("Right", "Left").replace("MirrorSide", "Right")
+		clip.track_set_path(track, NodePath(path))
+		for key: int in range(clip.track_get_key_count(track)):
+			if clip.track_get_type(track) == Animation.TYPE_ROTATION_3D:
+				var q: Quaternion = clip.track_get_key_value(track, key)
+				clip.track_set_key_value(track, key, Quaternion(q.x, -q.y, -q.z, q.w))
+			elif clip.track_get_type(track) == Animation.TYPE_POSITION_3D:
+				var p: Vector3 = clip.track_get_key_value(track, key)
+				clip.track_set_key_value(track, key, Vector3(-p.x, p.y, p.z))
+
+## Preserve Dylan's proportions while transferring the capture's rest-relative
+## rotations. Only the hips translate; physics owns all horizontal movement.
+func _retarget(source: Animation, source_rig: Skeleton3D) -> Animation:
+	var rig: Node = load(SOURCE % "dylan_rig_idle").instantiate()
+	var target_rig: Skeleton3D = rig.find_child("Skeleton3D", true, false)
+	var result := Animation.new()
+	result.length = source.length
+	for track: int in range(source.get_track_count()):
+		var path := source.track_get_path(track)
+		var bone := String(path.get_subname(0))
+		var s := source_rig.find_bone(bone)
+		var d := target_rig.find_bone(bone)
+		if s < 0 or d < 0:
+			continue
+		var type := source.track_get_type(track)
+		if type != Animation.TYPE_ROTATION_3D and not (type == Animation.TYPE_POSITION_3D and bone == "mixamorig_Hips"):
+			continue
+		var out := result.add_track(type)
+		result.track_set_path(out, path)
+		var sp := source_rig.get_bone_parent(s)
+		var dp := target_rig.get_bone_parent(d)
+		var a := source_rig.get_bone_global_rest(sp).basis.get_rotation_quaternion() if sp >= 0 else Quaternion.IDENTITY
+		var b := target_rig.get_bone_global_rest(dp).basis.get_rotation_quaternion() if dp >= 0 else Quaternion.IDENTITY
+		var correction := source_rig.get_bone_global_rest(s).basis.get_rotation_quaternion().inverse() * target_rig.get_bone_global_rest(d).basis.get_rotation_quaternion()
+		for key: int in range(source.track_get_key_count(track)):
+			var time := source.track_get_key_time(track, key)
+			if type == Animation.TYPE_ROTATION_3D:
+				var q: Quaternion = source.track_get_key_value(track, key)
+				result.rotation_track_insert_key(out, time, (b.inverse() * a * q * correction).normalized())
+			else:
+				var p: Vector3 = source.track_get_key_value(track, key)
+				# Dylan's imported captures stand at roughly half the source rig.
+				result.position_track_insert_key(out, time, p * (0.528636 / 0.977298))
+	rig.free()
+	return result
 
 ## A windowed clip inherits whatever ground the actor had already covered, so a
 ## planted clip would drop the body away from where it stands. Each one is slid

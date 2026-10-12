@@ -9,7 +9,7 @@ var notice: Label
 var menu: TerminalMenu
 
 func prompt_text() -> String:
-	return "E · Acessar terminal"
+	return GamepadControls.shared.interact_label() + " · Access terminal"
 
 func _ready() -> void:
 	super()
@@ -36,15 +36,15 @@ func save_progress() -> void:
 	# Using the terminal is itself the Fase 1 objective, so the stage this press
 	# reaches has to be in the record this press writes, not one press behind.
 	# The live objective only moves once the file accepted it.
-	var record: Dictionary = SaveGame.write(scene_path, player.global_position, player.visual.rotation.y, MissionState.Stage.DONE)
+	var record: Dictionary = SaveGame.write(scene_path, player.global_position, player.visual.rotation.y, MissionState.Stage.DONE, player.vitality)
 	if record.is_empty():
-		announce("TERMINAL SEM RESPOSTA — progresso não salvo")
-		menu.write_line("FALHA AO GRAVAR: progresso não salvo. Tente save novamente.")
+		announce("TERMINAL NOT RESPONDING — progress not saved")
+		menu.write_line("SAVE FAILED: progress not saved. Try save again.")
 		return
 	MissionState.reach(MissionState.Stage.DONE)
 	saved.emit(record)
-	announce("PROGRESSO SALVO · registro %d · %s" % [record["saves"], SaveGame.stamp(record)])
-	menu.write_line("PROGRESSO E ESTOQUE SALVOS · REGISTRO %d · %s" % [record["saves"], SaveGame.stamp(record)])
+	announce("PROGRESS SAVED · record %d · %s" % [record["saves"], SaveGame.stamp(record)])
+	menu.write_line("PROGRESS AND SUPPLIES SAVED · RECORD %d · %s" % [record["saves"], SaveGame.stamp(record)])
 
 ## Shows a line over the prompt and lets it fade, the way a terminal would
 ## acknowledge and then go quiet again.

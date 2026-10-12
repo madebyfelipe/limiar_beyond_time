@@ -4,7 +4,7 @@
 ## Combate — pistola, mira e alvos, 11/10/2026
 
 - `systems/combat/`: `PlayerWeapon` (filho `Weapon` do `player_dylan.tscn`) é o **único dono da mira**. Processa antes do corpo (`process_physics_priority = -1`); `PlayerController` e `DylanVisual` só leem `aiming`, `heading` e `turn_input`. Tanque com a arma erguida: pés plantados e corpo girado pela arma. Esquema câmera: pernas pelas teclas, corpo encarando a mira, 70% da caminhada.
-- `AimSettings` (estático, `user://settings.cfg` seção `[aim]`, mesmas regras do `ControlScheme`): modo da mira moderna — cursor no chão / livre 360 / assistida — e mira automática do tanque. O livre 360 guarda o rumo em espaço de **mundo**, para não mudar a cada corte de câmera.
+- `AimSettings` (estático, `user://settings.cfg` seção `[aim]`, mesmas regras do `ControlScheme`): modo da mira moderna — cursor no chão / livre 360 / assistida / alvo travado — e mira automática do tanque. O livre 360 guarda o rumo em espaço de **mundo**, para não mudar a cada corte de câmera. Alvo travado seleciona pelo cursor ao erguer e conserva a identidade; roda/Tab alternam, gatilho mantido repete somente nesta opção. `lock_indicator.gd`, dentro do quadro, distingue seleção, bloqueio e alvo fora da tela do retículo 3D de impacto.
 - `AimSolver` leva o mouse da janela ao `SubViewport` 3D (`SubViewportContainer` com `stretch`) antes de virar raio; o container ignora mouse, então nada depende de eventos chegarem ao viewport.
 - Tiros e linhas de visada são raios 3D do peito (2/3 da altura da cápsula: 1,2 m no Dylan de 1,8 m). Camadas físicas nomeadas: 1 "mundo", 3 "alvos". `Hurtbox` (Area3D na camada 3) encaminha dano a um `Health`; ao zerar, sai da camada e do grupo `combat_targets`. Pode apontar o próprio `body` para não bloquear a linha de visada até si.
 - `AimPose` (`SkeletonModifier3D` filho do `Skeleton3D`) monta a pose de pistola sobre qualquer clipe, com `influence` em rampa. Resultado de modificador só é legível em `modification_processed`/`skeleton_updated`; a pistola é posicionada nesse sinal.
@@ -144,7 +144,7 @@ A troca de câmera, imagem e conjunto de oclusores deve ser atômica antes da pr
 - Normalizar entrada para evitar ganho diagonal. Visual gira suavemente para o deslocamento.
 - Guardar base da câmera no início da entrada. Manter enquanto houver direcional, mesmo após cortes. Liberar quando todas as teclas direcionais forem soltas.
 - Valores vigentes desde 11/10/2026: caminhada 1,8 m/s; corrida 3,8 m/s; aceleração 26 m/s²; desaceleração 40 m/s²; gravidade 20 m/s². Rotação configurável em PlayerConfig. As velocidades acompanham a passada das capturas do Dylan (1,48 e 2,73 m/s), e as rampas firmes removem a derrapagem ao soltar a tecla; o contrato anterior era 2,5/5,0 com 15/20. `tank_turn_speed` 1,5 rad/s e `tank_reverse_factor` 0,45 regem o esquema de tanque, ambos escolhidos para ficar perto do que as capturas de giro e de marcha à ré carregam.
-- WASD e setas; Shift corre. Sem mouse look, salto, esquiva, mira ou stamina na Fase 1.
+- WASD e setas; Shift corre. No exterior, Q esquiva e H usa kit médico; `PlayerController` possui Health, imunidade breve e bloqueio por morte. Arma/mira em `PlayerWeapon` e combate do Keleken em `KelekenActor`; regras em `COMBAT.md`. Sem mouse look, salto ou stamina.
 
 ## Interfaces mínimas planejadas
 

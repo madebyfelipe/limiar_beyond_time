@@ -21,6 +21,8 @@ var presentation: PresentationController
 var art_available: bool = true
 var doorway: DoorInteraction
 var operation: LevelOperation
+var keleken: KelekenActor
+var keleken_wander: KelekenWander
 
 func _ready() -> void:
 	instructions.visible = OS.get_cmdline_args().has("--debug-instructions")
@@ -118,6 +120,13 @@ func _ready() -> void:
 	operation.frame = $Frame/Composition
 	operation.restart_requested.connect(restart)
 	add_child(operation)
+	keleken = preload("res://actors/keleken/keleken.tscn").instantiate()
+	keleken.name = "Keleken"
+	keleken.combat_enabled = true
+	keleken.player = player
+	world.add_child(keleken)
+	keleken_wander = preload("res://actors/keleken/keleken_wander.gd").new()
+	keleken.add_child(keleken_wander)
 	_update_label()
 
 func arrive_from_door() -> void:
@@ -132,6 +141,7 @@ func arrive_from_door() -> void:
 ## touched, because restarting an attempt is not erasing a save.
 func restart() -> void:
 	player.reset_to_start()
+	keleken_wander.reset()
 	director.reset_to(shots[0])
 	MissionState.reset()
 	operation.mark_safe()
@@ -145,10 +155,12 @@ func _physics_process(_delta: float) -> void:
 func _advance(stage: MissionState.Stage) -> void:
 	if not MissionState.reach(stage):
 		return
-	operation.show_notice("Objetivo: %s" % MissionState.objective(), 3.0)
+	operation.show_notice("Objective: %s" % MissionState.objective(), 3.0)
 	_update_label()
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if InputBindings.is_custom_event(event):
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_B:
 			set_art_mode(not presentation.art_mode)
@@ -156,7 +168,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			ControlScheme.toggle()
 			_update_label()
 		elif event.physical_keycode == KEY_R:
-			restart()
+			if player.weapon == null or (not player.weapon.aiming and not player.weapon.is_reloading()):
+				restart()
 
 func set_art_mode(enabled: bool) -> void:
 	if enabled and not art_available:
@@ -166,7 +179,7 @@ func set_art_mode(enabled: bool) -> void:
 
 func _update_label() -> void:
 	var shot_name: String = String(presentation.current_shot.definition.shot_id) if presentation.current_shot else ""
-	var movement: String = "setas giram e andam" if ControlScheme.is_tank() else "WASD/setas mover"
+	var movement: String = "arrows turn and move" if ControlScheme.is_tank() else "WASD/arrows move"
 	instructions.text = "EXTERIOR · %s · %s
-%s · Shift correr · E abrir porta · B arte/geometria · F4 filtro · T controles (%s) · F3 diagnóstico · R reiniciar · Esc pausa
-%s" % [shot_name,"ARTE CANDIDATA — alinhamento em revisão" if presentation.art_mode else "GEOMETRIA 3D",movement,ControlScheme.label(),MissionState.objective()]
+%s · Shift run · Q dodge · H med kit · E door · B art/geometry · F4 filter · T controls (%s) · F3 diagnostics · R restart · Esc pause
+%s" % [shot_name,"CANDIDATE ART — alignment under review" if presentation.art_mode else "3D GEOMETRY",movement,ControlScheme.label(),MissionState.objective()]

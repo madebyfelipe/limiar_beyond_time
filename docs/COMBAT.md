@@ -1,4 +1,4 @@
-# Combate — pistola, mira e alvos
+# Combate — pistola, Keleken e Dylan
 
 Data: 11/10/2026. Pedido do usuário:
 
@@ -13,7 +13,46 @@ em 360° com retículo, híbrido com assistência — são **opções selecioná
 uma escolha de arquitetura.
 
 Primeira fatia do item **P1 — Combate** do `PLAN.md`: uma arma, mira para câmera
-fixa, munição, recarga, dano e saúde. Esquiva e dano ao jogador ficam para depois.
+fixa, munição, recarga, dano e saúde. Em 12/10/2026, o combate do exterior foi
+completado com IA do Keleken, dano/morte do Dylan, esquiva e uso de kits.
+
+## Combate no exterior — 12/10/2026
+
+Abra `executar-exterior.cmd`. O Keleken patrulha a estrada, detecta Dylan a até
+8 m dentro de um cone de 120° ou a 2,5 m por proximidade, sempre respeitando
+paredes e altura. Após 0,45 s de alerta, persegue a 2,8 m/s. Perder a visão por
+3 s faz o inimigo retornar ao ponto de patrulha.
+
+A bicada prepara o ataque, fixa a direção e aplica **25 de dano uma vez** em
+0,42 s, dentro de 1,8 m e do cone frontal, com linha de visão. Depois do clipe de
+1 s há 0,65 s de intervalo. Sair do alcance, andar para o lado ou esquivar evita
+o impacto. Tiros usam a Hurtbox do inimigo (100 HP), interrompem a bicada e
+podem matá-lo; o corpo morto deixa de bloquear passagem e atrair a mira.
+
+**Q / △ / Y** inicia uma esquiva de 0,32 s a 7 m/s, com 0,24 s de
+invulnerabilidade e intervalo de 0,85 s. A direção segue o movimento no esquema
+câmera e os eixos do corpo no tanque; sem direção, Dylan recua. A colisão limita
+o deslocamento. A esquiva interrompe a mira e impede disparos durante o movimento.
+
+Dylan começa com 100 HP. Ao ser atingido, há reação de 0,18 s e imunidade de
+0,65 s para evitar dano repetido. O HUD acompanha a vida e pisca em vermelho.
+Ao morrer, movimento, arma, esquiva e cura são desativados; a tela indica
+**Esc / Menu → Reiniciar**, que restaura Dylan e o Keleken.
+
+**H / R3 / RS** consome um kit para recuperar até 50 HP. Vida cheia, ausência
+de kits, morte, pausa e interação bloqueiam o uso sem gastar estoque. Compre
+na guarita com `buy medkit`. O HUD mostra quantidade e atalhos remapeados;
+os dois comandos podem ser configurados nas telas de controles. R3/RS passa
+a ser cura; o diagnóstico mantém F3 e o touchpad do PS4.
+
+As portas conservam saúde e suprimentos. `save` registra saúde junto com o
+estoque; registros anteriores sem saúde começam com 100 HP. Reiniciar recupera
+a vida e o carregador, preservando o estoque atual de kits e reserva.
+
+`tests/check_enemy_combat.gd` (probe `combate-inimigo`) verifica percepção,
+oclusão, perseguição/desistência, janela de ataque, esquiva nos dois esquemas,
+colisão, invulnerabilidade, cura/estoque, tiro real, mortes, reinício e saúde
+persistente. `check_dylan_doors.gd` verifica saúde/estoque no percurso das portas.
 
 ## Onde está
 
@@ -60,7 +99,7 @@ em `PlayerWeapon.magazine` e atravessa portas.
 - Quando o alvo travado cai, a arma passa sozinha para o próximo visível.
 - Desligada a mira automática, a arma aponta para onde Dylan está virado.
 
-## Esquema câmera — três modos de mira (menu JOGABILIDADE)
+## Esquema câmera — quatro modos de mira (menu JOGABILIDADE)
 
 Em todos, Dylan **anda em qualquer direção** a 70% da caminhada, nunca corre, e o
 corpo encara a mira — é isso que permite andar de lado.
@@ -70,6 +109,7 @@ corpo encara a mira — é isso que permite andar de lado.
 | **Cursor no chão** | Cursor visível. Raio da câmera pelo cursor: se cai num alvo, mira **nele** (altura incluída); senão, no ponto do chão. | A arma fica presa àquele **ponto do mundo**; o rumo gira conforme Dylan passa por ele. | Segue o cursor na nova câmera. |
 | **Livre 360** (padrão) | Cursor escondido e devolvido ao lugar a cada quadro. O rumo vive **no mundo**; o movimento do mouse o empurra ao longo de um círculo de 220 px em volta do Dylan na tela. | O rumo fica **fixo em relação ao Dylan**. | **Não muda.** |
 | **Assistida** | O do cursor; se um alvo visível estiver a menos de 20° do rumo, a mira é puxada para ele. | Como cursor. | Como cursor. |
+| **Alvo travado** | Ao segurar direito, seleciona o alvo sob/próximo do cursor. Roda/Tab troca; mover o mouse conserva a seleção. | Acompanha o inimigo no mundo. | Mantém o alvo; seta indica quando sai da tela. |
 
 O **livre 360** guarda o rumo em espaço de mundo de propósito: num jogo de câmeras
 fixas, um rumo guardado na tela mudaria a cada corte. `AimSolver.screen_heading`
@@ -85,7 +125,7 @@ chão devolve exatamente o mesmo rumo quando o mouse está parado.
   participa.
 - Com alvo travado, o tiro vai **ao centro do alvo** só depois que o corpo virou até
   0,2 rad dele; antes disso sai na direção do corpo, como a arma desenhada.
-- Cadência: um disparo por toque, 0,32 s entre disparos. Gatilho em vazio recarrega
+- Cadência: um disparo por toque; **Alvo travado** permite segurar o gatilho para repetir. 0,32 s entre disparos. Gatilho em vazio recarrega
   se houver reserva. Recarga leva 1,6 s e tira do estoque exatamente o que coube.
 - Retículo: anel onde o tiro acertaria **agora** — vermelho sobre alvo, âmbar sobre
   qualquer outra coisa. Uma parede no caminho aparece antes do disparo.
@@ -95,8 +135,11 @@ chão devolve exatamente o mesmo rumo quando o mouse está parado.
 
 Não há capturas de mira no projeto. Até elas existirem, `AimPose`
 (`SkeletonModifier3D`) monta a pose sobre qualquer clipe das pernas: braço direito
-reto ao longo do tiro, braço esquerdo levado à empunhadura. A pistola é uma caixa
-escura posicionada na mão no sinal `skeleton_updated`, alinhada ao tiro.
+reto ao longo do tiro, braço esquerdo levado à empunhadura. A pistola usa o modelo
+original `assets/models/weapons/pistol/pistol_lowpoly.glb` (756 triângulos),
+posicionado na mão no sinal `skeleton_updated` e alinhado ao tiro. O nó `Muzzle`
+do modelo fornece a origem do traçador. Fonte Blender e prévia estão no diretório
+do asset; os braços e dedos continuam com pose procedural.
 
 Pernas durante a mira: parado → `idle`; para trás → `walk_back`; de frente ou de
 lado → `walk`. O seletor já procura `aim_idle`, `strafe_left` e `strafe_right` na
@@ -104,6 +147,8 @@ biblioteca: **quando essas capturas forem adicionadas ao `tools/build_dylan_anim
 com esses nomes, passam a ser usadas sem mudar código.**
 
 ## Verificação
+
+Opção adicional inspirada em Parasite Eve II: ver [levantamento, controles e validação](PARASITE_EVE_2_MOUSE.md). Combate ampliado: **1430 ticks headless / 1438 gráficos, zero falhas**, incluindo persistência isolada, eventos de roda, cortes, alvo móvel, bloqueio, morte/remoção, recarga e interrupção de botões mantidos. Cinco regressões (combate, tanque, portas, terminal e operação): zero falhas. O relatório abaixo documenta a primeira fatia de combate.
 
 `tests/check_combat.gd` (`combate`), headless, **808 ticks, 0 falhas**. Cada asserção
 nova foi verificada contra o próprio defeito, reintroduzindo-o (dez defeitos):
@@ -142,8 +187,9 @@ modificador.
 - Sem som de disparo, sem cápsulas, sem marca de impacto.
 - O carregador não vai para o salvamento; uma sessão retomada começa com o
   carregador cheio. A reserva vai (é o `SupplyStock`).
-- Não há inimigos: os alvos de treino são o único consumidor de `Hurtbox`/`Health`.
-  Dano ao Dylan, esquiva e morte do jogador não existem.
-- Gamepad sem mapeamento.
+- Dodge now uses retargeted Mixamo captures; see [Dodge and gamepad](DODGE_AND_GAMEPAD.md).
+  Hit reactions and death remain procedural. Keleken falls through a visual
+  transform because its rig has no dedicated death clip. Pursuit uses local
+  obstacle avoidance, without global navigation through complex routes.
 - No estande, o HUD do terminal mostra "PISTOLA: NÃO" e o objetivo da estrada,
   porque a arma é emprestada e o estande não tem objetivo próprio.

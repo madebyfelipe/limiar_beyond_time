@@ -108,7 +108,7 @@ func run() -> void:
 	check(menu.input_field.text == "inventory", "Tab did not complete a command")
 	press(KEY_ENTER)
 	await tick()
-	check(menu.output.text.contains("CARTUCHOS 90"), "Inventory did not report real stock")
+	check(menu.output.text.contains("ROUNDS 90"), "Inventory did not report real stock")
 	menu.input_field.text = "buy me"
 	press(KEY_TAB)
 	check(menu.input_field.text == "buy medkit", "Tab did not complete a product")
@@ -116,7 +116,7 @@ func run() -> void:
 	# Failed saves leave progress alone and preserve the console for retry.
 	SaveGame.path = "res://.local/missing-console-directory/save.cfg"
 	await command("save")
-	check(menu.output.text.contains("FALHA AO GRAVAR"), "Disk failure showed success")
+	check(menu.output.text.contains("SAVE FAILED"), "Disk failure showed success")
 	check(MissionState.stage == MissionState.Stage.TERMINAL, "Failed save advanced objective")
 	SaveGame.path = SaveGame.PROBE_PATH
 	await command("save now")
@@ -124,7 +124,7 @@ func run() -> void:
 	await command("exit now")
 	check(menu.visible and paused, "Malformed exit closed the console")
 	await command("unknown-command")
-	check(menu.output.text.contains("Comando desconhecido"), "Unknown command had no response")
+	check(menu.output.text.contains("Unknown command"), "Unknown command had no response")
 	await command("shop")
 	check(menu.output.text.contains("medkit") and menu.output.text.contains("1800"), "Shop did not list products")
 	await command("  BuY    AMMO  ")
@@ -133,7 +133,7 @@ func run() -> void:
 	check(SupplyStock.credits == 1600 and SupplyStock.med_kits == 1, "Portuguese alias or multiword product failed")
 	var acquired: Dictionary = SupplyStock.snapshot()
 	await command("buy weapon")
-	check(SupplyStock.snapshot() == acquired and menu.output.text.contains("Créditos insuficientes"), "Unaffordable buy changed stock")
+	check(SupplyStock.snapshot() == acquired and menu.output.text.contains("Not enough credits"), "Unaffordable buy changed stock")
 	await command("buy medkit 2")
 	check(SupplyStock.snapshot() == acquired, "Unsupported quantity was charged")
 	SupplyStock.credits = 2400
@@ -141,7 +141,7 @@ func run() -> void:
 	check(SupplyStock.weapon and SupplyStock.credits == 600, "Weapon purchase failed")
 	SupplyStock.credits = 2400
 	await command("buy weapon")
-	check(SupplyStock.credits == 2400 and menu.output.text.contains("já foi adquirida"), "Duplicate weapon was charged")
+	check(SupplyStock.credits == 2400 and menu.output.text.contains("is already owned"), "Duplicate weapon was charged")
 	SupplyStock.restore(acquired)
 	await command("clear")
 	check(menu.output.text.is_empty(), "Clear left old transcript")
@@ -150,7 +150,7 @@ func run() -> void:
 	await command("save")
 	var record: Dictionary = SaveGame.read()
 	check(record.get("supplies", {}) == acquired and MissionState.stage == MissionState.Stage.DONE, "Save did not store stock/objective")
-	check(menu.output.text.contains("PROGRESSO E ESTOQUE SALVOS"), "Save acknowledgement missing")
+	check(menu.output.text.contains("PROGRESS AND SUPPLIES SAVED"), "Save acknowledgement missing")
 	await capture("session")
 	root.size = Vector2i(1280, 960)
 	await tick(8)

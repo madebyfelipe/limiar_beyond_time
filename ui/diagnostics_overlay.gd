@@ -27,24 +27,24 @@ func _process(delta: float) -> void:
 
 func describe() -> String:
 	if player == null or director == null:
-		return "Diagnóstico indisponível"
+		return "Diagnostics unavailable"
 	var p: Vector3 = player.global_position
 	var reference: MovementReference = player.movement_reference
 	var horizontal: float = Vector2(player.velocity.x, player.velocity.z).length()
 	var shot: String = String(director.current_shot.definition.shot_id) if director.current_shot else "—"
 	var candidate: String = "%s %s s" % [director.candidate.definition.shot_id, _n(director.candidate_time)] if director.candidate else "—"
 	var lines: PackedStringArray = [
-		"F3 · DIAGNÓSTICO",
-		"FPS %d · quadro %s ms" % [Engine.get_frames_per_second(), _n(frame_ms)],
-		"Posição  x %s · y %s · z %s" % [_n(p.x), _n(p.y), _n(p.z)],
-		"Velocidade %s m/s · chão %s" % [_n(horizontal), "sim" if player.is_on_floor() else "não"],
-		"Enquadramento %s · candidato %s" % [shot, candidate],
-		"Referência %s · direita (%s; %s) · fundo (%s; %s)" % ["travada" if reference.locked else "livre", _n(reference.right.x), _n(reference.right.z), _n(reference.back.x), _n(reference.back.z)],
-		"Direção desejada (%s; %s)" % [_n(player.desired_direction.x), _n(player.desired_direction.z)],
+		"F3 · DIAGNOSTICS",
+		"FPS %d · frame %s ms" % [Engine.get_frames_per_second(), _n(frame_ms)],
+		"Position  x %s · y %s · z %s" % [_n(p.x), _n(p.y), _n(p.z)],
+		"Speed %s m/s · grounded %s" % [_n(horizontal), "yes" if player.is_on_floor() else "no"],
+		"Shot %s · candidate %s" % [shot, candidate],
+		"Reference %s · right (%s; %s) · back (%s; %s)" % ["locked" if reference.locked else "free", _n(reference.right.x), _n(reference.right.z), _n(reference.back.x), _n(reference.back.z)],
+		"Desired direction (%s; %s)" % [_n(player.desired_direction.x), _n(player.desired_direction.z)],
 	]
 	if progress:
-		lines.append("Percurso %s · %s s" % [["ida", "volta", "concluído"][progress.stage], _n(progress.elapsed)])
-	lines.append("Simulação %s" % ("pausada" if get_tree().paused else "ativa"))
+		lines.append("Route %s · %s s" % [["outbound", "return", "complete"][progress.stage], _n(progress.elapsed)])
+	lines.append("Simulation %s" % ("paused" if get_tree().paused else "active"))
 	return "\n".join(lines)
 
 func _n(value: float) -> String:
