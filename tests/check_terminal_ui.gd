@@ -188,6 +188,22 @@ func run() -> void:
 	await tick()
 	var pause: PauseMenu = room.operation.pause_menu
 	check(pause.visible and paused and pause.resume_button.has_focus(), "Pause failed after console")
+	# The control scheme lives on the gameplay page, behind its own row.
+	var mode: int = ControlScheme.mode
+	click(pause.gameplay_button)
+	check(pause._is_gameplay_page_open(), "Gameplay page did not open from the menu")
+	click(pause.scheme_button)
+	check(ControlScheme.mode != mode, "Control scheme button stopped working")
+	pause._close_gameplay_page()
+	# The presentation row opens a page of its own; the stepper lives there.
+	var step: int = RetroFilter.pixel_step
+	click(pause.filter_button)
+	check(pause._is_filter_page_open(), "Presentation page did not open from the menu")
+	click(pause.pixel_button)
+	check(RetroFilter.pixel_step != step, "Pixelation stepper stopped working")
+	pause._close_filter_page()
+	await tick()
+	await capture("pause-4x3")
 	click(pause.resume_button)
 	check(not paused, "Mouse Continue did not resume")
 	room.free()

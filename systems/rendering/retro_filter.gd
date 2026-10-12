@@ -18,6 +18,9 @@ const PIXEL_STEPS: Array[Dictionary] = [
 	{"name": "PSX", "size": Vector2(320.0, 180.0)},
 ]
 
+## How a virtual pixel reaches the window: hard blocks or blended neighbours.
+const SCALING: Array[String] = ["mais próximo", "bilinear"]
+
 enum Effect { COLOR, SCANLINES, GRILLE, CURVE, VIGNETTE }
 
 ## Each switch: the label a menu shows, the shader uniform it drives, the
@@ -43,6 +46,8 @@ static var enabled: bool = true
 ## Index into PIXEL_STEPS. "médio" by default: the filter now also covers the
 ## interface, and 320x180 chews menu text past reading.
 static var pixel_step: int = 2
+## Index into SCALING. Nearest by default, the look the project was tuned on.
+static var scaling: int = 0
 static var effects: Dictionary = {}
 static var _loaded: bool = false
 
@@ -80,6 +85,7 @@ static func ensure_loaded() -> void:
 		return
 	enabled = bool(file.get_value(SECTION, "enabled", true))
 	pixel_step = clampi(int(file.get_value(SECTION, "pixels", pixel_step)), 0, PIXEL_STEPS.size() - 1)
+	scaling = clampi(int(file.get_value(SECTION, "scaling", scaling)), 0, SCALING.size() - 1)
 	for row: Dictionary in EFFECTS:
 		effects[row["id"]] = bool(file.get_value(SECTION, "effect_%d" % int(row["id"]), effects[row["id"]]))
 
@@ -92,6 +98,7 @@ static func _store() -> void:
 	file.load(SETTINGS_PATH)
 	file.set_value(SECTION, "enabled", enabled)
 	file.set_value(SECTION, "pixels", pixel_step)
+	file.set_value(SECTION, "scaling", scaling)
 	for row: Dictionary in EFFECTS:
 		file.set_value(SECTION, "effect_%d" % int(row["id"]), bool(effects[row["id"]]))
 	file.save(SETTINGS_PATH)
@@ -113,6 +120,15 @@ static func set_pixel_step(from: Node, value: int) -> void:
 	pixel_step = clampi(value, 0, PIXEL_STEPS.size() - 1)
 	refresh(from)
 
+static func set_scaling(from: Node, value: int) -> void:
+	ensure_loaded()
+	scaling = clampi(value, 0, SCALING.size() - 1)
+	refresh(from)
+
+static func scaling_name() -> String:
+	ensure_loaded()
+	return SCALING[scaling]
+
 static func set_effect(from: Node, id: int, value: bool) -> void:
 	ensure_loaded()
 	effects[id] = value
@@ -132,6 +148,9 @@ static func describe() -> String:
 	if not enabled:
 		return "Desligado"
 	var parts: PackedStringArray = ["Pixels: " + pixel_name()]
+	# Blending only means something while there are virtual pixels to blend.
+	if PIXEL_STEPS[pixel_step]["size"] != Vector2.ZERO and scaling != 0:
+		parts[0] += " " + scaling_name()
 	for row: Dictionary in EFFECTS:
 		if effects[row["id"]]:
 			parts.append(String(row["name"]))
@@ -163,6 +182,7 @@ func _apply_settings(show_notice: bool = false) -> void:
 	var pixelated: bool = enabled and step != Vector2.ZERO
 	material.set_shader_parameter("virtual_resolution", step if pixelated else size.max(Vector2.ONE))
 	material.set_shader_parameter("scanline_rows", minf(step.y if pixelated else size.y, MAX_SCANLINE_ROWS))
+	material.set_shader_parameter("smoothing", 1.0 if pixelated and scaling == 1 else 0.0)
 	# With nothing switched on there is nothing to sample for, so the pass and
 	# its copy of the screen are skipped outright.
 	effect.visible = pixelated or any_effect

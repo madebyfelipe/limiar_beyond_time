@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://systems/combat/weapon_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "PISTOLA"
+damage = 25.0
+fire_interval = 0.32
+magazine = 15
+reload_time = 1.6
+reach = 30.0

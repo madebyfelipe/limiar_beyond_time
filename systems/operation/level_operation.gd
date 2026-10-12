@@ -26,6 +26,7 @@ var diagnostics: DiagnosticsOverlay
 var notice: Label
 var notice_timer: Timer
 var hud: GameHud
+var weapon_readout: WeaponReadout
 ## Last place the actor stood on the floor; where the safety net returns them.
 var last_safe: Transform3D
 
@@ -75,6 +76,11 @@ func _ready() -> void:
 	notice_timer.timeout.connect(notice.hide)
 	add_child(notice_timer)
 	last_safe = player.global_transform
+	if player.weapon != null:
+		weapon_readout = WeaponReadout.new()
+		weapon_readout.name = "WeaponReadout"
+		weapon_readout.weapon = player.weapon
+		frame.add_child(weapon_readout)
 
 func _physics_process(_delta: float) -> void:
 	if player.global_position.y < recovery_height:

@@ -60,6 +60,30 @@ As duas características pedidas foram medidas, não só olhadas:
 
 Capturas dos quatro em `.local/retro-0..3.png`, geradas pelo próprio probe.
 
+## Suavização da pixelização (mais próximo / bilinear)
+
+Data: 11/10/2026. Pedido do usuário: "adicionar opção de pixelização entre mais
+próximo e bilinear". Linha **SUAVIZAÇÃO** na página de apresentação, logo abaixo
+de PIXELIZAÇÃO; gravada em `[video] scaling` (0 = mais próximo, 1 = bilinear).
+
+- **Mais próximo** (padrão): cada pixel virtual é um bloco duro. É o que vinha
+  antes e o que o contrato "pixel virtual sem variação interna" exige.
+- **Bilinear**: a ampliação do framebuffer para a janela mistura os quatro pixels
+  virtuais vizinhos. Cada um dos quatro continua sendo uma amostra pontual da
+  composição, com ganho e cor de 5 bits/dithering aplicados **no próprio pixel
+  virtual** — a mistura acontece só no caminho para a janela, então a paleta e o
+  padrão Bayer continuam pertencendo ao framebuffer, como numa imagem de console
+  passada por um escalonador.
+- Com pixelização desligada a opção não tem efeito (não há pixels virtuais para
+  misturar), e `describe()` só a menciona quando ela muda algo.
+- Varredura e grade continuam ancoradas ao pixel virtual nos dois modos.
+
+Verificação no `filtro-retro`: no nível PSX, dos 2673 blocos interiores que o
+modo mais próximo mantém uniformes, **2629 passam a ter gradiente** com bilinear;
+voltar ao mais próximo devolve a imagem idêntica byte a byte; o botão do menu
+alterna e dá a volta. Para caber a linha nova, a página passou a linhas de 62 px
+em passo 68, terminando acima do rodapé impresso no skin.
+
 ## Limites
 
 - É pós-processamento da composição 16:9, não emulação de hardware: não há jitter

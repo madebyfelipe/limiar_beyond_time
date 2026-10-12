@@ -7,7 +7,8 @@ signal restart_requested
 
 @export var resume_button: Button
 @export var restart_button: Button
-@export var scheme_button: Button
+## Main page row that opens the gameplay page.
+@export var gameplay_button: Button
 @export var filter_button: Button
 @export var quit_button: Button
 ## Probes that are not exercising focus loss may disable it.
@@ -17,7 +18,13 @@ var screen: RetroScreen
 ## Second page: the presentation options, one row per effect.
 var filter_screen: RetroScreen
 var pixel_button: Button
+var scaling_button: Button
 var effect_buttons: Dictionary = {}
+## Third page: how Dylan is steered and how he aims.
+var gameplay_screen: RetroScreen
+var scheme_button: Button
+var modern_aim_button: Button
+var tank_aim_button: Button
 
 func _ready() -> void:
 	_build_skin()
@@ -25,10 +32,11 @@ func _ready() -> void:
 	resume_button.pressed.connect(close)
 	restart_button.pressed.connect(_on_restart_pressed)
 	quit_button.pressed.connect(func() -> void: get_tree().quit())
-	if scheme_button:
+	if gameplay_button:
 		ControlScheme.ensure_loaded()
-		scheme_button.pressed.connect(_on_scheme_pressed)
-		_update_scheme_button()
+		AimSettings.ensure_loaded()
+		gameplay_button.pressed.connect(_on_gameplay_pressed)
+		_update_gameplay_button()
 	if filter_button:
 		RetroFilter.ensure_loaded()
 		filter_button.pressed.connect(_on_filter_pressed)
@@ -38,7 +46,37 @@ func _ready() -> void:
 ## is stored by ControlScheme, so it survives scene changes and sessions.
 func _on_scheme_pressed() -> void:
 	ControlScheme.toggle()
-	_update_scheme_button()
+	_update_gameplay_page()
+
+## The modern scheme's three aim modes are a player's choice, not a design
+## decision taken for them; AimSettings stores it beside the scheme.
+func _on_modern_aim_pressed() -> void:
+	AimSettings.cycle_modern()
+	_update_gameplay_page()
+
+func _on_tank_aim_pressed() -> void:
+	AimSettings.set_tank_auto_target(not AimSettings.tank_auto_target)
+	_update_gameplay_page()
+
+func _on_gameplay_pressed() -> void:
+	screen.hide()
+	gameplay_screen.show()
+	_update_gameplay_page()
+	scheme_button.grab_focus()
+
+func _close_gameplay_page() -> void:
+	gameplay_screen.hide()
+	screen.show()
+	_update_gameplay_button()
+	gameplay_button.grab_focus()
+
+func _is_gameplay_page_open() -> bool:
+	return gameplay_screen != null and gameplay_screen.visible
+
+func _update_gameplay_page() -> void:
+	scheme_button.text = "CONTROLES:  < %s >" % ControlScheme.label().to_upper()
+	modern_aim_button.text = "MIRA (CÂMERA):  < %s >" % AimSettings.modern_name().to_upper()
+	tank_aim_button.text = "MIRA AUTOMÁTICA (TANQUE):  %s" % ("LIGADA" if AimSettings.tank_auto_target else "DESLIGADA")
 
 ## Opens the presentation page. Each effect is its own switch there, so the
 ## look is assembled instead of picked from a list; RetroFilter stores the
@@ -65,26 +103,35 @@ func _on_pixel_pressed() -> void:
 	RetroFilter.set_pixel_step(self, (RetroFilter.pixel_step + 1) % RetroFilter.PIXEL_STEPS.size())
 	_update_filter_page()
 
+func _on_scaling_pressed() -> void:
+	RetroFilter.set_scaling(self, (RetroFilter.scaling + 1) % RetroFilter.SCALING.size())
+	_update_filter_page()
+
 func _toggle_effect(id: int) -> void:
 	RetroFilter.set_effect(self, id, not RetroFilter.is_effect_on(id))
 	_update_filter_page()
 
 func _update_filter_page() -> void:
 	pixel_button.text = "PIXELIZAÇÃO:  < %s >" % RetroFilter.pixel_name().to_upper()
+	scaling_button.text = "SUAVIZAÇÃO:  < %s >" % RetroFilter.scaling_name().to_upper()
 	for row: Dictionary in RetroFilter.EFFECTS:
 		var id: int = int(row["id"])
 		var button: Button = effect_buttons[id]
 		button.text = "%s:  %s" % [String(row["name"]).to_upper(), "LIGADO" if RetroFilter.is_effect_on(id) else "DESLIGADO"]
 
-func _update_scheme_button() -> void:
+## Names the aim that the current scheme uses, since that is the one in play.
+func _update_gameplay_button() -> void:
 	# Upper case to match the rest of the panel, which is set in tracked capitals.
-	scheme_button.text = "CONTROLES: %s" % ControlScheme.label().to_upper()
+	var aim: String = ("auto" if AimSettings.tank_auto_target else "manual") if ControlScheme.is_tank() else AimSettings.modern_name()
+	gameplay_button.text = "JOGABILIDADE: %s · %s" % [ControlScheme.label().to_upper(), aim.to_upper()]
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") and not event.is_echo():
 		if _is_filter_page_open():
 			# Esc steps back one page before it gives the game back.
 			_close_filter_page()
+		elif _is_gameplay_page_open():
+			_close_gameplay_page()
 		elif visible:
 			close()
 		else:
@@ -98,12 +145,13 @@ func _notification(what: int) -> void:
 func open() -> void:
 	if get_tree().paused and not visible:
 		return
-	_update_scheme_button()
+	_update_gameplay_button()
 	_update_filter_button()
 	get_tree().paused = true
 	show()
 	skin_layer.show()
 	filter_screen.hide()
+	gameplay_screen.hide()
 	screen.show()
 	resume_button.grab_focus()
 
@@ -126,37 +174,70 @@ func _build_skin() -> void:
 	screen.build(preload("res://assets/ui/retro_terminal/pause_menu_skin_v02.png"))
 	resume_button = screen.button_at("CONTINUAR", Rect2(424, 272, 824, 87), Callable(), 36)
 	restart_button = screen.button_at("REINICIAR", Rect2(424, 373, 824, 87), Callable(), 36)
-	scheme_button = screen.button_at("", Rect2(424, 474, 824, 87), Callable(), 33)
+	gameplay_button = screen.button_at("", Rect2(424, 474, 824, 87), Callable(), 33)
 	filter_button = screen.button_at("", Rect2(424, 575, 824, 87), Callable(), 33)
 	quit_button = screen.button_at("SAIR DO JOGO", Rect2(424, 676, 824, 87), Callable(), 36)
-	screen.focus_ring([resume_button, restart_button, scheme_button, filter_button, quit_button])
+	# The two summary rows grow with the settings they describe; past the frame
+	# they trim with an ellipsis instead of stretching the button out of the skin.
+	for summary: Button in [gameplay_button, filter_button]:
+		summary.clip_text = true
+		summary.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	screen.focus_ring([resume_button, restart_button, gameplay_button, filter_button, quit_button])
 	_build_filter_page()
+	_build_gameplay_page()
 	skin_layer.hide()
 
 ## The presentation page, over the same skin: one stepper for how coarse the
-## picture is and one switch per effect, so scanlines and the tube are
-## independent of each other.
+## picture is, one for how its pixels are scaled, and one switch per effect,
+## so scanlines and the tube are independent of each other.
 func _build_filter_page() -> void:
 	RetroFilter.ensure_loaded()
 	filter_screen = RetroScreen.new()
 	skin_layer.add_child(filter_screen)
 	filter_screen.build(preload("res://assets/ui/retro_terminal/pause_menu_skin_v02.png"))
 	filter_screen.label_at("APRESENTAÇÃO", Rect2(300, 130, 1072, 70), 34)
+	# Seven rows and the way back have to end above the key hints printed at the
+	# foot of the skin (y ≈ 810), so the rows are 62 tall on a 68 pitch.
 	var rows: Array[Button] = []
 	var y: float = 236.0
-	pixel_button = filter_screen.button_at("", Rect2(300, y, 1072, 72), _on_pixel_pressed, 29)
+	pixel_button = filter_screen.button_at("", Rect2(300, y, 1072, 62), _on_pixel_pressed, 28)
 	rows.append(pixel_button)
+	y += 68.0
+	scaling_button = filter_screen.button_at("", Rect2(300, y, 1072, 62), _on_scaling_pressed, 28)
+	rows.append(scaling_button)
 	for row: Dictionary in RetroFilter.EFFECTS:
-		y += 80.0
+		y += 68.0
 		var id: int = int(row["id"])
-		var button: Button = filter_screen.button_at("", Rect2(300, y, 1072, 72), func() -> void: _toggle_effect(id), 29)
+		var button: Button = filter_screen.button_at("", Rect2(300, y, 1072, 62), func() -> void: _toggle_effect(id), 28)
 		effect_buttons[id] = button
 		rows.append(button)
-	y += 96.0
-	rows.append(filter_screen.button_at("VOLTAR", Rect2(300, y, 1072, 72), _close_filter_page, 29))
+	y += 80.0
+	rows.append(filter_screen.button_at("VOLTAR", Rect2(300, y, 1072, 62), _close_filter_page, 28))
 	filter_screen.focus_ring(rows)
 	_update_filter_page()
 	filter_screen.hide()
+
+## The gameplay page, over the same skin and in the presentation page's rows.
+func _build_gameplay_page() -> void:
+	gameplay_screen = RetroScreen.new()
+	skin_layer.add_child(gameplay_screen)
+	gameplay_screen.build(preload("res://assets/ui/retro_terminal/pause_menu_skin_v02.png"))
+	gameplay_screen.label_at("JOGABILIDADE", Rect2(300, 130, 1072, 70), 34)
+	var rows: Array[Button] = []
+	var y: float = 236.0
+	scheme_button = gameplay_screen.button_at("", Rect2(300, y, 1072, 62), _on_scheme_pressed, 28)
+	rows.append(scheme_button)
+	y += 68.0
+	modern_aim_button = gameplay_screen.button_at("", Rect2(300, y, 1072, 62), _on_modern_aim_pressed, 28)
+	rows.append(modern_aim_button)
+	y += 68.0
+	tank_aim_button = gameplay_screen.button_at("", Rect2(300, y, 1072, 62), _on_tank_aim_pressed, 28)
+	rows.append(tank_aim_button)
+	y += 80.0
+	rows.append(gameplay_screen.button_at("VOLTAR", Rect2(300, y, 1072, 62), _close_gameplay_page, 28))
+	gameplay_screen.focus_ring(rows)
+	_update_gameplay_page()
+	gameplay_screen.hide()
 
 func _exit_tree() -> void:
 	if visible:
