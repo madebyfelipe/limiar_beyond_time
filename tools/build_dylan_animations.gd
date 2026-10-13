@@ -51,6 +51,8 @@ const CLIPS := {
 	# Standing) opens with the start, hands thrown up to the face, before it
 	# sinks into a 20 s cower. Only the start is kept, held on its end.
 	&"startled": {"file": "startled", "loop": false, "from": 0.6, "to": 2.4, "plant": true, "optional": true},
+	# Relay cutscene: Dylan glances back over his shoulder at the window.
+	&"look_over_shoulder": {"file": "look_over_shoulder", "loop": false, "plant": true, "optional": true},
 	# Relay room console. Mixamo only has seated typing ("Typing", Sitting At A
 	# Computer And Typing); its upright trunk and arms go over the standing legs.
 	&"terminal_type": {"file": "typing_seated", "loop": true, "from": 2.0, "to": 10.0, "stitch": 0.15, "stand": true, "optional": true},
@@ -81,7 +83,7 @@ const CLIPS := {
 	&"rifle_walk": {"file": "rifle_walk", "loop": true, "plant": true, "optional": true},
 	&"rifle_run": {"file": "rifle_run", "loop": true, "plant": true, "optional": true},
 	&"rifle_walk_back": {"file": "rifle_walk_back", "loop": true, "plant": true, "optional": true},
-	&"rifle_run_stop": {"file": "rifle_run_stop", "loop": false, "plant": true, "optional": true},
+	&"rifle_run_stop": {"file": "rifle_run_stop", "loop": false, "from": 0.5, "plant": true, "optional": true},
 	&"rifle_aim_idle": {"file": "rifle_aim_idle", "loop": true, "plant": true, "optional": true},
 	&"rifle_aim_walk": {"file": "rifle_aim_walk", "loop": true, "plant": true, "optional": true},
 	&"rifle_aim_walk_back": {"file": "rifle_aim_walk_back", "loop": true, "plant": true, "optional": true},

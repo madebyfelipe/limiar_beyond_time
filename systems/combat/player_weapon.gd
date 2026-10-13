@@ -20,9 +20,9 @@ signal target_changed(target: Hurtbox)
 signal weapon_changed
 
 const DEFAULT_DEFINITION := preload("res://resources/combat/pistol.tres")
-const RIFLE_DEFINITION := preload("res://resources/combat/rifle.tres")
+const SHOTGUN_DEFINITION := preload("res://resources/combat/shotgun.tres")
 ## The guns Dylan can carry, in the order the switch cycles through them.
-const ARSENAL: Array[WeaponDefinition] = [DEFAULT_DEFINITION, RIFLE_DEFINITION]
+const ARSENAL: Array[WeaponDefinition] = [DEFAULT_DEFINITION, SHOTGUN_DEFINITION]
 const WORLD_MASK := 1
 ## Shots and sight lines leave from the chest: this fraction of the body's
 ## collision height, 1,2 m on the 1,8 m Dylan of the levels and 1,6 m on the
@@ -141,16 +141,17 @@ func owns(candidate: WeaponDefinition) -> bool:
 	if practice:
 		return true
 	SupplyStock.ensure_loaded()
-	return SupplyStock.rifle if candidate.id == &"rifle" else SupplyStock.weapon
+	return SupplyStock.shotgun if candidate.id == &"shotgun" else SupplyStock.weapon
 
-## Puts the next owned gun in hand. Raising, firing and reloading stop, so the
-## switch can never leave a half-finished reload on either magazine.
-func switch_weapon() -> bool:
+## Puts the next owned gun in hand (`direction` -1 for the previous one).
+## Raising, firing and reloading stop, so the switch can never leave a
+## half-finished reload on either magazine.
+func switch_weapon(direction: int = 1) -> bool:
 	if not player.can_use_weapon():
 		return false
 	var at: int = ARSENAL.find(_definition(definition.id))
 	for step: int in range(1, ARSENAL.size()):
-		var candidate: WeaponDefinition = ARSENAL[(at + step) % ARSENAL.size()]
+		var candidate: WeaponDefinition = ARSENAL[posmod(at + step * direction, ARSENAL.size())]
 		if owns(candidate):
 			equip(candidate)
 			return true
@@ -254,6 +255,13 @@ func _physics_process(delta: float) -> void:
 		reload()
 	if player.can_use_weapon() and Input.is_action_just_pressed(&"switch_weapon"):
 		switch_weapon()
+	# The mouse wheel walks through the guns, except while a target lock is
+	# held up: there the same wheel cycles targets (`lock_next_target`).
+	elif not (aiming and uses_locked_aim()):
+		if Input.is_action_just_pressed(&"weapon_next"):
+			switch_weapon(1)
+		elif Input.is_action_just_pressed(&"weapon_previous"):
+			switch_weapon(-1)
 	if aiming:
 		if ControlScheme.is_tank():
 			_aim_tank(delta)
@@ -584,16 +592,32 @@ func fire() -> bool:
 	cooldown = definition.fire_interval
 	var origin: Vector3 = muzzle()
 	var direction: Vector3 = shot_direction()
-	var hit: Dictionary = _ray(origin, origin + direction * definition.reach, WORLD_MASK | Hurtbox.LAYER)
-	var end: Vector3 = hit.position if not hit.is_empty() else origin + direction * definition.reach
-	var struck: Object = hit.get("collider")
-	if struck is Hurtbox:
-		(struck as Hurtbox).take_hit(definition.damage, end, direction)
-	last_shot = {"origin": origin, "end": end, "collider": struck, "direction": direction}
+	# The first pellet flies down the aim and is the shot the feedback shows;
+	# the others scatter inside the cone.
+	var pellet_hits: int = 0
+	for pellet: int in range(definition.pellets):
+		var path: Vector3 = direction if pellet == 0 else _scatter(direction, deg_to_rad(definition.spread_degrees))
+		var hit: Dictionary = _ray(origin, origin + path * definition.reach, WORLD_MASK | Hurtbox.LAYER)
+		var end: Vector3 = hit.position if not hit.is_empty() else origin + path * definition.reach
+		var struck: Object = hit.get("collider")
+		if struck is Hurtbox:
+			(struck as Hurtbox).take_hit(definition.damage, end, path)
+			pellet_hits += 1
+		if pellet == 0:
+			last_shot = {"origin": origin, "end": end, "collider": struck, "direction": direction}
+	last_shot["pellet_hits"] = pellet_hits
+	var end: Vector3 = last_shot["end"]
 	_show_tracer(end)
 	fired.emit(last_shot)
 	ammo_changed.emit()
 	return true
+
+## A direction inside a cone of half-angle `angle` around `around`, spread
+## evenly over the cone's area.
+func _scatter(around: Vector3, angle: float) -> Vector3:
+	var side: Vector3 = around.cross(Vector3.UP if absf(around.dot(Vector3.UP)) < 0.95 else Vector3.RIGHT).normalized()
+	var tilt: float = angle * sqrt(randf())
+	return around.rotated(side, tilt).rotated(around, randf() * TAU).normalized()
 
 func reload() -> bool:
 	if not player.can_use_weapon() or not is_armed() or reload_left > 0.0 or magazine >= definition.magazine or reserve() <= 0:
@@ -610,6 +634,14 @@ func _finish_reload() -> void:
 	ammo_changed.emit()
 
 # --- Feedback -----------------------------------------------------------------
+
+## Where a shot fired now would strike: the chest ray along the aim, out to
+## the gun's reach. The long gun's barrels are turned onto this point.
+func aim_end() -> Vector3:
+	var origin: Vector3 = muzzle()
+	var end: Vector3 = origin + shot_direction() * definition.reach
+	var hit: Dictionary = _ray(origin, end, WORLD_MASK | Hurtbox.LAYER)
+	return hit.position if not hit.is_empty() else end
 
 ## Use the shot's impact, with a visible beam starting at the imported gun tip.
 ## A second ray clips the offset tip's path too. A muzzle pushed through cover

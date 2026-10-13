@@ -4,11 +4,13 @@
 
 [resource]
 script = ExtResource("1")
-id = &"rifle"
-display_name = "RIFLE"
-damage = 40.0
-fire_interval = 0.2
-magazine = 30
-reload_time = 2.4
-reach = 60.0
+id = &"shotgun"
+display_name = "SHOTGUN"
+damage = 14.0
+fire_interval = 0.5
+magazine = 2
+reload_time = 2.2
+reach = 20.0
 two_handed = true
+pellets = 8
+spread_degrees = 6.0

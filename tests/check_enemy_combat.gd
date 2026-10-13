@@ -38,6 +38,11 @@ func fresh(distance: float = 1.4) -> void:
 	release()
 	trail.restart()
 	trail.keleken_wander.set_physics_process(false)
+	# One animal at a time here: the pen's others are parked out of play.
+	for other: KelekenActor in trail.kelekens.slice(1):
+		other.process_mode = Node.PROCESS_MODE_DISABLED
+		other.collision_layer = 0
+		other.position = Vector3(0, -50, 0)
 	enemy.position = ENEMY_AT
 	enemy.rotation.y = PI
 	player.reset_to(Transform3D(Basis.IDENTITY, ENEMY_AT + Vector3(0, 0, distance)))

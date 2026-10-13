@@ -42,8 +42,10 @@ const GATE_APPROACH := Vector3(0,0,-1.1)
 const GATE_ARRIVAL := Vector3(0,0.06,-2.2)
 ## North of this line the relay shed has been reached and the phase closes.
 const RELAY_Z := -24.0
-## The animal keeps to the pen stretch until it perceives Dylan.
+## The animals keep to the pen stretch until they perceive Dylan. The first
+## home is the original animal's; the second starts deeper in the pen.
 const KELEKEN_HOME := Vector3(0.6,0.06,-14.5)
+const KELEKEN_HOMES: Array[Vector3] = [KELEKEN_HOME, Vector3(-1.3,0.06,-17.6)]
 const KELEKEN_BOUNDS := Rect2(-2.3,-19.0,4.6,8.5)
 @onready var world: Node3D = $Frame/Composition/Actors/WorldViewport/World
 @onready var background: TextureRect = $Frame/Composition/Background
@@ -60,8 +62,11 @@ var gate: DoorInteraction
 var relay_door: PhaseGate
 var rear_door: DoorInteraction
 var operation: LevelOperation
+## The first animal and its patrol, as before; `kelekens` holds them all.
 var keleken: KelekenActor
 var keleken_wander: KelekenWander
+var kelekens: Array[KelekenActor] = []
+var keleken_wanders: Array[KelekenWander] = []
 
 func _ready() -> void:
 	instructions.visible = OS.get_cmdline_args().has("--debug-instructions")
@@ -177,15 +182,20 @@ func _ready() -> void:
 	operation.frame = $Frame/Composition
 	operation.restart_requested.connect(restart)
 	add_child(operation)
-	keleken = preload("res://actors/keleken/keleken.tscn").instantiate()
-	keleken.name = "Keleken"
-	keleken.combat_enabled = true
-	keleken.player = player
-	world.add_child(keleken)
-	keleken_wander = preload("res://actors/keleken/keleken_wander.gd").new()
-	keleken_wander.home_position = KELEKEN_HOME
-	keleken_wander.bounds = KELEKEN_BOUNDS
-	keleken.add_child(keleken_wander)
+	for index: int in range(KELEKEN_HOMES.size()):
+		var animal: KelekenActor = preload("res://actors/keleken/keleken.tscn").instantiate()
+		animal.name = "Keleken" if index == 0 else "Keleken%d" % (index + 1)
+		animal.combat_enabled = true
+		animal.player = player
+		world.add_child(animal)
+		var wander: KelekenWander = preload("res://actors/keleken/keleken_wander.gd").new()
+		wander.home_position = KELEKEN_HOMES[index]
+		wander.bounds = KELEKEN_BOUNDS
+		animal.add_child(wander)
+		kelekens.append(animal)
+		keleken_wanders.append(wander)
+	keleken = kelekens[0]
+	keleken_wander = keleken_wanders[0]
 	_update_label()
 
 ## Three ways in: the yard gate, the relay shed's front door coming back out,
@@ -220,7 +230,8 @@ func _place_in_rear_yard() -> void:
 ## the yard and the objective.
 func restart() -> void:
 	player.reset_to_start()
-	keleken_wander.reset()
+	for wander: KelekenWander in keleken_wanders:
+		wander.reset()
 	if MissionState.stage >= MissionState.Stage.OUTAGE:
 		_place_in_rear_yard()
 	else:

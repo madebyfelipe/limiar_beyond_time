@@ -8,7 +8,7 @@ Abra `executar-exterior.cmd`: há um Keleken na estrada, próximo ao ponto inici
 
 Para escolher todos os clipes e girar a câmera, abra `executar-keleken.cmd`. Teclas 1–7 ou botões selecionam o clipe, ←/→ giram a câmera, a opção “Mover sobre o piso” liga o deslocamento físico e Esc sai.
 
-**Origem real das animações:** clipes originais autorados por código em `tools/rig_keleken.py` e baked no Blender. Não foram usados clipes de Mesh2Motion, Mixamo ou dos pacotes comerciais pesquisados. O rig também é customizado, criado diretamente pela API do Blender; não foi gerado pelo addon Rigify. Isso é distinto das opções pesquisadas e recomendadas inicialmente.
+**Origem real das animações:** desde 13/10/2026, walk, run, attack_beak e death vêm do Velociraptor CC0 da Quaternius, por retarget (ver a atualização abaixo). Idle, look, alert, recover e hit continuam autorados por código em `tools/rig_keleken.py`, e tudo é baked no Blender. Não foram usados clipes de Mesh2Motion, Mixamo ou dos pacotes comerciais pesquisados. O rig também é customizado, criado diretamente pela API do Blender; não foi gerado pelo addon Rigify. Isso é distinto das opções pesquisadas e recomendadas inicialmente.
 
 A primeira versão tinha cabeça rígida e passada mecânica. Após o feedback do usuário, idle/look foram refeitos com olhares rápidos, pausas e inclinações, e a caminhada recebeu recuo/avanço do pescoço, compensação da orientação da cabeça, passos menores, levantamento menor do pé e flexão dos dedos no balanço. As pausas do wander entram em momentos variados do idle. Esta revisão continua sendo animação autorada de protótipo, sem captura de movimento.
 
@@ -34,6 +34,34 @@ Altura da cópia de estudo: 2,4 m, base no chão e frente −Z. Pode ser ajustad
 | recover | 1,0 s | Recuperação |
 | hit | 0,5 s | Recuo ao levar tiro; volta à pose de repouso (12/10/2026) |
 | death | 1,6 s | Cambaleia, pernas dobram sobre os pés plantados, pescoço desce ao chão; termina deitado (12/10/2026) |
+
+**Atualização de 13/10/2026 — movimento de doador gratuito.** Pedido: "verifique as animações do Keleken, de onde podemos tirar de graça e pegue a melhor opção". As opções gratuitas conferidas:
+
+| Fonte | Licença | Situação |
+| --- | --- | --- |
+| [Quaternius — Animated LowPoly Dinosaurs](https://quaternius.com/packs/animateddinosaurs.html) | CC0 | **Escolhida.** O Velociraptor é um terópode bípede, como o Keleken, e traz Idle, Walk, Run, Attack, Jump e Death. O Drive oficial respondeu "Quota exceeded" e o itch.io exige login; a mesma malha animada está no [Poly Pizza](https://poly.pizza/m/cnlGH2UcDd), sem login |
+| Mesh2Motion (rig Bird) | MIT/CC0 | Só Flap, Glide, Idle e Walk; sem corrida, ataque ou morte |
+| Truebones Zoo | gratuito, royalty-free | Exige checkout no Gumroad com e-mail; não baixado |
+| Avestruz, emu, ave-do-terror rigados (CGTrader, RenderHub, Superhive) | comerciais | Pagos |
+
+O doador fica em `assets/models/keleken/source/donor/velociraptor_quaternius.glb` (SHA-256 `1d9ecad0…3f43a745c`, licença em `LICENSE.txt` ao lado). A malha do raptor não entra no jogo, só o movimento. `tools/rig_keleken.py` faz o retarget no Blender:
+
+- **Pés:** os do raptor também são alvos de IK. Seus caminhos, na escala da perna (0,95 m contra 2,94 unidades, 0,323), dirigem `CTRL_foot`. O raptor apoia o pé atrás do quadril e o Keleken à frente, e a passada do raptor é longa para a perna do Keleken. O build centra a passada no apoio do Keleken e escolhe a maior escala com que o IK alcança todos os alvos a menos de 1 cm: 0,65 no walk e 0,75 no run.
+- **Apoio:** o pé plantado do raptor fica parado alguns quadros em cada ponta do apoio, e os dois pés andam com velocidades 7–9 % diferentes. O apoio é refeito com velocidade constante e igual para os dois pés, com o pé travado de lado. As janelas de contato vão para `animation_manifest.json`, e o teste lê de lá.
+- **Corpo:** quadril, tronco, pescoço, cabeça, cauda e braços (asas, pela metade) recebem as rotações do raptor medidas contra a pose de repouso de cada rig, então roll e ângulos de repouso não importam. O pescoço único do raptor é distribuído pelos quatro do Keleken. A mandíbula, que o raptor não tem, fica entreaberta e abre no golpe.
+- **Ave:** sobre o walk do raptor continuam o balanço de cabeça e os olhares autorados, mais suaves.
+- **Ataque:** retemporizado para a cabeça chegar mais longe aos 0,5 s, dentro da janela de 0,42 s do `KelekenActor`.
+- **Morte:** o raptor cai de lado. Os pés só se movem (sem a rotação, que enterrava os dedos), e o quadril sobe quadro a quadro o quanto a pele afundaria no chão.
+
+| Clipe | Duração | Origem | Velocidade nativa (2,4 m) |
+| --- | --- | --- | --- |
+| walk | 1,267 s | raptor + cabeça autorada | 0,857 m/s |
+| run | 0,533 s | raptor | 3,316 m/s |
+| attack_beak | 1,0 s | raptor, retemporizado | — |
+| death | 1,3 s | raptor | — |
+| idle, look, alert, recover, hit | como antes | autorados | — |
+
+Com o Keleken mais rápido (`COMBAT.md`), a perseguição de 3,4 m/s toca o run a cerca de 1x e a patrulha de 1,5 m/s toca o walk a 1,75x. Validação: `check_keleken_animation.gd` com deslize do pé plantado de 0,05 m/s no walk e 0,10 m/s no run em execução, contato a menos de 4 mm, pele acima do chão e morte sem afundar. O limite do run assado passou a ser um décimo da velocidade do clipe, porque a 1/120 do ciclo um milímetro de interpolação entre chaves já lê 0,3 m/s. O teste de morte deixou de exigir pés parados, porque a queda de lado dobra as pernas.
 
 **Atualização de 12/10/2026 — opções tipo Mixamo reavaliadas.** Não há serviço aberto equivalente ao Mixamo com corrida/ataque/morte de ave. Mesh2Motion (MIT/CC0) refez o rig Bird com asas e bico, mas os clipes de ave seguem focados em voo, idle e walk. Truebones Zoo (gratuito com cupom, royalty-free, não open source) é o candidato a doador de corrida/ataque, ainda não baixado. Tripo (tipo "avian") e Anything World são pagos/fechados. Decisão: `hit` e `death` foram autorados neste gerador; doador externo fica para avaliação. Validação: 9 clipes, cabeça a 0,61 m e pelve a 0,55 m no fim da morte, pés deslizando 3 mm, pele acima do chão. `tools/capture_keleken_pose.gd` renderiza poses para revisão.
 

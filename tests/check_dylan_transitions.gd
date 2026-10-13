@@ -35,16 +35,37 @@ func run() -> void:
 	check(visual.grip_pose.active and visual.grip_pose._bones.size() == 15, "The right hand is not closed around the grip")
 
 	# Run, let go: the stop plays, then the idle.
+	var standing: Transform3D = player.global_transform
 	Input.action_press("move_up")
 	Input.action_press("run")
 	await tick(40)
 	check(animator.current_animation == "run", "Holding run did not run: " + animator.current_animation)
 	Input.action_release("move_up")
 	Input.action_release("run")
-	# Braking from 3,8 m/s takes about six frames.
-	await tick(8)
+	# The stop starts at once and the body brakes along its capture: a short
+	# slide, not a halt in two frames and not a glide.
+	var let_go: Vector3 = player.global_position
+	await tick(3)
 	check(animator.current_animation == "run_stop", "Stopping a run did not play the stop: " + animator.current_animation)
+	check(player.braking(), "The body is not braking along the stop capture")
+	await tick(60)
+	var slide: float = Vector2(player.global_position.x - let_go.x, player.global_position.z - let_go.z).length()
+	check(slide > 0.5 and slide < 1.2, "The run stop slid %.2f m instead of about 0,8 m" % slide)
+	check(player.get_real_velocity().length() < 0.1 and not player.braking(), "The run stop did not come to rest")
+	# Taking a key during the slide ends the brake and walks on.
+	Input.action_press("move_up")
+	Input.action_press("run")
+	await tick(40)
+	Input.action_release("move_up")
+	Input.action_release("run")
+	await tick(4)
+	Input.action_press("move_up")
+	await tick(4)
+	check(not player.braking(), "Moving again did not end the brake")
+	Input.action_release("move_up")
 	await tick(90)
+	player.reset_to(standing)
+	await tick(10)
 	check(animator.current_animation == "idle", "The stop did not hand back to idle: " + animator.current_animation)
 
 	# A long idle is broken by a look around, which walking cancels.

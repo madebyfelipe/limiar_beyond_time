@@ -68,6 +68,27 @@ func run() -> void:
 	var run_speed: float = Vector2(player.get_real_velocity().x, player.get_real_velocity().z).length()
 	Input.action_release("move_up")
 	Input.action_release("run")
+	# The same cadence with the shotgun, whose two-handed captures carry their
+	# own native speeds.
+	var held: WeaponDefinition = player.weapon.definition
+	player.weapon.practice = true
+	player.weapon.equip(PlayerWeapon.SHOTGUN_DEFINITION)
+	player.reset_to(Transform3D(Basis.IDENTITY, Vector3(0, 0.06, 24)))
+	await tick(5)
+	Input.action_press("move_up")
+	await tick(30)
+	var armed_clip: String = visual.animator.current_animation
+	var armed_walking: float = await sample(player, visual, 90)
+	Input.action_press("run")
+	await tick(40)
+	var armed_running: float = await sample(player, visual, 60)
+	Input.action_release("move_up")
+	Input.action_release("run")
+	player.weapon.equip(held)
+	check(armed_clip.begins_with("rifle_"), "The shotgun walk did not use a two-handed capture: " + armed_clip)
+	check(armed_walking >= 0.0 and armed_walking < 0.45, "Foot skates while walking with the shotgun: %.2f m/s" % armed_walking)
+	check(armed_running >= 0.0 and armed_running < 0.75, "Foot skates while running with the shotgun: %.2f m/s" % armed_running)
+	print("FOOT shotgun walk=%.2f m/s run=%.2f m/s" % [armed_walking, armed_running])
 	ControlScheme.set_mode(ControlScheme.Mode.CAMERA_RELATIVE)
 	# A perfectly matched cycle leaves the contact foot still; the tolerance
 	# covers the frames where weight transfers between the feet.

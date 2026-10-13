@@ -13,5 +13,10 @@ extends Resource
 @export_range(0.1, 10.0) var reload_time: float = 1.6
 ## Metres a shot travels before it stops counting.
 @export_range(1.0, 200.0) var reach: float = 30.0
-## Held in both hands: the visual uses the rifle captures and model.
+## Held in both hands: the visual uses the two-handed (rifle) captures.
 @export var two_handed: bool = false
+## Rays per trigger pull, each dealing `damage`: one for a bullet, a spread of
+## shot for the shotgun. The first always flies straight down the aim.
+@export_range(1, 16) var pellets: int = 1
+## Half-angle of the cone the other pellets scatter in.
+@export_range(0.0, 30.0) var spread_degrees: float = 0.0

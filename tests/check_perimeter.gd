@@ -223,9 +223,13 @@ func run() -> void:
 	check(animal != null and animal.combat_enabled,"The animal is not on the trail, or cannot fight there")
 	check(scene.KELEKEN_BOUNDS.has_point(Vector2(animal.position.x,animal.position.z)),"The animal started outside its pen: %v" % animal.position)
 	check(scene.keleken_wander.home_position == scene.KELEKEN_HOME,"The patrol did not take the trail home")
-	# The walks below are unattended; combat has its own probe.
-	animal.combat_enabled = false
-	animal.collision_layer = 0
+	check(scene.kelekens.size() == 2,"The pen does not hold two animals: %d" % scene.kelekens.size())
+	check(scene.kelekens[0].position.distance_to(scene.kelekens[1].position) > 2.0,"The two animals start on top of each other")
+	for other: KelekenActor in scene.kelekens:
+		check(scene.KELEKEN_BOUNDS.has_point(Vector2(other.position.x,other.position.z)),"An animal started outside its pen: %v" % other.position)
+		# The walks below are unattended; combat has its own probe.
+		other.combat_enabled = false
+		other.collision_layer = 0
 
 	# --- The corridor holds, and its framings hold the actor ---
 	var east: Vector3 = await push(Vector3.RIGHT)

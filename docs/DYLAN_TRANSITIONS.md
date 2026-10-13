@@ -42,11 +42,13 @@ afunda no chão (pose em pé a 0,005 em vez de 0,5). Por segurança,
 | `aim_walk_back` | `pistol_walk_back.fbx` | Pistol Walk Backward | ciclo | Mirando e recuando |
 | `strafe_left` / `strafe_right` | `pistol_strafe_left/right.fbx` | Pistol Strafe | ciclo | Mirando e andando de lado |
 | `startled` | `startled.fbx` | Terrified (*Being Terrified While Standing*) | 0,6–2,4 s | Susto na janela do relé. O Mixamo não tem "Startled"; o início do Terrified é o tranco com as mãos no rosto |
+| `look_over_shoulder` | `look_over_shoulder.fbx` | Look Over Shoulder | inteira (3,77 s) | Cutscene do relé, desde 13/10/2026: olha por cima do ombro direito para a janela quando o animal para; substitui o `startled`, que fica de reserva. A cabeça vira 130° para trás entre 0,5 e 2,0 s e volta até 2,5 s, então a sala gira Dylan com a janela 130° atrás do ombro direito (`LOOK_BACK_DEGREES`) |
 | `terminal_type` | `typing_seated.fbx` | Typing (*Sitting At A Computer And Typing*) | 2–10 s, emendado | Console do relé. Só existe digitação sentada; tronco e braços vão sobre quadril e pernas do idle (opção `stand`) |
 
 Velocidade nativa dos ciclos de pistola, medida pelo pé de apoio sob o quadril e
 calibrada pelo walk (1,48 m/s): `aim_walk` 2,06, `aim_walk_back` 1,14,
-`strafe_left` 1,72 e `strafe_right` 1,76 m/s. Com a mira, Dylan anda a 1,26 m/s,
+`strafe_left` 1,72 e `strafe_right` 1,76 m/s. Remedidos em 13/10/2026 (ver
+`SHOTGUN.md`): 2,51, 1,42, 2,06 e 2,35. Com a mira, Dylan anda a 1,26 m/s,
 então esses ciclos tocam entre 0,6x e 1,1x.
 
 ## Comportamento em `dylan_visual.gd`
@@ -60,6 +62,16 @@ então esses ciclos tocam entre 0,6x e 1,1x.
   clipe, volta o comportamento antigo de inclinar o modelo.
 - Mirando, cada direção usa o ciclo de pistola correspondente. Se faltar um, cai
   para o ciclo desarmado.
+
+## Parada da corrida (13/10/2026)
+
+Pedido: a corrida fora de sincronia e "esse leve desaceleramento da corrida".
+
+- **Cadência:** `run` foi remedido para 2,91 m/s e `rifle_run` para 4,0 m/s (antes 2,73 e 3,83). O pé de apoio fica a cerca de 0,04 m/s de zero no meio do apoio. A corrida desarmada continua tocando a 1,31x para acompanhar os 3,8 m/s do Dylan.
+- **Desaceleração:** antes o corpo parava em 0,1 s (40 m/s²) e o `run_stop` tocava parado no lugar. Agora, ao soltar a corrida, o `run_stop` começa na hora e o corpo freia pela curva de velocidade do quadril da própria captura (`STOP_PROFILES` em `dylan_visual.gd`, medida por `tools/measure_stop_profiles.gd`, na escala de 1,84x do rig). O excesso acima da curva cai na desaceleração normal. O clipe toca na cadência da corrida (até 1,5x).
+- Desarmado, Dylan desliza 0,8 m em cerca de 0,6 s. Com a escopeta, desliza 1,3 m em 0,8 s; o `rifle_run_stop` agora começa aos 0,5 s, onde a captura deixa de correr e passa a frear.
+- Nova entrada, mira, esquiva, dano, reset ou perda de controle encerram a freada (`PlayerController.brake_along()`, `braking()`, `end_brake()`).
+- `check_dylan_transitions.gd` confere que a parada começa na hora, freia, desliza entre 0,5 e 1,2 m, para, e que voltar a andar encerra a freada.
 
 ## Pistola sempre na mão
 
@@ -81,6 +93,7 @@ passaram `locomocao`, `esquiva`, `combate`, `combate-inimigo`, `rele`,
 
 | Arquivo | Bytes | SHA-256 |
 | --- | --- | --- |
+| `look_over_shoulder.fbx` | 1.940.368 | `6dbf30e564f4cb91b2392f607c8bd806b8b290087e27f1ee76a71ce32294e722` |
 | `startled.fbx` | 1.788.400 | `2013e0552cd95d3af41d805d5778095e11290f39bfe2168ce6fd44f5871aae46` |
 | `dodge_back_v2.fbx` | 443.824 | `3ead5a22856d5a4c7705eef56f0240094a8590a97d71e39ed708d4c936fea5e6` |
 | `run_stop.fbx` | 354.368 | `4d4fdfd6bdc774add50634651d16f52d4fedb7fad789e51d914b7feb776c3064` |

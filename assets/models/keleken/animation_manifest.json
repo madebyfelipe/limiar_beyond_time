@@ -28,7 +28,7 @@
     "wing_01.R",
     "wing_02.R"
   ],
-  "origin": "Original authored prototype; baked IK. No third-party motion clips.",
+  "origin": "Idle, look, alert, recover and hit authored in tools/rig_keleken.py; walk, run, attack_beak and death retargeted from Quaternius' Velociraptor (CC0 1.0, source/donor/LICENSE.txt). Baked IK.",
   "source_sha256": "1748ed72afc6b5e1f85c2df601afa2a0d5c1790418f0bd3c0655b65b53ee8376",
   "clips": {
     "idle": {
@@ -36,18 +36,46 @@
       "loop": true
     },
     "walk": {
-      "frames": 36,
+      "frames": 38,
       "loop": true,
-      "speed": 1.0,
-      "stance": 0.6,
-      "lift": 0.14
+      "donor": true,
+      "donor_length": 1.25,
+      "contact": {
+        "L": [
+          0.9474,
+          0.4737
+        ],
+        "R": [
+          0.4737,
+          0.0
+        ]
+      },
+      "speed": 0.857,
+      "stride_fit": [
+        -0.0763,
+        0.65
+      ]
     },
     "run": {
-      "frames": 24,
+      "frames": 16,
       "loop": true,
-      "speed": 2.8,
-      "stance": 0.42,
-      "lift": 0.34
+      "donor": true,
+      "donor_length": 0.5417,
+      "contact": {
+        "L": [
+          0.0,
+          0.3125
+        ],
+        "R": [
+          0.5625,
+          0.6875
+        ]
+      },
+      "speed": 3.316,
+      "stride_fit": [
+        0.183,
+        0.75
+      ]
     },
     "look": {
       "frames": 72,
@@ -61,7 +89,9 @@
       "frames": 30,
       "loop": false,
       "hit_start": 0.42,
-      "hit_end": 0.58
+      "hit_end": 0.58,
+      "donor": true,
+      "donor_length": 0.8333
     },
     "recover": {
       "frames": 30,
@@ -72,8 +102,10 @@
       "loop": false
     },
     "death": {
-      "frames": 48,
-      "loop": false
+      "frames": 39,
+      "loop": false,
+      "donor": true,
+      "donor_length": 1.2917
     }
   }
 }

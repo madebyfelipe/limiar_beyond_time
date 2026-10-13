@@ -1,8 +1,10 @@
-"""Build the editable avian rig and bake original clips. Run with Blender 4.5.
+"""Build the editable avian rig and bake its clips. Run with Blender 4.5.
 
 blender --background --factory-startup --python tools/rig_keleken.py
 Source axes: +X forward, +Y up, +/-Z sides. Blender: +Y forward, +Z up.
-No external animation data. The original GLB is read-only.
+The original GLB is read-only. Walk, run, attack and death are retargeted from
+Quaternius' CC0 Velociraptor (source/donor/, see LICENSE.txt); idle, look,
+alert, recover and hit stay authored here.
 """
 import bpy
 import hashlib
@@ -198,7 +200,104 @@ mesh.parent = rig
 mesh["source_sha256"] = EXPECTED_HASH
 rig["foot_controls"] = "CTRL_foot.L/R: move in world; CTRL_knee.L/R: bend plane; hock IK and toes follow. Controls remain in source only."
 rig["height_m"] = 2.4
-rig["animation_origin"] = "Original keyframed flightless-bird prototype; no motion capture or third-party clips."
+rig["animation_origin"] = "Authored idle/look/alert/recover/hit; walk/run/attack/death retargeted from Quaternius' CC0 Velociraptor."
+
+# --- Motion donor ------------------------------------------------------------
+# A raptor is a running theropod like the Keleken: same leg chain (thigh,
+# shin, tarsus, toes), a long tail and a striking head. Its feet are IK
+# targets too, so their paths drive CTRL_foot, scaled from its leg to ours,
+# and stay planted. The trunk, neck, head, tail and arms carry over as
+# rotations measured against each rig's rest pose, which makes bone rolls and
+# rest angles irrelevant. Its one neck bone is spread over our four.
+DONOR = SOURCE / "donor" / "velociraptor_quaternius.glb"
+DONOR_FPS = 24
+DONOR_ACTIONS = {"walk": "Velociraptor_Walk", "run": "Velociraptor_Run",
+                 "attack_beak": "Velociraptor_Attack", "death": "Velociraptor_Death"}
+# Donor frames each clip uses. The walk's keys run to 58, but its cycle ends
+# at 30 and the rest holds the opening pose.
+DONOR_RANGES = {"walk": (0, 30)}
+# The donor faces -Y in Blender; ours faces +Y.
+TURN = Quaternion((0, 0, 1), math.pi)
+DONOR_BONES = ["Hips", "Torso", "Shoulders", "Neck", "Head", "Tail2", "Tail4",
+               "FrontUpLeg.L", "FrontUpLeg.R", "BackFoot.L", "BackFoot.R"]
+before = set(bpy.data.objects)
+before_actions = set(bpy.data.actions)
+bpy.ops.import_scene.gltf(filepath=str(DONOR))
+donor_objects = [o for o in bpy.data.objects if o not in before]
+donor = next(o for o in donor_objects if o.type == "ARMATURE")
+
+
+def donor_matrix(name, rest=False):
+    local = donor.data.bones[name].matrix_local if rest else donor.pose.bones[name].matrix
+    m = donor.matrix_world @ local
+    return m.to_translation(), m.to_3x3().normalized().to_quaternion()
+
+
+# Leg length, hip joint to the planted foot, sets the scale for every path.
+LEG = point(specs["thigh.L"][0]).z - point(specs["tarsus.L"][1]).z
+DONOR_LEG = (donor.matrix_world @ donor.data.bones["BackLeg.L"].head_local).z - donor_matrix("BackFoot.L", True)[0].z
+DONOR_SCALE = LEG / DONOR_LEG
+print("DONOR leg", round(LEG, 3), "donor leg", round(DONOR_LEG, 3), "scale", round(DONOR_SCALE, 4))
+rest_pose = {name: donor_matrix(name, True) for name in DONOR_BONES}
+
+
+def donor_sample(action, time):
+    """World rotation deltas and path offsets of the donor, in our frame."""
+    donor.animation_data.action = action
+    frame = time * DONOR_FPS
+    bpy.context.scene.frame_set(int(math.floor(frame)), subframe=frame - math.floor(frame))
+    bpy.context.view_layer.update()
+    turns, offsets = {}, {}
+    for name in DONOR_BONES:
+        position, rotation = donor_matrix(name)
+        rest_position, rest_rotation = rest_pose[name]
+        turns[name] = TURN @ (rotation @ rest_rotation.inverted()) @ TURN.inverted()
+        offsets[name] = TURN @ ((position - rest_position) * DONOR_SCALE)
+    return turns, offsets
+
+
+def donor_action(clip):
+    return next(a for a in bpy.data.actions if a.name.endswith(DONOR_ACTIONS[clip]) and a not in before_actions)
+
+
+donor_samples = {}
+
+
+def sample_donor_clip(clip, frames, warp=lambda phase: phase):
+    action = donor_action(clip)
+    first, last = DONOR_RANGES.get(clip, action.frame_range)
+    length = (last - first) / DONOR_FPS
+    donor_samples[clip] = [donor_sample(action, warp(frame / frames) * length) for frame in range(frames + 1)]
+    return length
+
+
+def strike_phase():
+    """Where the donor's head reaches furthest forward in its attack."""
+    action = donor_action("attack_beak")
+    first, last = int(action.frame_range[0]), int(action.frame_range[1])
+    best = (-1e9, 0.)
+    for frame in range(first, last + 1):
+        donor.animation_data.action = action
+        bpy.context.scene.frame_set(frame)
+        bpy.context.view_layer.update()
+        reach = (TURN @ donor_matrix("Head")[0]).y
+        if reach > best[0]:
+            best = (reach, (frame - first) / (last - first))
+    return best[1]
+
+
+def stance_speed(clip):
+    """Planted-foot speed of a donor cycle on our rig, in metres per second at
+    the study scale: the linear stance's travel over its time, both feet."""
+    duration = CLIPS[clip]["frames"] / FPS
+    speeds = []
+    for side in ("L", "R"):
+        run = planted_frames(clip, side)
+        travel = abs(STANCE_PATH[(clip, side, run[-1])][1] - STANCE_PATH[(clip, side, run[0])][1])
+        speeds.append(travel / (duration * (len(run) - 1) / CLIPS[clip]["frames"]))
+    print("DONOR", clip, "stance speed by foot", [round(v, 3) for v in speeds], "frames", [len(planted_frames(clip, side)) for side in ("L", "R")])
+    return sum(speeds) / len(speeds)
+
 
 scene = bpy.context.scene
 scene.render.fps = FPS
@@ -232,18 +331,159 @@ def head_bob(phase):
 
 CLIPS = {
     "idle": {"frames": 192, "loop": True},
-    "walk": {"frames": 36, "loop": True, "speed": 1.0, "stance": .60, "lift": .14},
-    "run": {"frames": 24, "loop": True, "speed": 2.8, "stance": .42, "lift": .34},
+    # Retargeted cycles: 1,25 s and 0,54 s at the donor's 24 fps, kept within
+    # a frame at ours. Their speed is the planted foot's, measured below.
+    "walk": {"frames": 38, "loop": True, "donor": True},
+    "run": {"frames": 16, "loop": True, "donor": True},
     "look": {"frames": 72, "loop": True},
     "alert": {"frames": 36, "loop": False},
-    "attack_beak": {"frames": 30, "loop": False, "hit_start": .42, "hit_end": .58},
+    # The donor's strike is retimed so the head is furthest out at 0,5 s,
+    # inside the hit window KelekenActor checks from 0,42 s.
+    "attack_beak": {"frames": 30, "loop": False, "hit_start": .42, "hit_end": .58, "donor": True},
     "recover": {"frames": 30, "loop": False},
     # Reaction to a round: a sharp recoil that settles back on the rest pose.
     "hit": {"frames": 15, "loop": False},
-    # Staggers, the legs give way under the planted feet, the neck comes down.
-    # Ends lying, not on the rest pose: it is held by the actor once it plays.
-    "death": {"frames": 48, "loop": False},
+    # The donor's fall onto its side. Ends lying, not on the rest pose: it is
+    # held by the actor once it plays.
+    "death": {"frames": 39, "loop": False, "donor": True},
 }
+STRIKE = strike_phase()
+
+
+def attack_warp(phase):
+    # Piecewise linear: the wind-up fills the first half, the return the rest.
+    return STRIKE * phase / .5 if phase < .5 else STRIKE + (1. - STRIKE) * (phase - .5) / .5
+
+
+for clip in DONOR_ACTIONS:
+    CLIPS[clip]["donor_length"] = round(sample_donor_clip(clip, CLIPS[clip]["frames"], attack_warp if clip == "attack_beak" else (lambda phase: phase)), 4)
+def contact_window(clip, side):
+    """Phases [start, end] of the longest stretch with the foot planted; start
+    can be past end when the stance wraps across the loop."""
+    down = [sample[1]["BackFoot." + side].z < .012 for sample in donor_samples[clip][:-1]]
+    frames = len(down)
+    best = (0, 0)
+    for start in range(frames):
+        if down[start] and not down[start - 1]:
+            length = 0
+            while length < frames and down[(start + length) % frames]:
+                length += 1
+            best = max(best, (length, start), key=lambda item: item[0])
+    length, start = best
+    return [round(start / frames, 4), round(((start + length - 1) % frames) / frames, 4)]
+
+
+for clip in ("walk", "run"):
+    CLIPS[clip]["contact"] = {side: contact_window(clip, side) for side in ("L", "R")}
+    print("DONOR", clip, "contact", CLIPS[clip]["contact"])
+print("DONOR strike at", round(STRIKE, 3), "of the donor attack")
+# The donor leaves nothing behind in the rig file or the export.
+for obj in donor_objects:
+    bpy.data.objects.remove(obj, do_unlink=True)
+for action in [a for a in bpy.data.actions if a not in before_actions]:
+    bpy.data.actions.remove(action)
+scene.render.fps = FPS
+
+
+# Keleken bone <- donor rotation. Neck bones blend from the shoulders' turn to
+# the neck's; the arms are half-way between the chest and the donor's arms.
+def donor_turns(turns):
+    shoulders, neck = turns["Shoulders"], turns["Neck"]
+    result = {"pelvis": turns["Hips"], "spine": turns["Torso"], "chest": shoulders,
+              "head": turns["Head"], "tail_01": turns["Tail2"], "tail_02": turns["Tail4"]}
+    for index, name in enumerate(("neck_01", "neck_02", "neck_03", "neck_04")):
+        result[name] = shoulders.slerp(neck, (index + 1) / 4.)
+    for side in ("L", "R"):
+        result[f"wing_01.{side}"] = shoulders.slerp(turns[f"FrontUpLeg.{side}"], .5)
+    return result
+
+
+# Stride fit per cycle: (centre, scale) applied along the travel to both feet.
+# The donor stands with its feet behind the hip and we stand with ours ahead
+# of it, and its stride is long for our leg: laid on as it is, the back of the
+# stance asks for a foot the leg cannot reach and the foot lifts. The fit
+# centres the stance on ours and takes the longest stride the IK still
+# reaches everywhere, measured below.
+STRIDE_FIT = {}
+
+
+def planted_frames(clip, side):
+    """Frames of each foot's stance, in order, wrapping across the loop."""
+    down = [sample[1]["BackFoot." + side].z < .012 for sample in donor_samples[clip][:-1]]
+    frames = len(down)
+    start = next(i for i in range(frames) if down[i] and not down[i - 1])
+    run = []
+    while down[(start + len(run)) % frames] and len(run) < frames:
+        run.append((start + len(run)) % frames)
+    return run
+
+
+# The donor's planted foot stands still for a few frames at each end of its
+# stance while its body is meant to travel on: in place, that foot would skate
+# forward with the body. The stance is laid out again at one constant speed
+# between the same touch-down and lift-off points.
+# The donor's feet also travel 7-9 % apart in speed, which no single playback
+# rate can match: both are set to their mean, each about its own midpoint.
+STANCE_PATH = {}
+for clip in ("walk", "run"):
+    stances = {}
+    for side in ("L", "R"):
+        run = planted_frames(clip, side)
+        first = donor_samples[clip][run[0]][1]["BackFoot." + side].y
+        last = donor_samples[clip][run[-1]][1]["BackFoot." + side].y
+        stances[side] = (run, first, last, (last - first) / max(1, len(run) - 1))
+    per_frame = sum(stance[3] for stance in stances.values()) / 2.
+    for side, (run, first, last, _) in stances.items():
+        middle = (first + last) / 2.
+        half = per_frame * (len(run) - 1) / 2.
+        # Sideways, a planted foot holds its mean place instead of rocking.
+        across = sum(donor_samples[clip][frame][1]["BackFoot." + side].x for frame in run) / len(run)
+        for index, frame in enumerate(run):
+            STANCE_PATH[(clip, side, frame)] = (across, middle - half + per_frame * index)
+
+DRIVEN = ["pelvis", "spine", "chest", "neck_01", "neck_02", "neck_03", "neck_04", "head",
+          "tail_01", "tail_02", "wing_01.L", "wing_01.R"]
+
+
+def pose_donor(clip, frame):
+    turns, offsets = donor_samples[clip][frame]
+    world = donor_turns(turns)
+    translate_world("pelvis", offsets["Hips"])
+    for name in DRIVEN:
+        parent = specs[name][2]
+        local = world.get(parent, Quaternion()).inverted() @ world[name]
+        rest = rig.pose.bones[name].bone.matrix_local.to_quaternion()
+        rig.pose.bones[name].rotation_quaternion = rest.inverted() @ local @ rest
+    centre, scale = STRIDE_FIT.get(clip, (0., 1.))
+    for side in ("L", "R"):
+        offset = offsets[f"BackFoot.{side}"].copy()
+        key = (clip, side, frame % CLIPS[clip]["frames"])
+        if key in STANCE_PATH:
+            offset.x, offset.y = STANCE_PATH[key]
+            offset.z = 0.
+        offset.y = (offset.y - centre) * scale
+        # A planted foot never dips under the floor it stands on.
+        offset.z = max(offset.z, 0.)
+        translate_world(f"CTRL_foot.{side}", offset)
+        if clip != "death":
+            # Falling, the donor's feet roll over and would tip our toes into
+            # the floor; the dying feet only move.
+            rest = rig.pose.bones[f"CTRL_foot.{side}"].bone.matrix_local.to_quaternion()
+            rig.pose.bones[f"CTRL_foot.{side}"].rotation_quaternion = rest.inverted() @ turns[f"BackFoot.{side}"] @ rest
+    phase = frame / CLIPS[clip]["frames"]
+    if clip == "walk":
+        # A raptor holds its head still; a bird pumps it and glances about.
+        # The authored head bob and looks ride over the donor's neck.
+        bob = head_bob((phase * 2) % 1.)
+        rotate_world_axis("neck_01", (1, 0, 0), -.09 * bob)
+        rotate_world_axis("neck_02", (1, 0, 0), .03 * bob)
+        rotate_world_axis("head", (1, 0, 0), .09 * bob - .03 * bob)
+        head_yaw = gesture(phase, [(0, 0), (.10, 0), (.17, .13), (.32, .13), (.42, 0), (.60, 0), (.68, -.10), (.86, -.10), (.96, 0), (1, 0)])
+        rotate_world_axis("neck_04", (0, 0, 1), head_yaw * .3)
+        rotate_world_axis("head", (0, 0, 1), head_yaw * .7)
+    # The donor has no jaw: the beak rests a little open and gapes for the strike.
+    gape = math.sin(math.pi * min(1., max(0., (phase - .3) / .35))) if clip == "attack_beak" else 0.
+    rotate_world_axis("jaw", (1, 0, 0), .12 + .3 * gape)
 
 def recoil(k, phase):
     """Shared by hit and the first beat of death: thrown back and up."""
@@ -266,7 +506,9 @@ def pose_clip(clip, phase, info):
         pb.rotation_quaternion = (1, 0, 0, 0)
         pb.scale = (1, 1, 1)
     wave = math.sin(2. * math.pi * phase)
-    if clip in ("walk", "run"):
+    if info.get("donor"):
+        pose_donor(clip, round(phase * info["frames"]))
+    elif clip in ("walk", "run"):
         run = clip == "run"
         duration = info["frames"] / FPS
         stance = info["stance"]
@@ -376,6 +618,44 @@ def pose_clip(clip, phase, info):
             rotate_world_axis(f"wing_01.{side}", (0, 1, 0), sign * .25 * c)
         rotate_world_axis("tail_01", (1, 0, 0), -.2 * c)
 
+def reset_pose():
+    for pb in rig.pose.bones:
+        pb.rotation_mode = "QUATERNION"
+        pb.location = (0, 0, 0)
+        pb.rotation_quaternion = (1, 0, 0, 0)
+        pb.scale = (1, 1, 1)
+
+
+def reach_error(clip):
+    """Worst gap between a foot target and the hock-to-foot end the IK reaches."""
+    worst = 0.
+    for frame in range(CLIPS[clip]["frames"]):
+        reset_pose()
+        pose_donor(clip, frame)
+        bpy.context.view_layer.update()
+        evaluated = rig.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        for side in ("L", "R"):
+            target = evaluated.pose.bones[f"CTRL_foot.{side}"].head
+            reached = evaluated.pose.bones[f"tarsus.{side}"].tail
+            worst = max(worst, (target - reached).length)
+    return worst
+
+
+for clip in ("walk", "run"):
+    planted = [sample[1]["BackFoot." + side].y for sample in donor_samples[clip] for side in ("L", "R") if sample[1]["BackFoot." + side].z < .012]
+    centre = (max(planted) + min(planted)) / 2.
+    for step in range(11):
+        scale = round(1. - step * .05, 2)
+        STRIDE_FIT[clip] = (centre, scale)
+        if reach_error(clip) < .01:
+            break
+    print("DONOR", clip, "stride centre", round(centre, 3), "scale", scale, "reach error", round(reach_error(clip), 4))
+    # The planted speed follows the stride.
+    CLIPS[clip]["speed"] = round(stance_speed(clip) * scale, 3)
+    CLIPS[clip]["stride_fit"] = [round(centre, 4), scale]
+    print("DONOR", clip, "fitted speed", CLIPS[clip]["speed"], "m/s")
+reset_pose()
+
 rig.animation_data_create()
 source_actions = {}
 for clip, info in CLIPS.items():
@@ -385,6 +665,15 @@ for clip, info in CLIPS.items():
     for frame in range(info["frames"] + 1):
         phase = frame / info["frames"]
         pose_clip(clip, phase, info)
+        if clip == "death":
+            # The donor falls on its side through our wider body; raise the
+            # pelvis by however far the skin would sink under the floor.
+            bpy.context.view_layer.update()
+            evaluated = mesh.evaluated_get(bpy.context.evaluated_depsgraph_get())
+            lowest = min((mesh.matrix_world @ v.co).z for v in evaluated.data.vertices)
+            if lowest < 0.:
+                pelvis = rig.pose.bones["pelvis"]
+                pelvis.location = pelvis.location + pelvis.bone.matrix_local.to_3x3().inverted() @ Vector((0, 0, -lowest))
         for name in animated:
             pb = rig.pose.bones[name]
             pb.keyframe_insert("location", frame=frame + 1)
@@ -461,7 +750,7 @@ bpy.ops.export_scene.gltf(filepath=str(ASSET / "keleken_animated.glb"), export_f
     export_optimize_animation_size=False, export_skins=True, export_extras=True)
 
 metadata = {"height_m": 2.4, "forward_godot": "-Z", "fps": FPS, "bones": list(specs),
-    "origin": "Original authored prototype; baked IK. No third-party motion clips.",
+    "origin": "Idle, look, alert, recover and hit authored in tools/rig_keleken.py; walk, run, attack_beak and death retargeted from Quaternius' Velociraptor (CC0 1.0, source/donor/LICENSE.txt). Baked IK.",
     "source_sha256": EXPECTED_HASH, "clips": CLIPS}
 (ASSET / "animation_manifest.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
 assert hashlib.sha256((ASSET / "model_base.glb").read_bytes()).hexdigest() == EXPECTED_HASH

@@ -1,23 +1,23 @@
 {
-  "name": "LIMIAR service rifle",
-  "triangles": 1012,
+  "name": "LIMIAR double-barrel shotgun",
+  "triangles": 736,
   "mesh_parts": 1,
-  "authored_parts": 51,
+  "authored_parts": 23,
   "materials": 6,
   "units": "meters",
   "godot_forward": "-Z",
   "godot_up": "+Y",
-  "origin": "pistol grip",
+  "origin": "grip",
   "muzzle_godot": [
     0,
     0.062,
-    -0.627
+    -0.712
   ],
   "support_godot": [
     0,
-    0.02,
-    -0.33
+    0.03,
+    -0.26
   ],
-  "source": "tools/build_rifle.py",
+  "source": "tools/build_shotgun.py",
   "status": "original prototype visual; no internal mechanism"
 }

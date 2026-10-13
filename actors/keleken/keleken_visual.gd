@@ -1,8 +1,13 @@
 class_name KelekenVisual
 extends Node3D
-## Original baked clips on an avian rig. Physics drives world translation.
+## Baked clips on an avian rig: walk, run, attack and death retargeted from a
+## CC0 raptor, the rest authored (tools/rig_keleken.py). Physics drives world
+## translation.
 const SOURCE_HEIGHT := 2.4
-const NATIVE_SPEED := {&"walk": 1.0, &"run": 2.8}
+## Planted-foot speed of each cycle at SOURCE_HEIGHT, from the build
+## (animation_manifest.json, after the stride fit): the 3,4 m/s chase plays
+## the run at about 1x and the 1,5 m/s patrol the walk at 1,75x.
+const NATIVE_SPEED := {&"walk": 0.857, &"run": 3.316}
 const LOOPING: Array[StringName] = [&"idle", &"walk", &"run", &"look"]
 @export_range(1.0, 4.0) var target_height: float = 2.4
 @onready var model: Node3D = $Model

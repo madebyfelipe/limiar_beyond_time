@@ -1,0 +1,7 @@
+Velociraptor (Animated LowPoly Dinosaurs) by Quaternius — CC0 1.0 Universal.
+https://creativecommons.org/publicdomain/zero/1.0/
+Pack page: https://quaternius.com/packs/animateddinosaurs.html
+File downloaded 2026-10-13 from Poly Pizza (https://poly.pizza/m/cnlGH2UcDd),
+static.poly.pizza/c1f0c4cb-c84f-415c-8323-d8cb871a2126.glb.
+Used only as a motion donor: tools/rig_keleken.py retargets its Walk, Run,
+Attack and Death onto the Keleken rig. The raptor mesh is not shipped.

@@ -31,6 +31,16 @@ var weapon: PlayerWeapon
 ## is off: the body accelerates, turns and animates exactly as if a stick held
 ## it, so a scripted walk needs no clips or physics of its own.
 var autopilot: Vector3 = Vector3.ZERO
+## A run let go of slows along its stop capture instead of halting in two
+## frames: DylanVisual hands over the capture's hip speed, in world m/s every
+## `brake_step` s of playback, and the rate it plays the clip at. The body
+## sheds any speed above that curve at the normal deceleration and then
+## follows it, so the planted feet hold while the stop plays. New input, the
+## gun, a dodge, a hit or a reset end it.
+var brake_profile: PackedFloat32Array = PackedFloat32Array()
+var brake_step: float = 0.05
+var brake_rate: float = 1.0
+var brake_time: float = 0.0
 
 func _ready() -> void:
 	spawn_transform = global_transform
@@ -134,6 +144,7 @@ func start_dodge() -> bool:
 func reset_to(target: Transform3D) -> void:
 	global_transform = target
 	velocity = Vector3.ZERO
+	end_brake()
 	desired_direction = Vector3.ZERO
 	turn_input = 0.0
 	dodge_left = 0.0
@@ -147,6 +158,28 @@ func _notification(what: int) -> void:
 		movement_reference.reset()
 
 ## Where the body is pointing, which tank steering drives and turns.
+func brake_along(profile: PackedFloat32Array, step: float, rate: float) -> void:
+	brake_profile = profile
+	brake_step = step
+	brake_rate = rate
+	brake_time = 0.0
+
+func braking() -> bool:
+	return not brake_profile.is_empty()
+
+func end_brake() -> void:
+	brake_profile = PackedFloat32Array()
+
+## The speed the stop capture carries now, or -1 once it has run out.
+func _brake_speed(delta: float) -> float:
+	brake_time += delta
+	var at: float = brake_time * brake_rate / brake_step
+	if at >= brake_profile.size() - 1:
+		end_brake()
+		return -1.0
+	var index: int = int(at)
+	return lerpf(brake_profile[index], brake_profile[index + 1], at - index) * brake_rate
+
 func facing() -> Vector3:
 	return Vector3(-sin(visual.rotation.y), 0.0, -cos(visual.rotation.y))
 
@@ -159,6 +192,7 @@ func _physics_process(delta: float) -> void:
 	if control_enabled and Input.is_action_just_pressed("dodge"):
 		start_dodge()
 	if is_dead() or dodge_left > 0.0 or hit_stun_left > 0.0:
+		end_brake()
 		desired_direction = dodge_direction if dodge_left > 0.0 else Vector3.ZERO
 		turn_input = 0.0
 		velocity.x = desired_direction.x * config.dodge_speed
@@ -203,6 +237,15 @@ func _physics_process(delta: float) -> void:
 		speed = config.walk_speed * config.tank_reverse_factor
 	var rate: float = config.acceleration if not desired_direction.is_zero_approx() else config.deceleration
 	var horizontal: Vector3 = Vector3(velocity.x, 0, velocity.z).move_toward(desired_direction * speed, rate * delta)
+	if braking():
+		if not desired_direction.is_zero_approx() or aiming or scripted or not control_enabled:
+			end_brake()
+		else:
+			var along: Vector3 = Vector3(velocity.x, 0, velocity.z)
+			var follow: float = _brake_speed(delta)
+			if follow >= 0.0:
+				var now: float = along.length()
+				horizontal = along.normalized() * clampf(follow, now - config.deceleration * delta, now) if now > 0.0 else Vector3.ZERO
 	velocity.x = horizontal.x
 	velocity.z = horizontal.z
 	velocity.y = -0.1 if is_on_floor() else velocity.y - config.gravity * delta

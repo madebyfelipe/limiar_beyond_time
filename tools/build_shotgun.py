@@ -1,9 +1,10 @@
-"""Author the original low-poly rifle visual and export its GLB, Blender source
-and preview. Blender +Y forward/+Z up exports as Godot -Z forward/+Y up.
-Same conventions as tools/build_pistol.py: origin at the pistol grip, a
-"Muzzle" empty at the bore exit, and a "Support" empty on the handguard where
-the left hand holds it. An exterior game prop, with no internal mechanism.
-Run with the project's portable Blender --background --python tools/build_rifle.py.
+"""Author the original low-poly double-barrel shotgun visual and export its GLB,
+Blender source and preview. Blender +Y forward/+Z up exports as Godot -Z
+forward/+Y up. Same conventions as tools/build_rifle.py, so the rifle captures
+hold it the same way: origin at the grip, a "Muzzle" empty between the two bore
+exits, and a "Support" empty on the forend where the left hand holds it. An
+exterior game prop, with no internal mechanism.
+Run with the project's portable Blender --background --python tools/build_shotgun.py.
 """
 import bpy
 import json
@@ -12,7 +13,7 @@ from pathlib import Path
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[1]
-ASSET = ROOT / "assets/models/weapons/rifle"
+ASSET = ROOT / "assets/models/weapons/shotgun"
 SOURCE = ASSET / "source"
 SOURCE.mkdir(parents=True, exist_ok=True)
 (SOURCE / ".gdignore").write_text("", encoding="utf-8")
@@ -30,14 +31,14 @@ def material(name, color, metallic=0.0, roughness=0.8):
     shader.inputs["Roughness"].default_value = roughness
     return mat
 
-steel = material("CharcoalSteel", (0.11, 0.13, 0.15), 0.5, 0.65)
-frame = material("DarkFrame", (0.055, 0.064, 0.073), 0.15, 0.85)
-polymer = material("Polymer", (0.024, 0.03, 0.032), 0.0, 0.95)
+steel = material("BluedSteel", (0.07, 0.08, 0.10), 0.6, 0.55)
+frame = material("CaseFrame", (0.20, 0.19, 0.17), 0.55, 0.6)
+wood = material("Walnut", (0.17, 0.075, 0.035), 0.0, 0.7)
 edge = material("EdgeSteel", (0.22, 0.24, 0.25), 0.55, 0.65)
 dark = material("Recess", (0.008, 0.011, 0.014), 0.0, 1.0)
-sight = material("SightMark", (0.57, 0.60, 0.50), 0.0, 0.8)
+sight = material("BeadSight", (0.72, 0.66, 0.45), 0.4, 0.5)
 
-root = bpy.data.objects.new("Rifle", None)
+root = bpy.data.objects.new("Shotgun", None)
 bpy.context.collection.objects.link(root)
 parts = []
 
@@ -88,53 +89,49 @@ def tube(name, y0, y1, z, radius, mat, sides=8):
                                         location=(0, (y0 + y1) / 2, z), rotation=(math.pi / 2, 0, 0))
     return finish(bpy.context.object, name, mat)
 
-BORE = 0.062  # height of the barrel axis above the grip origin
+BORE = 0.062  # height of the barrel axes above the grip origin
+GAUGE = 0.0105  # each barrel's half-spacing across X
 
-# Receiver and stock.
-box("UpperReceiver", (0, 0.045, 0.072), (0.040, 0.270, 0.042), steel, 0.003)
-box("LowerReceiver", (0, 0.035, 0.036), (0.036, 0.200, 0.032), frame, 0.002)
-box("TopRail", (0, 0.060, 0.098), (0.022, 0.240, 0.010), frame, 0.001)
-for i in range(12):
-    box("RailSlot", (0, -0.060 + i * 0.020, 0.1035), (0.024, 0.006, 0.002), dark)
-box("BufferTube", (0, -0.140, 0.070), (0.030, 0.110, 0.030), frame, 0.002)
-profile("Stock", [(-0.300, 0.095), (-0.180, 0.088), (-0.180, 0.050), (-0.215, 0.010),
-                  (-0.300, -0.030)], 0.038, polymer)
-box("ButtPad", (0, -0.304, 0.032), (0.040, 0.010, 0.128), dark, 0.002)
-
-# Pistol grip, trigger guard and magazine.
-profile("Grip", [(-0.040, -0.090), (-0.008, -0.090), (0.020, 0.024), (-0.018, 0.028)], 0.032, polymer)
-profile("GuardBase", [(0.070, 0.020), (0.076, 0.012), (0.014, 0.004), (0.010, 0.012)], 0.014, frame)
-profile("Trigger", [(0.040, 0.022), (0.047, 0.019), (0.040, 0.000), (0.030, -0.006), (0.033, 0.004)], 0.006, edge)
-profile("Magazine", [(0.090, 0.020), (0.150, 0.020), (0.170, -0.140), (0.115, -0.150)], 0.030, polymer)
-for i in range(4):
-    box("MagazineRib", (0, 0.120 + i * 0.010, -0.060 - i * 0.022), (0.032, 0.004, 0.006), frame)
-box("MagazineWell", (0, 0.120, 0.012), (0.038, 0.074, 0.024), frame, 0.002)
-box("EjectionPort", (0.0205, 0.060, 0.074), (0.001, 0.060, 0.018), dark)
-box("ChargingHandle", (0, -0.088, 0.088), (0.030, 0.014, 0.010), edge, 0.001)
-
-# Handguard, barrel and sights.
-box("Handguard", (0, 0.300, BORE), (0.044, 0.240, 0.050), frame, 0.004)
+# Action (receiver) with its top lever, and the walnut stock behind it.
+box("Action", (0, 0.060, 0.058), (0.046, 0.110, 0.050), frame, 0.004)
+box("ActionFloor", (0, 0.070, 0.028), (0.040, 0.090, 0.014), frame, 0.002)
+box("TopLever", (0, 0.010, 0.088), (0.012, 0.040, 0.006), edge, 0.001)
+box("TopTang", (0, -0.020, 0.080), (0.016, 0.060, 0.006), frame, 0.001)
 for side in (-1, 1):
-    for i in range(6):
-        box("HandguardVent", (side * 0.0225, 0.210 + i * 0.036, BORE), (0.001, 0.018, 0.022), dark)
-box("Foregrip", (0, 0.330, 0.010), (0.026, 0.034, 0.060), polymer, 0.003)
-tube("Barrel", 0.420, 0.585, BORE, 0.010, steel)
-tube("GasBlock", 0.430, 0.455, BORE, 0.015, edge)
-tube("FlashHider", 0.585, 0.625, BORE, 0.013, frame, 6)
-box("FrontSight", (0, 0.440, 0.100), (0.010, 0.016, 0.040), frame, 0.001)
-box("FrontSightMark", (0, 0.432, 0.118), (0.003, 0.0005, 0.004), sight)
-box("RearSight", (0, -0.050, 0.112), (0.030, 0.020, 0.018), frame, 0.001)
-box("RearSightNotch", (0, -0.060, 0.118), (0.008, 0.001, 0.006), dark)
-box("MuzzleRecess", (0, 0.6255, BORE), (0.012, 0.0004, 0.012), dark)
+    box("Hinge", (side * 0.0235, 0.112, 0.040), (0.002, 0.012, 0.012), edge)
+# One walnut piece from the action to the butt: the wrist narrows behind the
+# action, the comb drops towards the butt and the semi-pistol grip hangs under.
+profile("Stock", [(0.006, 0.082), (-0.060, 0.074), (-0.385, 0.036), (-0.385, -0.074),
+                  (-0.120, -0.016), (-0.055, 0.004), (-0.030, -0.058), (-0.004, -0.060),
+                  (0.006, 0.034)], 0.038, wood)
+box("ButtPlate", (0, -0.389, -0.019), (0.040, 0.008, 0.112), dark, 0.002)
+box("GripCap", (0, -0.017, -0.061), (0.030, 0.026, 0.004), dark, 0.001)
+profile("GuardBase", [(0.080, 0.022), (0.086, 0.014), (0.014, -0.004), (0.006, 0.010)], 0.014, frame)
+for i, y in enumerate((0.036, 0.054)):
+    profile("Trigger%d" % i, [(y, 0.022), (y + 0.006, 0.019), (y, 0.002), (y - 0.008, -0.002), (y - 0.006, 0.006)], 0.006, edge)
+
+# Side-by-side barrels with their rib, the forend and the bead.
+for side, name in ((-1, "Left"), (1, "Right")):
+    tube(name + "Barrel", 0.115, 0.710, BORE, 0.0105, steel, 10)
+    tube(name + "Breech", 0.115, 0.160, BORE, 0.0125, steel, 10)
+    tube(name + "Bore", 0.7095, 0.7105, BORE, 0.0085, dark, 10)
+    parts[-1].location.x = side * GAUGE
+    parts[-2].location.x = side * GAUGE
+    parts[-3].location.x = side * GAUGE
+box("Rib", (0, 0.410, BORE + 0.011), (0.008, 0.590, 0.004), steel, 0.001)
+box("UnderRib", (0, 0.410, BORE - 0.010), (0.010, 0.590, 0.006), steel)
+box("Forend", (0, 0.250, 0.044), (0.040, 0.190, 0.030), wood, 0.004)
+box("ForendIron", (0, 0.160, 0.040), (0.036, 0.020, 0.030), frame, 0.002)
+box("Bead", (0, 0.700, BORE + 0.016), (0.004, 0.004, 0.004), sight)
 
 muzzle = bpy.data.objects.new("Muzzle", None)
 bpy.context.collection.objects.link(muzzle)
 muzzle.parent = root
-muzzle.location = (0, 0.627, BORE)
+muzzle.location = (0, 0.712, BORE)
 support = bpy.data.objects.new("Support", None)
 bpy.context.collection.objects.link(support)
 support.parent = root
-support.location = (0, 0.330, 0.020)
+support.location = (0, 0.260, 0.030)
 
 source_parts = len(parts)
 triangles = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in parts)
@@ -144,22 +141,22 @@ for obj in parts:
 bpy.context.view_layer.objects.active = parts[0]
 bpy.ops.object.join()
 joined = bpy.context.object
-joined.name = "RifleMesh"
+joined.name = "ShotgunMesh"
 parts = [joined]
 
 bpy.ops.object.select_all(action="DESELECT")
 for obj in [root, muzzle, support, *parts]:
     obj.select_set(True)
 bpy.context.view_layer.objects.active = root
-bpy.ops.export_scene.gltf(filepath=str(ASSET / "rifle_lowpoly.glb"),
+bpy.ops.export_scene.gltf(filepath=str(ASSET / "shotgun_lowpoly.glb"),
     export_format="GLB", use_selection=True, export_yup=True, export_cameras=False,
     export_lights=False, export_animations=False)
 
-manifest = {"name": "LIMIAR service rifle", "triangles": triangles,
+manifest = {"name": "LIMIAR double-barrel shotgun", "triangles": triangles,
             "mesh_parts": len(parts), "authored_parts": source_parts, "materials": 6, "units": "meters",
-            "godot_forward": "-Z", "godot_up": "+Y", "origin": "pistol grip",
-            "muzzle_godot": [0, BORE, -0.627], "support_godot": [0, 0.020, -0.330],
-            "source": "tools/build_rifle.py",
+            "godot_forward": "-Z", "godot_up": "+Y", "origin": "grip",
+            "muzzle_godot": [0, BORE, -0.712], "support_godot": [0, 0.030, -0.260],
+            "source": "tools/build_shotgun.py",
             "status": "original prototype visual; no internal mechanism"}
 (ASSET / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
@@ -180,8 +177,8 @@ bpy.ops.object.camera_add(location=(0.9, 0.35, 0.30))
 camera = bpy.context.object
 camera.name = "PreviewCamera"
 camera.data.type = "ORTHO"
-camera.data.ortho_scale = 1.05
-aim_at(camera, (0, 0.16, 0.0))
+camera.data.ortho_scale = 1.25
+aim_at(camera, (0, 0.17, 0.0))
 scene.camera = camera
 for location, power, size in [((0.6, 0.3, 0.6), 3.0, 0.8), ((-0.5, -0.2, 0.3), 1.2, 0.5),
                               ((0.2, -0.6, 0.4), 2.0, 0.4)]:
@@ -192,7 +189,7 @@ for location, power, size in [((0.6, 0.3, 0.6), 3.0, 0.8), ((-0.5, -0.2, 0.3), 1
     lamp.data.size = size
     aim_at(lamp, (0, 0.15, 0))
 
-scene.render.filepath = str(ASSET / "rifle_preview.png")
-bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE / "rifle.blend"))
+scene.render.filepath = str(ASSET / "shotgun_preview.png")
+bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE / "shotgun.blend"))
 bpy.ops.render.render(write_still=True)
-print("RIFLE triangles=%d parts=%d" % (triangles, source_parts))
+print("SHOTGUN triangles=%d parts=%d" % (triangles, source_parts))

@@ -8,7 +8,7 @@ enum State { PATROL, ALERT, CHASE, ATTACK, HURT, RETURN, DEAD }
 @export var perception_range: float = 8.0
 @export var field_of_view: float = 120.0
 @export var proximity_range: float = 2.5
-@export var chase_speed: float = 2.8
+@export var chase_speed: float = 3.4
 @export var attack_range: float = 1.65
 @export var attack_damage: float = 25.0
 @export var memory_duration: float = 3.0

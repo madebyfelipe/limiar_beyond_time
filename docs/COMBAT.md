@@ -23,10 +23,16 @@ Abra `executar-perimetro.cmd` (ou chegue pela continuidade: terminal da guarita,
 junto com o Keleken; a estrada do exterior ficou sem inimigo. Estrutura de fase,
 cenário e câmeras em `PERIMETER.md`.
 
-O Keleken patrulha o cercado da trilha, detecta Dylan a até
+Desde 13/10/2026 são **dois** Keleken no cercado da trilha: o original, com casa
+em (0,6; −14,5), e um segundo mais ao fundo, em (−1,3; −17,6), na mesma área de
+patrulha (`Perimeter.KELEKEN_HOMES`; `perimeter.keleken` continua sendo o
+primeiro e `kelekens` lista os dois). Cada um detecta Dylan a até
 8 m dentro de um cone de 120° ou a 2,5 m por proximidade, sempre respeitando
-paredes e altura. Após 0,45 s de alerta, persegue a 2,8 m/s. Perder a visão por
-3 s faz o inimigo retornar ao ponto de patrulha.
+paredes e altura. Após 0,45 s de alerta, persegue a **3,4 m/s** (era 2,8) e
+patrulha a **1,5 m/s** (era 1,15). Dylan corre a 3,8 m/s, então ainda consegue
+abrir distância correndo. As pernas acompanham a velocidade sozinhas, porque
+`keleken_visual.gd` escala o clipe pela velocidade no chão. Perder a visão por
+3 s faz o inimigo retornar ao ponto de patrulha. Reiniciar devolve os dois.
 
 A bicada prepara o ataque, fixa a direção e aplica **25 de dano uma vez** em
 0,42 s, dentro de 1,8 m e do cone frontal, com linha de visão. Depois do clipe de

@@ -25,6 +25,8 @@ const TERMINAL_APPROACH := Vector3(1.95, 0.0, -0.35)
 const WINDOW_SHOT_POSITION := Vector3(2.15, 1.6, 0.55)
 const WINDOW_SHOT_TARGET := Vector3(0.65, 1.65, -2.3)
 const WINDOW_CENTRE := Vector3(0.65, 1.75, -2.3)
+## How far behind his right shoulder Dylan's look-over-shoulder capture looks.
+const LOOK_BACK_DEGREES := 130.0
 const ANIMAL_FROM := Vector3(-3.6, 0.0, -3.5)
 const ANIMAL_TO := Vector3(4.2, 0.0, -3.5)
 const ANIMAL_PAUSE_AT := Vector3(0.45, 0.0, -3.5)
@@ -277,7 +279,9 @@ func play_outage() -> void:
 	cutscene_camera.current = true
 	var turn := create_tween()
 	var to_window: Vector3 = WINDOW_CENTRE - player.global_position
-	var heading: float = atan2(-to_window.x, -to_window.z)
+	# Back to the glass: the look-over-shoulder capture turns the head 130
+	# degrees over the right shoulder, so the window sits there.
+	var heading: float = atan2(-to_window.x, -to_window.z) + deg_to_rad(LOOK_BACK_DEGREES)
 	turn.tween_property(player.visual, "rotation:y", player.visual.rotation.y + angle_difference(player.visual.rotation.y, heading), 0.45 / cutscene_speed)
 	_dylan().play_scripted(&"idle")
 	animal = KELEKEN.instantiate()
@@ -293,9 +297,11 @@ func play_outage() -> void:
 	var cross := create_tween()
 	cross.tween_property(animal, "position", ANIMAL_PAUSE_AT, ANIMAL_FROM.distance_to(ANIMAL_PAUSE_AT) / 1.0 / cutscene_speed)
 	await cross.finished
-	# It stops in the lamp light and looks in; Dylan starts back from the glass.
+	# It stops in the lamp light and looks in; Dylan looks back over his
+	# shoulder at the glass. The look is back forward by 2,5 s, inside the
+	# 2,8 s before the room view returns.
 	animal.visual.play_clip(&"look")
-	_dylan().play_scripted(&"startled", &"idle")
+	_dylan().play_scripted(&"look_over_shoulder", &"startled")
 	operation.show_notice("Something is circling the shed.", 3.0 / cutscene_speed)
 	await _wait(1.6)
 	animal.visual.play_clip(&"walk", 1.4)
