@@ -18,7 +18,7 @@ func run() -> void:
 	transition.retro_filter.hide()
 	transition.region_title.text = "GUARDHOUSE"
 	await capture("door-closed")
-	transition.hinge.rotation.y = -0.75
+	transition.pose_at(3.3)
 	await capture("door-opening")
 	root.size = Vector2i(1280,960)
 	transition.region_title.text = "PERIMETER TRAIL"

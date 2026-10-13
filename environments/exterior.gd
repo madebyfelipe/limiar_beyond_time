@@ -132,6 +132,7 @@ func _ready() -> void:
 	north_gate.approach = NORTH_GATE_APPROACH
 	north_gate.facing = 0.0
 	north_gate.entry_id = &"yard_gate"
+	north_gate.passage = &"gate"
 	north_gate.phase_id = &"perimeter"
 	north_gate.destination_name = "Perimeter Trail"
 	north_gate.open_hint = "North gate"

@@ -37,9 +37,16 @@ const CLIPS := {
 		"replacement": {"file": "dodge_back_v2", "loop": false, "from": 0.15, "to": 1.35, "plant": true}},
 	# "Stand To Roll": crouch, dive roll and the rise back to standing.
 	&"dodge_forward": {"file": "roll_stand", "loop": false, "from": 0.45, "to": 1.95, "plant": true},
-	# The capture walks up, opens and crosses in 6,37 s. Only the reach and the
-	# push survive, matching the 0,72 s gesture stage in door_transition.gd.
-	&"door_interact": {"file": "door_open", "loop": false, "from": 2.48, "to": 3.2, "plant": true},
+	# "Opening Door Inwards", 6,37 s: the right hand rises to the handle
+	# (1,0-2,0 s), holds it (to 2,45), pushes (to 3,1), the body walks through
+	# with the left hand on the open leaf (3,3-4,5) and turns to shut it.
+	# The gameplay gesture is the reach alone, 0,72 s, ending where the
+	# cinematic in door_transition.gd cuts in (CUT_IN), so the cut lands on
+	# the action. The painted door never moves, so nothing is pushed in place.
+	&"door_interact": {"file": "door_open", "loop": false, "from": 1.03, "to": 1.75, "plant": true},
+	# The whole capture with its own travel, for the figure in the cinematic.
+	# Clip time is capture time; door_transition.gd names the moments it uses.
+	&"door_cross": {"file": "door_open", "loop": false},
 	# A single 110° turn, not a cycle. The window below is the stretch whose end
 	# pose sits closest to its start; the controller owns the rotation itself, so
 	# only the stepping is kept and the seam is stitched shut.

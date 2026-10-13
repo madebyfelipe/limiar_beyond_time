@@ -10,6 +10,8 @@ extends ApproachPrompt
 ## Names this doorway for the level on the other side, which may be reachable
 ## through more than one of them and has to know where to put the player.
 @export var entry_id: StringName = &""
+## What Dylan opens in the cinematic: &"door" or &"gate" (`door_transition.gd`).
+@export var passage: StringName = &"door"
 ## The doorway last used, read by the destination in `arrive_from_door()`.
 static var arrived_from: StringName = &""
 
@@ -36,5 +38,6 @@ func interact() -> void:
 		dylan.play_door_interaction()
 	var transition := preload("res://systems/interaction/door_transition.gd").new()
 	transition.name = "DoorTransition"
+	transition.passage = passage
 	get_tree().root.add_child(transition)
-	transition.begin(destination, returning_outside, player, destination_name)
+	transition.begin(destination, player, destination_name)

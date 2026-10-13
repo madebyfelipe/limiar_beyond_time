@@ -31,7 +31,10 @@ a Fase 1 inteira.
 ## O portão que liga as duas
 
 `systems/interaction/phase_gate.gd` é uma porta comum — mesmo ponto de
-aproximação, mesma cinemática — que só abre quando a fase seguinte foi liberada.
+aproximação, mesma sequência — que só abre quando a fase seguinte foi liberada.
+Desde 13/10/2026 o portão norte tem cinemática própria nos dois sentidos
+(`passage = &"gate"`): Dylan ergue a alavanca e empurra as duas folhas, em vez de
+abrir a porta de aço (`DYLAN_ANIMATION.md`, "Dylan na cinemática").
 Enquanto a Fase 1 não fecha no terminal, o aviso no portão lê **"North gate
 bolted"** e E recusa com um aviso na tela, em vez de não fazer nada. Depois do
 `save`, o aviso vira **"North gate"** e a viagem acontece.

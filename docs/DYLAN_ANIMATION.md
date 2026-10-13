@@ -21,7 +21,8 @@ F5 continua no percurso técnico. Esta implementação não alterou o preset de 
 | idle | Breathing Idle | 9,93 s, loop | Respiração e troca de apoio |
 | walk | Standard Walk, *In Place* | 1,17 s, loop | Contato de calcanhar, braços em oposição |
 | run | Slow Run, *In Place* | 0,73 s, loop | Tronco à frente, passada longa |
-| door_interact | Opening Door Inwards | 0,72 s | Recorte de 2,48 s a 3,20 s da captura de 6,37 s |
+| door_interact | Opening Door Inwards | 0,72 s | Desde 13/10/2026 o recorte é o alcance, de 1,03 s a 1,75 s da captura de 6,37 s (antes, o empurrão de 2,48 s a 3,20 s) |
+| door_cross | Opening Door Inwards | 6,37 s | A captura inteira, com o próprio deslocamento, para a figura da cinemática |
 | walk_back | Walking Backwards, *In Place* | 1,50 s, loop | Marcha à ré dos controles de tanque; carrega 0,61 m/s |
 | turn_left / turn_right | Turning In Place (+ *Mirror*) | 0,52 s, loop | Giro no lugar, sem rotação de raiz |
 
@@ -54,7 +55,7 @@ A suíte passava com os dois defeitos presentes — nenhum probe olhava para ond
 
 O esqueleto agora é o `mixamorig_*` de 65 ossos do auto-rigger, no lugar dos 26 ossos Tripo. O GLB original não foi alterado nem reexportado e seu SHA-256 continua `AEDBDF9C15EF225481FFA4630963C7F636702A071EB5CA5CC077B72CBE2816B1`; procedência, licença, escala e orientação estão em `assets/models/README.md`.
 
-Continua sem IK de pés em degraus e sem a mão presa à maçaneta: a mão faz o gesto de empurrar, mas não acompanha a folha da porta.
+Continua sem IK de pés em degraus. No cenário a folha pintada segue parada, e por isso o gesto ali passou a ser só o alcance da maçaneta; na cinemática, desde 13/10/2026, a folha acompanha a palma (ver abaixo).
 
 ## Sequência da porta
 
@@ -62,17 +63,30 @@ Continua sem IK de pés em degraus e sem a mão presa à maçaneta: a mão faz o
 
 `door_transition.gd` cria uma camada temporária que sobrevive à troca de cena:
 
-1. Gesto de Dylan por 0,72 s.
-2. Fade para preto e revelação de uma porta metálica 3D isolada, em composição 16:9.
-3. Giro da maçaneta por 0,22 s com estalo da trava.
-4. Abertura da folha por 1,35 s e aproximação da câmera, com som da dobradiça.
-5. Avanço da câmera por 0,65 s e novo fade para preto.
+1. Gesto de Dylan no cenário por 0,72 s: a mão direita sobe até a maçaneta (`door_interact`).
+2. Fade para preto e corte para o cenário isolado da passagem, em composição 16:9, com **Dylan em cena** de costas, visto por cima do ombro direito. A captura continua do ponto em que o gesto parou (1,75 s), então o corte cai no meio do movimento.
+3. Mão na maçaneta, que gira com o estalo da trava (2,0 s da captura).
+4. Empurrão (2,45–3,15 s) com som da dobradiça e aproximação da câmera.
+5. Travessia (a partir de 3,3 s), a mão esquerda apoiando a folha aberta; fade para preto de 3,85 a 4,45 s, antes de a captura virar para fechar a porta.
 6. Troca do ambiente sob preto, posicionamento na entrada e fade de chegada por 0,3 s.
 7. Retorno do controle e liberação da camada, câmera, malhas e áudio temporários.
 
-A saída usa abertura no sentido oposto e restaura a câmera próxima da guarita. Não há autoload. O terminal da sala passou a salvar progresso na mesma data; ver `SAVE_SYSTEM.md`.
+A cinemática dura 2,7 s entre os fades (antes 2,2 s) e continua sem autoload. Ida e volta usam a mesma tomada: Dylan sempre empurra.
 
-Os sons `assets/audio/door_latch.wav` e `door_creak.wav` foram sintetizados deterministicamente por `tools/author_door_audio.py`, sem samples externos. Headless não reproduz áudio; execução gráfica usa AudioStreamPlayer.
+### Dylan na cinemática (13/10/2026)
+
+Pedido: "adicione a animação da porta com o dylan e o portão tbm deve ter animação própria".
+
+- A figura é o rig `dylan_rig_idle.fbx` instanciado no mundo próprio da cinemática, a 1,8 m, tocando `door_cross`. Um relógio em segundos da captura posa o corpo a cada quadro (`AnimationPlayer` em modo manual) e o resto lê dessa mesma pose.
+- **As folhas não têm curva autorada.** Cada uma abre até encostar na palma que a empurra (meio do caminho entre o punho e o nó do dedo médio) e, solta, conserva o giro que recebeu. A figura é posicionada pelo lugar em que a captura põe a palma direita no início do empurrão, sobre a maçaneta.
+- **Porta** (`passage = &"door"`, o padrão): folha de aço com dobradiça à esquerda, na parede, abrindo para a sala escura. A mão direita gira a maçaneta e empurra até 33°; a folha segue e a esquerda a leva a ~90° durante a travessia.
+- **Portão** (`passage = &"gate"`, nos dois lados do portão norte): duas folhas de chapa entre pilares de concreto, na neve, com a placa amarela. Dylan ergue a alavanca no encontro das folhas e empurra a direita, que arrasta a esquerda até ele soltar; a mão esquerda manda a segunda adiante. Abrem ~29° e 30°, o bastante para o corpo passar com 17 cm de folga. Câmera mais baixa e aberta, luz quente do pátio, sons próprios.
+- A arma não aparece na cinemática: a mão direita segura a maçaneta. No cenário o gesto continua com a arma na mão, como antes.
+- O portão pintado tem uma folha só; a cinemática usa duas porque a captura atravessa em linha reta pelo meio.
+
+Os sons `door_latch.wav`, `door_creak.wav`, `gate_latch.wav` e `gate_swing.wav` em `assets/audio/` foram sintetizados deterministicamente por `tools/author_door_audio.py`, sem samples externos. Headless não reproduz áudio; execução gráfica usa AudioStreamPlayer.
+
+`tests/check_passage_cinematic.gd` (`cinematica-passagem`) mede nos ossos da figura, para as duas passagens: palma a menos de 5 cm da maçaneta no início do empurrão, nenhuma folha aberta antes disso nem saltando para a mão, folha a menos de 2 cm da palma enquanto empurrada, corpo sempre a mais de 9 cm do plano de cada folha e quadril além da abertura no corte. As asserções foram conferidas contra quatro defeitos reintroduzidos (portão sem inércia, maçaneta 19 cm acima, apoio da mão errado, folhas ignorando as mãos). `tools/preview_passage_cinematic.gd` grava quadros em `.local/passage-*.png`.
 
 ## Reprodução e verificação
 

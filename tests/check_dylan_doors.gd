@@ -86,9 +86,12 @@ func on_stage(value: StringName) -> void:
 	elif value == &"opening":
 		await create_timer(0.8).timeout
 		await capture("door-opening-%d" % capture_index)
+	elif value == &"crossing":
+		check(root.get_node("DoorTransition").leaves[0].angle > 0.6, "Dylan walked into a door that was not open yet")
 	elif value == &"loading":
 		var transition: Node = root.get_node("DoorTransition")
 		check(is_equal_approx(transition.curtain.modulate.a, 1.0), "Scene changed before the screen was black")
+		check(transition.bone_position("Hips").z < -0.5, "Dylan was not through the doorway when the room changed")
 
 func travel(room: Node, expected: String, number: int) -> void:
 	capture_index = number
@@ -109,6 +112,7 @@ func travel(room: Node, expected: String, number: int) -> void:
 	var transition: Node = root.get_node("DoorTransition")
 	var expected_title: String = "GUARDHOUSE" if expected.ends_with("save_room.tscn") else "GUARDHOUSE YARD"
 	check(transition.region_title.text == expected_title, "Cinematic displayed the wrong destination")
+	check(transition.passage == &"door" and transition.animator.current_animation == "door_cross", "Dylan does not open the door in the cinematic")
 	# The first stage precedes the test's connection.
 	check(RetroFilter.is_effect_on(RetroFilter.Effect.CURVE), "Door cinematic did not inherit the chosen presentation")
 	check(float(transition.retro_filter.effect.material.get_shader_parameter("curve")) > 0.0, "Door cinematic lost the preset's curvature")

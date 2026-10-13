@@ -146,6 +146,7 @@ func _ready() -> void:
 	gate.approach = GATE_APPROACH
 	gate.facing = PI
 	gate.entry_id = &"north_gate"
+	gate.passage = &"gate"
 	gate.target_scene = Phase.find(&"guardhouse").entry_scene
 	gate.destination_name = "Guardhouse Yard"
 	gate.returning_outside = true
