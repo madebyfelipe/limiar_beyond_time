@@ -89,13 +89,29 @@ func build_source() -> void:
 		box("GateRail",Vector3(0,y,0.08),Vector3(4.9,0.1,0.06),Color("8a9480"))
 	box("GateSign",Vector3(1.6,1.6,0.1),Vector3(0.8,0.5,0.04),Color("c7b672"))
 	# The pen stretch: where the animal is kept, between z = -10 and z = -19.
-	for z: float in [-10.0,-19.0]:
-		for x: float in [-2.85,2.85]:
-			box("PenPost",Vector3(x,0.75,z),Vector3(0.2,1.5,0.2),Color("5d5f55"))
-		box("PenBeam",Vector3(0,1.4,z),Vector3(5.8,0.12,0.1),Color("5d5f55"))
+	# Nothing is strung across the trail: the pen reads from what stands along
+	# its banks. Anything taller than the bank is on the west side, behind the
+	# actor for all three cameras, and only what the capsule can touch is solid.
 	box("FeedTrough",Vector3(2.75,0.3,-12),Vector3(0.8,0.6,2.4),Color("6f7560"),true)
 	box("TroughSnow",Vector3(2.75,0.62,-12),Vector3(0.82,0.04,2.42),Color("c4d2da"))
 	box("StrawBed",Vector3(-2.3,0.025,-16.5),Vector3(1.7,0.05,3.2),Color("8d8663"))
+	# A lean-to over the straw, footed in the bank and resting on the rock.
+	for z: float in [-15.1,-17.9]:
+		box("PenShelterPost",Vector3(-2.78,1.48,z),Vector3(0.12,1.16,0.12),Color("5d5f55"))
+	var roof := box("PenShelterRoof",Vector3(-3.2,2.22,-16.5),Vector3(1.5,0.08,3.4),Color("5d5f55"))
+	roof.rotation.z = -atan(0.4/1.4)
+	var roof_snow := box("PenShelterSnow",Vector3(-3.2,2.29,-16.5),Vector3(1.46,0.06,3.36),Color("c4d2da"))
+	roof_snow.rotation.z = roof.rotation.z
+	box("HayBale",Vector3(-2.8,0.3,-13.2),Vector3(0.8,0.6,1.2),Color("938a5f"),true)
+	box("HayBaleTop",Vector3(-2.9,0.85,-13.2),Vector3(0.6,0.5,1.1),Color("938a5f"))
+	box("HayBaleSnow",Vector3(-2.9,1.12,-13.2),Vector3(0.62,0.04,1.12),Color("c4d2da"))
+	box("FeedSacks",Vector3(2.8,0.25,-16.8),Vector3(0.8,0.5,1.1),Color("8b8672"),true)
+	box("FeedSackTop",Vector3(2.85,0.61,-16.8),Vector3(0.6,0.22,0.8),Color("9a947d"))
+	# A warning board on the wire where the pen begins, and its yard light.
+	box("PenSign",Vector3(-3.14,1.3,-9.6),Vector3(0.05,0.5,0.75),Color("c7b672"))
+	box("PenLampPost",Vector3(-3.3,2.3,-19.4),Vector3(0.14,2.8,0.14),Color("52626a"))
+	box("PenLampArm",Vector3(-2.95,3.64,-19.4),Vector3(0.8,0.08,0.08),Color("52626a"))
+	box("PenLampHead",Vector3(-2.6,3.56,-19.4),Vector3(0.3,0.1,0.2),Color("f4dfa0"))
 	box("CrateA",Vector3(2.55,0.5,-8.4),Vector3(1.1,1,1.1),Color("7a826d"),true)
 	box("CrateSnow",Vector3(2.55,1.02,-8.4),Vector3(1.12,0.05,1.12),Color("c4d2da"))
 	box("CrateB",Vector3(-2.6,0.4,-21.8),Vector3(1,0.8,1.2),Color("747b67"),true)
@@ -105,13 +121,15 @@ func build_source() -> void:
 	box("FallenPineSnow",Vector3(-1.35,0.92,-22.6),Vector3(3.6,0.06,0.58),Color("c4d2da"))
 	# Relay shed: the north cap of the corridor and the end of this content.
 	box("RelayShed",Vector3(0,1.7,-29.4),Vector3(6.6,3.4,5),Color("79858b"),true)
-	box("RelayFoundation",Vector3(0,0.2,-29.4),Vector3(6.8,0.4,5.2),Color("5f6d76"),true)
+	# The front door is at grade and the trail runs flush to it. The foundation
+	# shows on the sides and the back only: its front edge stops just inside the
+	# front wall (z = -26.9), so no ledge or step stands before the door.
+	box("RelayFoundation",Vector3(0,0.2,-29.455),Vector3(6.8,0.4,5.09),Color("5f6d76"),true)
 	box("RelayRoof",Vector3(0,3.47,-29.4),Vector3(7,0.14,5.4),Color("b7c8d1"))
-	box("RelayDoor",Vector3(0,1.15,-26.86),Vector3(1.1,2.1,0.06),Color("394c59"))
-	box("RelaySealPlate",Vector3(0,1.5,-26.8),Vector3(0.9,0.42,0.05),Color("b8ab6b"))
-	box("RelayHandle",Vector3(0.41,1.05,-26.8),Vector3(0.2,0.05,0.05),Color("b9c0bb"))
+	box("RelayDoor",Vector3(0,1.05,-26.86),Vector3(1.1,2.1,0.06),Color("394c59"))
+	box("RelaySealPlate",Vector3(0,1.4,-26.8),Vector3(0.9,0.42,0.05),Color("b8ab6b"))
+	box("RelayHandle",Vector3(0.41,0.95,-26.8),Vector3(0.2,0.05,0.05),Color("b9c0bb"))
 	box("RelayLamp",Vector3(0,2.4,-26.78),Vector3(0.7,0.12,0.16),Color("f4dfa0"))
-	box("RelayStep",Vector3(0,0.1,-26.45),Vector3(2.2,0.2,0.8),Color("899ba6"),true)
 	box("RelayMast",Vector3(-2.4,4.7,-29.4),Vector3(0.12,2.6,0.12),Color("52626a"))
 	for y: float in [4.3,4.8,5.3]:
 		box("MastCrossbar",Vector3(-2.4,y,-29.4),Vector3(1.2,0.06,0.06),Color("52626a"))

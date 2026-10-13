@@ -12,10 +12,11 @@ const ART_DIR := "res://assets/backgrounds/perimeter/authored/"
 const ART_FILES := ["art_cam01_v02.png","art_cam02_v03.png","art_cam03_v02.png","art_cam04_v01.png"]
 const ZONE_CENTERS := [Vector3(0,2,-5),Vector3(0,2,-15),Vector3(0,2,-25.5),Vector3(0,2,-36.5)]
 const ZONE_SIZES := [Vector3(14,6,11),Vector3(16,6,10),Vector3(14,6,12),Vector3(13,6,9)]
-## The relay shed's front door, from the step's foot on the trail (a 0,2 m
-## step the capsule cannot climb), and where the room sends Dylan back out.
-const RELAY_APPROACH := Vector3(0,0,-25.75)
-const RELAY_ARRIVAL := Vector3(0,0,-25.45)
+## The relay shed's front door, at grade: the trail runs flush to the wall at
+## z = -26,9 and the capsule stops at -26,6, inside the prompt's radius. The
+## room sends Dylan back out a pace further from the door.
+const RELAY_APPROACH := Vector3(0,0,-26.25)
+const RELAY_ARRIVAL := Vector3(0,0,-25.95)
 ## The rear door cut into the shed's back wall, and the yard behind it. The
 ## yard is closed by invisible bounds: nothing is authored past them yet.
 const REAR_DOOR_X := 2.4

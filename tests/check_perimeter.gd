@@ -254,8 +254,15 @@ func run() -> void:
 	check(MissionState.stage == MissionState.Stage.RELAY,"Reaching the shed did not close the phase")
 	check(perimeter.closed(),"The chain does not report Phase 2 as closed")
 	var north: Vector3 = await push(Vector3.FORWARD)
-	check(north.z > -26.6,"The relay shed let the player through: %v" % north)
-	# The shed door opens now that the phase is closed, from the foot of its step.
+	check(north.z > -26.65,"The relay shed let the player through: %v" % north)
+	# The trail runs flush to the shed: no step stops Dylan short of its door.
+	check(north.z < -26.5 and absf(north.y) < 0.05,"Something stops or lifts the player before the relay door: %v" % north)
+	check(scene.source.get_node_or_null("RelayStep") == null,"The step is back in front of the relay door")
+	# The pen is dressed along its banks; nothing is strung across the trail.
+	check(scene.source.get_node_or_null("PenBeam") == null and scene.source.get_node_or_null("PenPost") == null,"A pen fence crosses the trail again")
+	for label: String in ["PenShelterRoof","HayBale","FeedSacks","PenSign","PenLampPost"]:
+		check(scene.source.get_node_or_null(label) != null,"The pen lost its "+label)
+	# The shed door opens now that the phase is closed, from the trail in front of it.
 	check(scene.relay_door.unlocked() and scene.relay_door.target_scene == "res://environments/relay_room.tscn","The relay door does not lead into the shed")
 	await walk_to(scene.RELAY_APPROACH)
 	check(scene.relay_door.can_interact() and scene.relay_door.prompt_text().contains("Relay shed door"),"No prompt at the relay shed door")

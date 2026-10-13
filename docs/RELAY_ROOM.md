@@ -6,7 +6,7 @@ do perímetro; `executar-rele.cmd` abre a sala direto.
 ## Fluxo
 
 1. Na trilha, ao passar de z −24 a etapa vira `RELAY` e a porta do galpão abre
-   (prompt ao pé do degrau, em `RELAY_APPROACH`; o degrau de 0,2 m não é subível pela cápsula).
+   (prompt diante da porta, em `RELAY_APPROACH`; desde 13/10/2026 a porta fica ao nível do chão, sem degrau).
 2. A cinemática de porta mostra **RELAY ROOM**. Dentro, a etapa vira
    `RELAY_ROOM`: "Check the relay terminal for the operator's last log."
 3. **E** no terminal (parede leste) abre o console, que só reproduz:

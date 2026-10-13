@@ -52,11 +52,30 @@ pula as capturas.
 
 - Corredor de 6,4 m entre bancos de neve (x = ±3,2) e ombros de rocha
   (x = ±4,64), do portão em `z = 0` ao galpão do relé em `z = −29`.
-- Trecho do cercado entre `z = −10` e `z = −19`: postes, viga, cocho, cama de
-  palha. É a área de patrulha do Keleken.
+- Trecho do cercado entre `z = −10` e `z = −19`, lido pelo que fica junto aos
+  bancos e nunca atravessado na trilha: cocho e sacos de ração a leste; a oeste,
+  placa de aviso no arame, fardos de feno, abrigo de meia-água sobre a cama de
+  palha e poste de luz. É a área de patrulha do Keleken.
 - Pinheiro caído em `z = −22,6` deixa passagem só pelo lado leste.
-- Galpão do relé fecha o corredor ao norte, com porta lacrada, mastro e degrau.
+- Galpão do relé fecha o corredor ao norte, com mastro e porta ao nível do chão:
+  a trilha chega rente à parede, sem degrau.
 - Linha de árvores a x = ±12, fora do corredor e das câmeras.
+
+**Geometria revista em 13/10/2026 (tarde).** Saíram o degrau de 0,2 m diante da
+porta do galpão, que a cápsula não subia e parava Dylan em `z = −25,77`, a 1,1 m
+da porta, e as duas cercas (postes e viga a 1,4 m) que cruzavam a trilha em
+`z = −10` e `z = −19` sem colisão. A porta desceu ao chão e a fundação deixou de
+aparecer na fachada (termina 1 cm atrás da parede frontal), então Dylan encosta
+em `z = −26,6`; `RELAY_APPROACH` e `RELAY_ARRIVAL` avançaram 0,5 m para
+acompanhar. Dos adereços novos, só o fardo de baixo e os sacos são sólidos, e
+tudo que passa da altura do banco está a oeste, atrás do ator nas três câmeras.
+
+As capturas `geometry_cam0{1,2,3}.png` e `cameras.json` foram regeneradas. **As
+placas pintadas antes dessa revisão** (`art_cam01_v02`, `art_cam02_v03` e
+`art_cam03_v02`, ainda as ativas neste commit) mostram o degrau e as cercas que
+não existem mais, e Dylan passa por cima do que está pintado; B mostra a
+geometria. Só placas refeitas sobre as capturas novas correspondem a ela (na
+vista 1 muda só a placa de aviso, à direita).
 
 ### Câmeras
 
