@@ -58,6 +58,11 @@ O Godot criou metadados `.import` e texturas extraídas durante a importação. 
 - Modelo instalado no exterior e na sala, com altura visual/colisão de 1,8 m para a geometria autorada. Os ensaios originais mantêm a ampliação de 2,4 m. Não foi alterada a escala do asset-fonte.
 - Animações são procedurais de protótipo: sem captura de movimento, IK de pés ou mão presa à maçaneta. Detalhes/testes em `docs/DYLAN_ANIMATION.md`.
 
+## Transições, reações e mira Mixamo — 13/10/2026
+
+- Treze capturas novas em `dylan_protagonist/mixamo/`: dash para trás, parada de corrida, reação a tiro (desarmado e com pistola), morte, idle olhando em volta, cinco ciclos de pistola, susto e digitação. Exportadas com root motion; `.import` com `root_scale=100`, como as demais. Capturas, janelas e hashes em `docs/DYLAN_TRANSITIONS.md`.
+- O catálogo inteiro do Mixamo sobre o rig `dylan_mixamo` fica fora do Git, em `E:\LIMIAR\.local\mixamo_library\`.
+
 ## Esquivas Mixamo — 12/10/2026
 
 - Exportadas da conta do usuário sobre o rig `dylan_mixamo`, FBX Binary, 30 fps, sem skin: `dylan_protagonist/mixamo/roll_stand.fbx` (Stand To Roll → `dodge_forward`), `dodge_back.fbx` (Dodging Back → `dodge_back`) e `dodge_right.fbx` (Dodging Right → `dodge_right`, espelhado em `dodge_left`). O `dodge_right.fbx` anterior, vindo de um espelho público no GitHub, foi substituído.

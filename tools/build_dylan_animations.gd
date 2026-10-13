@@ -16,6 +16,8 @@ const HIPS := ":mixamorig_Hips"
 ##   stitch   cross-fade the tail over the head so the window loops seamlessly
 ##   optional skip with a note while the capture has not been downloaded yet;
 ##            DylanVisual.play_scripted falls back for a missing clip
+##   stand    keep only the trunk and arms; hips and legs come from the idle,
+##            so a seated capture can be performed standing
 const CLIPS := {
 	&"idle": {"file": "dylan_rig_idle", "loop": true},
 	&"walk": {"file": "walk", "loop": true},
@@ -27,12 +29,12 @@ const CLIPS := {
 	# "Dodging Right" (in place) and its mirror for the sidesteps.
 	&"dodge_right": {"file": "dodge_right", "loop": false, "from": 0.1, "to": 1.1, "plant": true},
 	&"dodge_left": {"file": "dodge_right", "loop": false, "from": 0.1, "to": 1.1, "plant": true, "mirror": true},
-	# The backstep. Replaced on request: a new capture dropped in as
-	# dodge_back_v2.fbx takes over the slot; until then "Dodging Back" (Jumping
-	# Backwards Dodge) stays, the hop without the idle around it. Set the window
-	# of the new capture after looking at it (tools/render_dodge_candidates.gd).
+	# The backstep. Replaced on request (2026-10-13) by "Backward Jump"
+	# (Jumping While Walking Backwards) in dodge_back_v2.fbx: the gather, the
+	# hop and the landing, without the walk around them. "Dodging Back" stays
+	# as the fallback while the newer file is absent.
 	&"dodge_back": {"file": "dodge_back", "loop": false, "from": 0.35, "to": 1.75, "plant": true,
-		"replacement": {"file": "dodge_back_v2", "loop": false, "plant": true}},
+		"replacement": {"file": "dodge_back_v2", "loop": false, "from": 0.15, "to": 1.35, "plant": true}},
 	# "Stand To Roll": crouch, dive roll and the rise back to standing.
 	&"dodge_forward": {"file": "roll_stand", "loop": false, "from": 0.45, "to": 1.95, "plant": true},
 	# The capture walks up, opens and crosses in 6,37 s. Only the reach and the
@@ -45,9 +47,36 @@ const CLIPS := {
 	&"turn_right": {"file": "turn_a", "loop": true, "from": 1.8, "to": 2.5, "plant": true, "unturn": true, "stitch": 0.25},
 	&"turn_left": {"file": "turn_b", "loop": true, "from": 1.8, "to": 2.5, "plant": true, "unturn": true, "stitch": 0.25},
 	# Relay room cutscene: Dylan starts back from the window when the animal
-	# looks in (Mixamo "Startled", In Place). Played once and held on its end.
-	&"startled": {"file": "startled", "loop": false, "plant": true, "optional": true},
+	# looks in. Mixamo has no "Startled"; "Terrified" (Being Terrified While
+	# Standing) opens with the start, hands thrown up to the face, before it
+	# sinks into a 20 s cower. Only the start is kept, held on its end.
+	&"startled": {"file": "startled", "loop": false, "from": 0.6, "to": 2.4, "plant": true, "optional": true},
+	# Relay room console. Mixamo only has seated typing ("Typing", Sitting At A
+	# Computer And Typing); its upright trunk and arms go over the standing legs.
+	&"terminal_type": {"file": "typing_seated", "loop": true, "from": 2.0, "to": 10.0, "stitch": 0.15, "stand": true, "optional": true},
+	# Transitions and reactions (Mixamo, 2026-10-13), all one-shots that the
+	# visual hands back to locomotion when they end.
+	# "Run To Stop" (Fast Stop From Full Run): plant and settle after a run.
+	&"run_stop": {"file": "run_stop", "loop": false, "plant": true, "optional": true},
+	# "Standing React Large From Front": the flinch while a hit stuns him.
+	&"hit": {"file": "hit_front", "loop": false, "from": 0.0, "to": 0.9, "plant": true, "optional": true},
+	# "Hit Reaction" (While Holding A Pistol): the same flinch with the gun up.
+	&"hit_aim": {"file": "hit_pistol", "loop": false, "from": 0.7, "to": 1.8, "plant": true, "optional": true},
+	# "Standing React Death Backward" (Death Falling Backwards): played once,
+	# held lying on the ground.
+	&"death": {"file": "death_back", "loop": false, "plant": true, "optional": true},
+	# "Unarmed Idle Looking Ver. 1": a look around that breaks a long idle.
+	&"idle_look": {"file": "idle_look", "loop": false, "plant": true, "optional": true},
+	# Pistol/handgun locomotion with the gun up: stance, strafes and steps.
+	&"aim_idle": {"file": "pistol_idle", "loop": true, "plant": true, "optional": true},
+	&"aim_walk": {"file": "pistol_walk", "loop": true, "plant": true, "optional": true},
+	&"aim_walk_back": {"file": "pistol_walk_back", "loop": true, "plant": true, "optional": true},
+	&"strafe_left": {"file": "pistol_strafe_left", "loop": true, "plant": true, "optional": true},
+	&"strafe_right": {"file": "pistol_strafe_right", "loop": true, "plant": true, "optional": true},
 }
+
+## Bones whose tracks a "stand" clip takes from the idle.
+const LOWER_BODY := ["Hips", "UpLeg", "Leg", "Foot", "ToeBase", "Toe_End"]
 
 func _init() -> void:
 	var library := AnimationLibrary.new()
@@ -60,9 +89,11 @@ func _init() -> void:
 			continue
 		var scene: Node = (load(SOURCE % spec["file"]) as PackedScene).instantiate()
 		var player := scene.find_child("AnimationPlayer", true, false) as AnimationPlayer
-		var source: Animation = player.get_animation(player.get_animation_list()[0])
+		var source: Animation = metric(player.get_animation(player.get_animation_list()[0]))
 		var clip: Animation = _window(source, spec.get("from", 0.0), spec.get("to", source.length),
 			spec.get("plant", false), spec.get("unturn", false), spec.get("stitch", 0.0))
+		if spec.get("stand", false):
+			_stand(clip)
 		clip.loop_mode = Animation.LOOP_LINEAR if spec["loop"] else Animation.LOOP_NONE
 		if spec.get("mirror", false):
 			_mirror(clip)
@@ -73,6 +104,47 @@ func _init() -> void:
 	var error: int = ResourceSaver.save(library, OUTPUT)
 	print("saved ", OUTPUT, " error=", error)
 	quit(error)
+
+## Mixamo FBX are in centimetres; every capture here is imported with
+## nodes/root_scale=100 so the hips track reads in the rig's metres. A capture
+## dropped in with the default import (root_scale=1) stands 0,005 above the
+## floor instead of 0,5; its hips track is scaled back here so it still builds.
+static func metric(source: Animation) -> Animation:
+	for track: int in range(source.get_track_count()):
+		if source.track_get_type(track) != Animation.TYPE_POSITION_3D or not str(source.track_get_path(track)).ends_with(":mixamorig_Hips"):
+			continue
+		var height: float = 0.0
+		for key: int in range(source.track_get_key_count(track)):
+			height = maxf(height, absf((source.track_get_key_value(track, key) as Vector3).y))
+		if height >= 0.05:
+			return source
+		var fixed: Animation = source.duplicate(true)
+		for key: int in range(fixed.track_get_key_count(track)):
+			fixed.track_set_key_value(track, key, (fixed.track_get_key_value(track, key) as Vector3) * 100.0)
+		return fixed
+	return source
+
+## Replaces the hips and legs of a clip with the idle's, looped over its length.
+func _stand(clip: Animation) -> void:
+	var scene: Node = (load(SOURCE % "dylan_rig_idle") as PackedScene).instantiate()
+	var player := scene.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	var idle: Animation = metric(player.get_animation(player.get_animation_list()[0]))
+	for track: int in range(clip.get_track_count()):
+		var path: NodePath = clip.track_get_path(track)
+		var bone: String = str(path).get_slice(":", 1).trim_prefix("mixamorig_").trim_prefix("Left").trim_prefix("Right")
+		if not LOWER_BODY.has(bone):
+			continue
+		var source: int = idle.find_track(path, clip.track_get_type(track))
+		if source < 0:
+			continue
+		for key: int in range(clip.track_get_key_count(track)):
+			var time: float = fmod(clip.track_get_key_time(track, key), idle.length)
+			match clip.track_get_type(track):
+				Animation.TYPE_POSITION_3D:
+					clip.track_set_key_value(track, key, idle.position_track_interpolate(source, time))
+				Animation.TYPE_ROTATION_3D:
+					clip.track_set_key_value(track, key, idle.rotation_track_interpolate(source, time))
+	scene.free()
 
 ## Reflect the capture across the sagittal plane and exchange paired bones.
 func _mirror(clip: Animation) -> void:

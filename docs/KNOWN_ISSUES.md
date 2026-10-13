@@ -10,9 +10,8 @@
 - **O conteúdo agora termina atrás do galpão** (`REAR_YARD`), não mais na porta
   lacrada do relé. As menções abaixo à porta lacrada como fim são históricas.
 - Log do operador é texto provisório; sem áudio na sala.
-- Faltam do Mixamo os clipes `terminal_type` e `startled_turn`, além dos de mira;
-  a sala já os pede por nome. O Claude in Chrome não estava conectado nesta sessão,
-  então nada foi baixado.
+- `terminal_type` e `startled` chegaram do Mixamo em 13/10/2026, junto com mira de
+  pistola, parada de corrida, reação a tiro e morte. Ver `DYLAN_TRANSITIONS.md`.
 - **Esquiva mais lenta**: 0,55 s, mesmos 2,24 m. **Sangue** no Keleken e clipes
   `hit`/`death` autorados. Ver `COMBAT.md` e `KELEKEN_ANIMATION.md`.
 

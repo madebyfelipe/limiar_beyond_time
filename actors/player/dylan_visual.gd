@@ -8,12 +8,23 @@ const SOURCE_HEIGHT := 0.9761
 ## Ground speed each capture carries on its own, measured from the planted foot
 ## travelling backwards under the hips. Playback follows the real speed, so the
 ## feet keep contact with the floor instead of skating over it.
-const NATIVE_SPEED := {&"walk": 1.48, &"run": 2.73, &"walk_back": 0.61}
+## The pistol captures were measured the same way against the walk's foot
+## (2026-10-13): stance-foot speed under the hips, scaled by walk 1,48.
+const NATIVE_SPEED := {&"walk": 1.48, &"run": 2.73, &"walk_back": 0.61,
+	&"aim_walk": 2.06, &"aim_walk_back": 1.14, &"strafe_left": 1.72, &"strafe_right": 1.76}
 ## Turn rate of the pivot capture, in rad/s, measured over its own window.
 const NATIVE_TURN := 0.887
 ## Below this cosine the body is travelling backwards rather than forwards.
 const BACKWARD_COSINE := -0.4
 const DODGE_CLIPS: Array[StringName] = [&"dodge_forward", &"dodge_back", &"dodge_left", &"dodge_right"]
+## Standing this long without input breaks the idle with a look around.
+const IDLE_LOOK_AFTER := 8.0
+## A one-shot (a stop, a flinch, a look around) gives way to locomotion as
+## soon as the body moves faster than this.
+const ONE_SHOT_RELEASE := 0.3
+## Braking passes through walking speed for a frame or two; a stop still
+## counts as the end of a run when the run was this recent.
+const RUN_STOP_GRACE := 0.25
 @export_range(0.5, 3.0) var target_height: float = 2.4
 @onready var model: Node3D = $Model
 @onready var skeleton: Skeleton3D = $Model/Skeleton3D
@@ -30,6 +41,10 @@ var pistol: Node3D
 var muzzle: Node3D
 var _hand: int = -1
 var _dodge_clip: StringName = &"dodge_right"
+## The transition or reaction playing over locomotion, if any.
+var _one_shot: StringName = &""
+var _idle_time: float = 0.0
+var _since_run: float = INF
 
 func _ready() -> void:
 	model.scale = Vector3.ONE * (target_height / SOURCE_HEIGHT)
@@ -52,15 +67,28 @@ func _ready() -> void:
 	muzzle = pistol.find_child("Muzzle", true, false) as Node3D
 	# After the modifiers, so the gun sits in the hand the stance has placed.
 	skeleton.skeleton_updated.connect(_place_pistol)
+	player.damaged.connect(_on_damaged)
 
 func _process(delta: float) -> void:
 	_update_aim(delta)
 	if player.is_dead():
+		if animator.has_animation(&"death"):
+			# Falls backwards once and stays down; the clip holds its last pose.
+			if locomotion != &"death":
+				locomotion = &"death"
+				_one_shot = &""
+				animator.speed_scale = 1.0
+				animator.play(&"death", 0.1)
+			return
 		animator.pause()
 		rotation.z = move_toward(rotation.z, -PI * 0.48, delta * 3.0)
 		return
+	if locomotion == &"death":
+		# Revived by a reset: start over from the stance.
+		locomotion = &""
 	rotation.z = move_toward(rotation.z, 0.0, delta * 5.0)
-	rotation.x = move_toward(rotation.x, 0.12 if player.hit_stun_left > 0.0 else 0.0, delta * 5.0)
+	var tilt: bool = player.hit_stun_left > 0.0 and not animator.has_animation(&"hit")
+	rotation.x = move_toward(rotation.x, 0.12 if tilt else 0.0, delta * 5.0)
 	if interaction_active:
 		return
 	if player.dodge_left > 0.0:
@@ -81,12 +109,41 @@ func _process(delta: float) -> void:
 	var speed: float = motion.length()
 	var forward: Vector3 = player.facing()
 	var next: StringName = _clip_for(motion, speed, Vector2(forward.x, forward.z))
+	_idle_time = _idle_time + delta if next == &"idle" else 0.0
+	_since_run = 0.0 if next == &"run" else _since_run + delta
+	if _one_shot == &"" and next == &"idle":
+		if _since_run < RUN_STOP_GRACE and locomotion != &"idle" and animator.has_animation(&"run_stop"):
+			_play_one_shot(&"run_stop", 0.1)
+		elif _idle_time > IDLE_LOOK_AFTER and animator.has_animation(&"idle_look"):
+			_idle_time = 0.0
+			_play_one_shot(&"idle_look", 0.3)
+	if _one_shot != &"":
+		var holding: bool = animator.current_animation == _one_shot and animator.is_playing()
+		if holding and (speed < ONE_SHOT_RELEASE or player.hit_stun_left > 0.0):
+			return
+		_one_shot = &""
+		locomotion = &""
 	if next != locomotion:
 		locomotion = next
 		animator.play(next, 0.16)
 	elif not animator.is_playing():
 		animator.play(next, 0.16)
 	animator.speed_scale = _rate_for(next, speed)
+
+## Plays a clip once over locomotion; _process hands back when it ends or
+## when the body starts moving.
+func _play_one_shot(clip: StringName, blend: float) -> void:
+	_one_shot = clip
+	locomotion = clip
+	animator.speed_scale = 1.0
+	animator.play(clip, blend)
+
+func _on_damaged(_amount: float) -> void:
+	if player.is_dead() or interaction_active or player.dodge_left > 0.0:
+		return
+	var clip: StringName = &"hit_aim" if _aiming() and animator.has_animation(&"hit_aim") else &"hit"
+	if animator.has_animation(clip):
+		_play_one_shot(clip, 0.05)
 
 func _dodge_clip_for(direction: Vector3, forward: Vector3) -> StringName:
 	var along: float = forward.dot(direction)
@@ -143,9 +200,8 @@ func _clip_for(motion: Vector2, speed: float, forward: Vector2) -> StringName:
 		return &"walk_back"
 	return &"run" if speed > player.config.walk_speed + 0.4 else &"walk"
 
-## Legs while the gun is up. Strafing and aimed captures do not exist yet, so a
-## sideways step borrows the walk until they are captured; the names below are
-## the ones a future capture should take to be picked up on its own.
+## Legs while the gun is up: the pistol captures (stance, steps forward and
+## back, strafes), each falling back to the unarmed cycle if it is missing.
 func _aim_clip_for(motion: Vector2, speed: float, forward: Vector2) -> StringName:
 	if speed < 0.08:
 		if absf(player.turn_input) > 0.1:
@@ -153,14 +209,14 @@ func _aim_clip_for(motion: Vector2, speed: float, forward: Vector2) -> StringNam
 		return &"aim_idle" if animator.has_animation(&"aim_idle") else &"idle"
 	var along: float = motion.normalized().dot(forward)
 	if along < BACKWARD_COSINE:
-		return &"walk_back"
+		return &"aim_walk_back" if animator.has_animation(&"aim_walk_back") else &"walk_back"
 	if along < 0.5:
 		var side: float = motion.normalized().cross(forward)
 		# Facing -Z, left is -X, where this cross product turns positive.
 		var strafe: StringName = &"strafe_left" if side > 0.0 else &"strafe_right"
 		if animator.has_animation(strafe):
 			return strafe
-	return &"walk"
+	return &"aim_walk" if animator.has_animation(&"aim_walk") else &"walk"
 
 func _rate_for(clip: StringName, speed: float) -> float:
 	if clip == &"idle" or clip == &"aim_idle":
@@ -188,5 +244,7 @@ func play_scripted(clip: StringName, fallback: StringName = &"idle") -> StringNa
 
 func end_interaction() -> void:
 	interaction_active = false
+	_one_shot = &""
+	_idle_time = 0.0
 	locomotion = &"idle"
 	animator.play(&"idle", 0.12)

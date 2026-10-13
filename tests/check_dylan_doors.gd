@@ -68,7 +68,8 @@ func walk_to(player: PlayerController, target: Vector3, running: bool = false) -
 		if not initial.is_equal_approx(visual.skeleton.get_bone_pose_rotation(bone)):
 			leg_changed = true
 	release()
-	await tick(20 if running else 12)
+	# A run ends in the 0,9 s stop before the idle.
+	await tick(70 if running else 12)
 	check(reached, "Dylan could not reach doorway waypoint: " + str(target))
 	check(visual.animator.current_animation == "idle", "Locomotion did not return to idle after stopping")
 

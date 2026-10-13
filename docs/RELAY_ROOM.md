@@ -62,10 +62,9 @@ antigos continuam válidos. Não há terminal de salvamento na trilha nem no rel
 
 A sala pede por nome `terminal_type` (ao teclado) e `startled` (o susto, quando o
 animal para e olha pela janela) por `DylanVisual.play_scripted()`, que cai para
-`idle` enquanto o clipe não existe. `startled` já está declarado em
-`tools/build_dylan_animations.gd` como opcional: basta exportar do Mixamo "Startled"
-(In Place, FBX Binary, 30 fps, sem skin, no rig `dylan_mixamo`) para
-`assets/models/dylan_protagonist/mixamo/startled.fbx` e reconstruir a biblioteca.
+`idle` se o clipe faltar. Desde 13/10/2026 os dois existem: `startled` é o início do
+"Terrified" do Mixamo, e `terminal_type` é o "Typing" sentado enxertado sobre as
+pernas em pé. Ver `DYLAN_TRANSITIONS.md`.
 
 ## Verificação
 

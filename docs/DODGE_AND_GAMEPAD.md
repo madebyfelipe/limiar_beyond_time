@@ -60,10 +60,10 @@ so each window is compressed into the escape. Since 2026-10-12 the escape lasts
 the captures now play at 2–2.7x instead of 3–4.7x. Invulnerability is 0.41 s
 and the cooldown 1.05 s, preserving the previous proportions.
 
-**Back dodge replacement requested on 2026-10-13.** The build tool takes
-`dodge_back_v2.fbx` over the hop as soon as that file exists (whole capture,
-planted, until its window is chosen with `tools/render_dodge_candidates.gd`).
-Drop the new Mixamo export there, rebuild `dylan_clips.res` and run `esquiva`.
+**Back dodge replaced on 2026-10-13.** `dodge_back` now comes from
+`dodge_back_v2.fbx`, Mixamo "Backward Jump" (*Jumping While Walking Backwards*),
+window 0.15–1.35 s: the gather, the hop and the landing. `dodge_back.fbx` stays as
+the fallback when the newer file is absent. See `DYLAN_TRANSITIONS.md`.
 
 Also evaluated and rejected: the four **Standing Dodge** captures of the Pro
 Longbow pack (the only matching four-direction set, but recorded side-on in an
