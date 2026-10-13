@@ -38,15 +38,19 @@ Sala de equipamentos de 6 × 4,4 m, pé-direito 2,8 m, dentro dos 6,6 × 5 m do 
 Diferente da guarita (uma caixa vista de um canto): racks na parede norte,
 banco de baterias a oeste e transformador baixo diante dos racks formam um L;
 terminal na parede leste; janela alta ao norte; duas portas (frente ao sul e fundos ao norte).
-Uma câmera fixa no canto sudoeste. Sem placa pintada: a sala é iluminada pelas próprias
-luzes (teto, brilho da tela, emergência), para que o corte de energia apareça.
+Uma câmera fixa no canto sudoeste. Desde 13/10/2026, placas próprias cobrem a
+sala iluminada e o apagão; a câmera da janela também tem sua placa. As luzes 3D
+continuam iluminando os personagens e o brilho das placas acompanha o piscar
+do teto e o pulso da emergência. B compara arte/geometria; o vidro da janela
+permanece transparente para mostrar o Keleken animado. Inventário e prompts em
+`RELAY_ART_2026-10-13.md`.
 
 Primeira versão tinha uma coluna de conduítes no centro; as capturas mostraram que ela
 escondia a porta dos fundos e o caminho até ela, e foi trocada pelo transformador.
 
 ## Atrás do galpão (provisório)
 
-`perimeter.gd` ganhou o enquadramento `perimeter_4` (só geometria, sem placa),
+`perimeter.gd` ganhou o enquadramento `perimeter_4` (com placa desde 13/10/2026),
 a porta dos fundos na parede traseira do galpão e limites invisíveis do pátio
 (laterais, fundo, os dois vãos ao lado do galpão e troncos dos três pinheiros).
 A versão final sai para uma área externa nova; este pátio é só a saída provisória.
@@ -76,5 +80,6 @@ saída automática, chegada atrás do galpão no enquadramento 4; limites do pá
 quatro lados; volta pela porta dos fundos para a sala escura; reinício.
 Capturas gráficas em `.local/relay-*.png`, inspecionadas.
 
-Limites: sem áudio (nem queda de energia nem o animal), sem placa pintada da sala e do
-pátio, cutscene sem clipes próprios do Dylan, log em inglês e provisório.
+Limites: sem áudio (nem queda de energia nem o animal), log em inglês e provisório.
+As placas geradas ainda são candidatas: a inspeção visual e os testes de
+navegação não certificam o alinhamento independente de contornos em pixels.

@@ -1,5 +1,15 @@
 # Arquitetura — LIMIAR Recon
 
+## Placas da sala do relé — 13/10/2026
+
+`relay_room.gd` preserva materiais 3D por objeto e alterna placas da sala com
+energia, apagão e janela. `relay_art_occluder.gdshader` amostra a placa em
+coordenadas de tela, mantendo a profundidade dos objetos para ocultar os atores.
+Na janela, o vidro conserva transparência; o animal e Dylan seguem em 3D.
+Brilho de fundo e oclusores é modulado em conjunto pelas luzes existentes.
+B restaura a geometria/material correspondente ao estado elétrico atual.
+Inventário, prompts e limites em `RELAY_ART_2026-10-13.md`.
+
 
 ## Combate — pistola, mira e alvos, 11/10/2026
 

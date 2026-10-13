@@ -6,14 +6,10 @@ extends Control
 const SOURCE := preload("res://environments/perimeter_source.tscn")
 const DEFINITIONS := [preload("res://resources/perimeter/shot_1.tres"),preload("res://resources/perimeter/shot_2.tres"),preload("res://resources/perimeter/shot_3.tres"),preload("res://resources/perimeter/shot_4.tres")]
 ## Plate hook: dropping these files in turns art mode on, one framing at a time.
-## The fourth framing, the yard behind the relay shed, has no plate: it is a
-## provisional way out until the next outdoor area exists, and shows geometry.
-## The second framing was turned on 13/10/2026 to look up the trail like the
-## third, so the stick keeps its meaning across the cut; its v02 plate belongs
-## to the old side-on pose and stays out until a plate is painted for this one
-## (ART_CAM02_V03_PROMPT.txt).
+## The second plate follows the camera re-posed on 13/10/2026; the fourth
+## paints the provisional rear yard. Both derive from the current geometry.
 const ART_DIR := "res://assets/backgrounds/perimeter/authored/"
-const ART_FILES := ["art_cam01_v02.png","","art_cam03_v02.png",""]
+const ART_FILES := ["art_cam01_v02.png","art_cam02_v03.png","art_cam03_v02.png","art_cam04_v01.png"]
 const ZONE_CENTERS := [Vector3(0,2,-5),Vector3(0,2,-15),Vector3(0,2,-25.5),Vector3(0,2,-36.5)]
 const ZONE_SIZES := [Vector3(14,6,11),Vector3(16,6,10),Vector3(14,6,12),Vector3(13,6,9)]
 ## The relay shed's front door, from the step's foot on the trail (a 0,2 m

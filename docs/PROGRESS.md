@@ -1,5 +1,20 @@
 # Progresso — LIMIAR Recon
 
+## Imagens dos novos ambientes — 13/10/2026
+
+- Cinco fundos gerados com image_gen integrado: sala do relé com energia,
+  apagão e janela; pátio traseiro; câmera reposicionada do cercado da trilha.
+- Referências de geometria/câmera por `tools/capture_relay_art.gd`, sem atores
+  ou interface. Assets e prompts completos em `RELAY_ART_2026-10-13.md`.
+- Integrados com alternância B, estados de energia e vidro transparente na
+  tomada animada. Câmeras e colisores preservados; originais de arte intactos.
+- `check_perimeter.gd` headless/gráfico: 2372 ticks, zero falhas.
+  `check_relay_room.gd` gráfico final: 3508 ticks, zero falhas. Capturas
+  inspecionadas. Uma execução intermediária foi interrompida durante alteração
+  concorrente do preload da arma; repetição passou. `git diff --check` passou.
+- Arte candidata, sem calibração fina independente; sem build/benchmark/suíte
+  completa. O conteúdo continua terminando no pátio provisório.
+
 ## Fase 2 — trilha do perímetro e estrutura de fase — 12/10/2026
 
 - Pedido: "gerar uma estrutura de fase nova para continuidade pra guarita, e mover o keleken para lá".

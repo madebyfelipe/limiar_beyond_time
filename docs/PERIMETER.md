@@ -138,7 +138,9 @@ ida/volta pelo portão e alternância arte/geometria. Capturas em
   sendo feito no terminal da guarita, antes do portão.
 - Desde 12/10/2026 (noite) a porta do relé abre para a Fase 3 (`RELAY_ROOM.md`),
   e a saída pelos fundos do galpão leva ao enquadramento provisório `perimeter_4`,
-  só geometria, com limites invisíveis. O conteúdo termina ali (`REAR_YARD`).
+  com limites invisíveis e placa `art_cam04_v01.png` desde 13/10/2026.
+  O conteúdo termina ali (`REAR_YARD`). A câmera reposicionada `perimeter_2`
+  usa agora `art_cam02_v03.png`; inventário em `RELAY_ART_2026-10-13.md`.
 - O quarto enquadramento do exterior (`exterior_4`, o pátio norte até o portão)
   usa `assets/backgrounds/env_1/exterior_authored/art_cam04_v02.png`, com prompt
   ao lado. `tools/capture_north_yard.gd` captura a fonte/câmera atuais sem

@@ -199,13 +199,10 @@ func run() -> void:
 	for label: String in ["Terrain","TrailBank","RockShoulder","GateLeaf","FallenPine","RelayShed"]:
 		check(scene.colliders.get_node_or_null(label) != null,"The trail lost the collider of "+label)
 	check(scene.art_available and scene.presentation.art_mode,"Perimeter did not start with its authored plates")
-	# The entrance and the shed are painted. The pen view was turned and waits for
-	# its new plate; the yard behind the shed has none yet. A stale plate drawn
-	# for another projection would be worse than geometry.
-	for index: int in [0,2]:
+	# All four current framings now have their own geometry-derived plate.
+	for index: int in range(4):
 		check(scene.shots[index].definition.background != null,"Missing authored plate: "+String(scene.shots[index].definition.shot_id))
-	for index: int in [1,3]:
-		check(scene.shots[index].definition.background == null,"A plate is shown for a framing it was not painted for: "+String(scene.shots[index].definition.shot_id))
+	check(scene.shots[1].definition.background.resource_path.ends_with("art_cam02_v03.png"),"The pen reused its old camera's plate")
 	# Up the trail is up the screen in the pen view and at the shed alike, so
 	# the stick keeps its meaning across that cut.
 	var pen_forward: Vector3 = -scene.shots[1].camera.global_basis.z

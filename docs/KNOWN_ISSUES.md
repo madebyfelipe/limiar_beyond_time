@@ -5,7 +5,8 @@
 
 - **Fase 3, sala do relé**: porta do galpão abre, terminal com boot do Arch e
   log do operador, queda de energia, Keleken na janela, saída automática pelos
-  fundos. Ver `RELAY_ROOM.md`. Sala e pátio atrás do galpão sem placa pintada;
+  fundos. Ver `RELAY_ROOM.md`. Sala, apagão, janela e pátio receberam placas
+  em 13/10/2026 (`RELAY_ART_2026-10-13.md`), ainda sem calibração fina;
   o pátio é **saída provisória** até existir a área externa nova.
 - **O conteúdo agora termina atrás do galpão** (`REAR_YARD`), não mais na porta
   lacrada do relé. As menções abaixo à porta lacrada como fim são históricas.

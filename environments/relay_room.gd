@@ -1,13 +1,17 @@
 extends Control
-## Phase 3 — inside the relay shed. The geometry owns collision and, with no
-## plate painted yet, also the look; the room is lit by its own lamps so the
-## power cut can be seen. The terminal plays the operator's log, the power
+## Phase 3 — inside the relay shed. The geometry owns collision; two plates
+## share its fixed camera before and after the outage. A third plate covers
+## the window cutscene while its actors and glass remain live. The terminal plays the operator's log, the power
 ## dies and something passes the window; then the player takes Dylan out by
 ## the rear door.
 const SOURCE := preload("res://environments/relay_room_source.tscn")
 const SCENE_PATH := "res://environments/relay_room.tscn"
 const KELEKEN := preload("res://actors/keleken/keleken.tscn")
 const PERIMETER := "res://environments/perimeter.tscn"
+const ART_POWERED := preload("res://assets/backgrounds/relay_room/art_powered_v01.png")
+const ART_OUTAGE := preload("res://assets/backgrounds/relay_room/art_outage_v01.png")
+const ART_WINDOW := preload("res://assets/backgrounds/relay_room/art_window_v01.png")
+const ART_SHADER := preload("res://systems/camera/relay_art_occluder.gdshader")
 ## One fixed framing from the south-west corner, under the ceiling, taking in
 ## the racks, the window, the terminal and the rear door.
 const CAMERA_POSITION := Vector3(-2.85, 2.6, 2.05)
@@ -57,6 +61,9 @@ var beat: StringName = &""
 var cutscene_speed: float = 1.0
 var _emergency_pulse: Tween
 var _lit_materials: Dictionary = {}
+var _geometry_materials: Dictionary = {}
+var _art_material: ShaderMaterial
+var art_mode: bool = true
 
 func _ready() -> void:
 	$Frame/Composition/Actors/WorldViewport/World/Capsule.hide()
@@ -70,6 +77,8 @@ func _ready() -> void:
 	environment_node.environment.ambient_light_energy = 0.28
 	source = SOURCE.instantiate()
 	world.add_child(source)
+	for mesh: MeshInstance3D in source.get_children():
+		_geometry_materials[mesh.name] = mesh.material_override
 	colliders = Node3D.new()
 	colliders.name = "SharedColliders"
 	world.add_child(colliders)
@@ -174,6 +183,7 @@ func _build_lights() -> void:
 
 ## Lamps, screen and rack lights on or off. The red lamp takes over in the dark.
 func _apply_power(on: bool) -> void:
+	_restore_geometry_materials()
 	powered = on
 	terminal.powered = on
 	ceiling_light.light_energy = 1.7 if on else 0.0
@@ -201,6 +211,36 @@ func _apply_power(on: bool) -> void:
 		_emergency_pulse = create_tween().set_loops()
 		_emergency_pulse.tween_property(emergency_light, "light_energy", 0.35, 0.9).set_trans(Tween.TRANS_SINE)
 		_emergency_pulse.tween_property(emergency_light, "light_energy", 1.4, 0.9).set_trans(Tween.TRANS_SINE)
+	for mesh: MeshInstance3D in source.get_children():
+		_geometry_materials[mesh.name] = mesh.material_override
+	_refresh_art()
+
+func _restore_geometry_materials() -> void:
+	for mesh: MeshInstance3D in source.get_children():
+		mesh.material_override = _geometry_materials[mesh.name]
+
+## Screen-projected materials keep the source meshes as depth occluders for
+## Dylan and the animal. The glass stays transparent in the window view.
+func _refresh_art() -> void:
+	var window_view: bool = cutscene_camera.current
+	var use_art: bool = art_mode and (camera.current or window_view)
+	background.visible = use_art
+	background.modulate = Color.WHITE
+	if not use_art:
+		_restore_geometry_materials()
+		return
+	background.texture = ART_POWERED if powered else ART_OUTAGE
+	if window_view:
+		background.texture = ART_WINDOW
+	_art_material = ShaderMaterial.new()
+	_art_material.shader = ART_SHADER
+	_art_material.set_shader_parameter("background", background.texture)
+	for mesh: MeshInstance3D in source.get_children():
+		mesh.material_override = _geometry_materials[mesh.name] if window_view and mesh.name == "WindowGlass" else _art_material
+
+func set_art_mode(enabled: bool) -> void:
+	art_mode = enabled
+	_refresh_art()
 
 ## Through a doorway: the front one from the trail, the rear one coming back.
 func arrive_from_door() -> void:
@@ -235,11 +275,17 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.physical_keycode == KEY_T:
 			ControlScheme.toggle()
+		elif event.physical_keycode == KEY_B:
+			set_art_mode(not art_mode)
 		elif event.physical_keycode == KEY_R and beat in [&"", &"done"]:
 			if player.weapon == null or (not player.weapon.aiming and not player.weapon.is_reloading()):
 				restart()
 
 func _process(_delta: float) -> void:
+	if background.visible:
+		var brightness: float = clampf(ceiling_light.light_energy / 1.7, 0.35, 1.0) if powered else lerpf(0.78, 1.0, clampf(emergency_light.light_energy / 1.4, 0.0, 1.0))
+		background.modulate = Color(brightness, brightness, brightness)
+		_art_material.set_shader_parameter("brightness", brightness)
 	# The rear door is barred from this side until the outage sends Dylan out.
 	rear_door.busy = MissionState.stage < MissionState.Stage.OUTAGE or (beat != &"" and beat != &"done")
 
@@ -277,6 +323,7 @@ func play_outage() -> void:
 	# Over Dylan's shoulder, onto the window.
 	beat = &"window"
 	cutscene_camera.current = true
+	_refresh_art()
 	var turn := create_tween()
 	var to_window: Vector3 = WINDOW_CENTRE - player.global_position
 	# Back to the glass: the look-over-shoulder capture turns the head 130
@@ -310,6 +357,7 @@ func play_outage() -> void:
 	await _wait(1.2)
 	# Back to the room view; the bars lift and the rear door is the player's.
 	camera.current = true
+	_refresh_art()
 	_dylan().end_interaction()
 	await bars.set_shown(false, 0.5 / cutscene_speed).finished
 	if is_instance_valid(animal):

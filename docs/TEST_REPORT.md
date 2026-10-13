@@ -1,5 +1,17 @@
 # Relatório de testes — percurso técnico (T09)
 
+## Fundos do relé e perímetro — 13/10/2026
+
+Godot 4.7.2, Windows, Forward+/Vulkan, RTX 4050 Laptop GPU.
+`check_perimeter.gd`: headless e gráfico, 2372 ticks, zero falhas.
+`check_relay_room.gd`: gráfico final, 3508 ticks, zero falhas. Conferidos sala
+iluminada/escura, alternância B, janela com vidro transparente e animal 3D,
+saída ao pátio, retorno e reinício; imagens inspecionadas. Prompts e limites em
+`RELAY_ART_2026-10-13.md`. Uma tentativa intermediária coincidiu com preload de
+rifle removido durante outra edição; interrompida e repetida com sucesso.
+Sem medição independente de alinhamento de contornos em pixels, suíte completa,
+build ou benchmark nesta tarefa.
+
 
 ## Armas, mira e suavização — Windows, 11/10/2026 (sessão Opus 5.5)
 
