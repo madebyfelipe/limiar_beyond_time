@@ -1,5 +1,11 @@
 # Fase 3 — sala do relé
 
+**Arte atual, 13/10/2026:** placas `relay_powered.png`, `relay_outage.png` e
+`relay_window.png` em `assets/backgrounds/dc2_psx/`, com direção explícita
+Dino Crisis 2 (2000) / PSX. O apagão é edição da placa iluminada; a janela
+mantém o vidro transparente e o animal em 3D. Prompts, referências e verificações
+em `DC2_PSX_ART_2026-10-13.md`. As menções a placas v01 abaixo são históricas.
+
 Implementada em 12/10/2026. Entrada pela porta do galpão do relé, no fim da trilha
 do perímetro; `executar-rele.cmd` abre a sala direto.
 

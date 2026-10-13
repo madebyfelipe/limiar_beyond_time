@@ -1,0 +1,4 @@
+Use case: precise-object-edit.
+IMAGE 1 is the edit target. IMAGE 2 is authoritative geometry.
+Remove ONLY the small invented glowing yellow lamp near the upper edge, above the distant olive gate at about normalized (0.289,0.004), and its warm pool of light on that distant gate/ground. There is no lamp at that gate. Restore matching concrete/steel/forest material and cold blue-gray ambient light at this tiny location. Preserve the distant gate itself and all its edges.
+Keep every other part of image 1 unchanged: exact rear shed, door/threshold, snowy roof, three-crossbar mast, tree positions, open level foreground snow, distant shelter, wire and road. No new fixtures. Do not change the overall composition, camera or exposure. Same full-bleed 16:9 image.

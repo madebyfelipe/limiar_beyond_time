@@ -2,7 +2,7 @@ extends Control
 ## Geometry owns the camera, collision and scale. B previews the art candidate.
 const SOURCE := preload("res://environments/save_room_source.tscn")
 const SHOT := preload("res://resources/save_room/shot_01.tres")
-const ART := "res://assets/backgrounds/env_1/save_room/art_cam01_close_v01.png"
+const ART := "res://assets/backgrounds/dc2_psx/guardhouse_cam01.png"
 const SCENE_PATH := "res://environments/save_room.tscn"
 ## Closest spot the 1,8 m capsule can stand to the keyboard, measured against
 ## the room's own colliders; the chair keeps it just west of the monitor.

@@ -212,7 +212,7 @@ func run() -> void:
 	# All four current framings now have their own geometry-derived plate.
 	for index: int in range(4):
 		check(scene.shots[index].definition.background != null,"Missing authored plate: "+String(scene.shots[index].definition.shot_id))
-	check(scene.shots[1].definition.background.resource_path.ends_with("art_cam02_v03.png"),"The pen reused its old camera's plate")
+	check(scene.shots[1].definition.background.resource_path.ends_with("perimeter_cam02.png"),"The pen reused its old geometry's plate")
 	# Up the trail is up the screen in the pen view and at the shed alike, so
 	# the stick keeps its meaning across that cut.
 	var pen_forward: Vector3 = -scene.shots[1].camera.global_basis.z

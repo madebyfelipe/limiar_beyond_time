@@ -6,10 +6,10 @@ extends Control
 const SOURCE := preload("res://environments/perimeter_source.tscn")
 const DEFINITIONS := [preload("res://resources/perimeter/shot_1.tres"),preload("res://resources/perimeter/shot_2.tres"),preload("res://resources/perimeter/shot_3.tres"),preload("res://resources/perimeter/shot_4.tres")]
 ## Plate hook: dropping these files in turns art mode on, one framing at a time.
-## The second plate follows the camera re-posed on 13/10/2026; the fourth
-## paints the provisional rear yard. Both derive from the current geometry.
-const ART_DIR := "res://assets/backgrounds/perimeter/authored/"
-const ART_FILES := ["art_cam01_v02.png","art_cam02_v03.png","art_cam03_v02.png","art_cam04_v01.png"]
+## All four plates follow the revised geometry of 13/10/2026: open pen trail,
+## side props, front door at grade, and the provisional rear yard.
+const ART_DIR := "res://assets/backgrounds/dc2_psx/"
+const ART_FILES := ["perimeter_cam01.png","perimeter_cam02.png","perimeter_cam03.png","perimeter_cam04.png"]
 const ZONE_CENTERS := [Vector3(0,2,-5),Vector3(0,2,-15),Vector3(0,2,-25.5),Vector3(0,2,-36.5)]
 const ZONE_SIZES := [Vector3(14,6,11),Vector3(16,6,10),Vector3(14,6,12),Vector3(13,6,9)]
 ## The relay shed's front door, at grade: the trail runs flush to the wall at

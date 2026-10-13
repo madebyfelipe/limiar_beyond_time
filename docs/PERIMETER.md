@@ -73,12 +73,15 @@ em `z = −26,6`; `RELAY_APPROACH` e `RELAY_ARRIVAL` avançaram 0,5 m para
 acompanhar. Dos adereços novos, só o fardo de baixo e os sacos são sólidos, e
 tudo que passa da altura do banco está a oeste, atrás do ator nas três câmeras.
 
-As capturas `geometry_cam0{1,2,3}.png` e `cameras.json` foram regeneradas. **As
-placas pintadas antes dessa revisão** (`art_cam01_v02`, `art_cam02_v03` e
-`art_cam03_v02`, ainda as ativas neste commit) mostram o degrau e as cercas que
-não existem mais, e Dylan passa por cima do que está pintado; B mostra a
-geometria. Só placas refeitas sobre as capturas novas correspondem a ela (na
-vista 1 muda só a placa de aviso, à direita).
+As capturas `geometry_cam0{1,2,3}.png` e `cameras.json` foram regeneradas.
+As placas anteriores a esta geometria foram preservadas como histórico.
+**Conjunto atual: Dino Crisis 2 (2000) / PSX**, em
+`assets/backgrounds/dc2_psx/perimeter_cam0{1,2,3,4}.png`, com prompts completos
+no mesmo diretório em `prompts/`. As quatro referências atuais de runtime
+estão em `perimeter/revised_geometry/`; `capture_perimeter_art.gd` reproduz
+as vistas sem regenerar fonte ou câmeras. A trilha permanece livre das antigas
+travessas e a porta frontal não tem degrau. Inventário e verificação final em
+`DC2_PSX_ART_2026-10-13.md` (também cobre os demais espaços jogáveis).
 
 ### Câmeras
 
@@ -120,6 +123,17 @@ sem pixelização pintada (o filtro do jogo cuida disso). A vista final do galp�
 foi usada como referência da vista central, eliminando a luminária duplicada
 e igualando a placa da porta, o tambor e os materiais. Prompts finais em
 `authored/ART_CAM0{1,2,3}_CLEAN_PROMPT.txt`.
+
+**Câmera 3 refeita em 13/10/2026.** `art_cam03_v03.png` substitui a v02
+na apresentação do galpão. A captura `geometry_cam03_current.png`, feita por
+`tools/capture_perimeter_cam03.gd` diretamente da cena jogável, orienta a
+composição; a câmera 2 v03 orienta somente materiais e iluminação. A nova
+arte aproxima o prédio, tronco, arame lateral e massas rochosas da geometria,
+preservando a passagem à direita do tronco. Prompt em
+`authored/ART_CAM03_V03_PROMPT.txt`. As versões anteriores estão preservadas.
+`check_perimeter.gd` gráfico: 2370 ticks, zero falhas; capturas da passagem e
+da porta inspecionadas. A validação cobre circulação e composição visual,
+sem certificação de alinhamento de todos os contornos em pixels.
 
 ## O Keleken
 

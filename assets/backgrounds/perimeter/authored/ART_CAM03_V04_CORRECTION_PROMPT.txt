@@ -1,0 +1,6 @@
+Use case: precise-object-edit. IMAGE 1 is the edit target, IMAGE 2 is the authoritative geometry for this SAME camera.
+Correct only incorrectly painted side props; preserve all other image 1 pixels/composition, including the flush ground-level door with no step, road, trunk, crate, roof, trees and rock shoulders.
+Remove the TWO stacked bags painted on the ground immediately to the LEFT of the olive drum at the building's right corner. There are NO sacks at this position in IMAGE 2. Fill their footprint with continuous snow/road matching its surroundings. Keep the drum itself in place.
+Remove the ochre plaque attached halfway up the left lamp pole. The pole has NO plaque. The warning sign is not visible in this camera and must not be added anywhere.
+Align the left lamp pole to IMAGE 2: the lamp head sits at normalized approximately (0.187,0.35) and pole base at (0.210,0.56); the head must be lower in screen than in IMAGE 1 and the pole shorter, matching its reference footprint. Keep ONE lamp head with modest warm lighting. Do not move the shelter or other props.
+Absolutely no additional objects. Output the same full-bleed 16:9 frame.

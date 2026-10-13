@@ -1,5 +1,30 @@
 # Relatório de testes — percurso técnico (T09)
 
+## Todos os espaços autorados — Dino Crisis 2 / PSX, 13/10/2026
+
+Doze placas atuais em `assets/backgrounds/dc2_psx/`, geradas com image_gen
+integrado e prompts explícitos Dino Crisis 2 (2000) / PSX. Importação concluída.
+Verificações headless (`--fixed-fps 60`): exterior 4100 ticks, guarita 2415,
+perímetro 2381, relé 3508; quatro processos com zero falhas e saída 0.
+Preview gráfico das doze vistas inspecionado (Forward+/Vulkan, RTX 4050 Laptop
+GPU), incluindo personagem, recorte da cancela e estados de energia/janela.
+`git diff --check` passou. Logs `.local/dc2-psx-*.log`; capturas
+`.local/dc2-psx/`; inventário e limites em `DC2_PSX_ART_2026-10-13.md`.
+Aviso de store de certificados do Windows no sandbox; nenhum erro de recurso,
+script ou shader. Sem suíte completa, build ou calibração independente por pixels.
+
+## Câmera 3 do espaço 2 refeita — 13/10/2026
+
+`art_cam03_v03.png` integrado, gerado com image_gen a partir da câmera
+atual (`geometry_cam03_current.png`), sem alterar fonte, câmera ou colisores.
+Godot 4.7.2, Forward+/Vulkan, RTX 4050 Laptop GPU:
+`check_perimeter.gd`, 2370 ticks, zero falhas, processo encerrado com saída 0.
+Capturas `.local/perimeter-art-perimeter_3-{21,23,25}.png` inspecionadas:
+passagem à direita do tronco e aproximação da porta. Log em
+`.local/cam03-perimeter-graphical.log`. Importação dos dois PNGs concluída;
+`git diff --check` passou. Sem suíte completa, build ou medição independente
+de todos os contornos em pixels nesta revisão.
+
 ## Fundos do relé e perímetro — 13/10/2026
 
 Godot 4.7.2, Windows, Forward+/Vulkan, RTX 4050 Laptop GPU.

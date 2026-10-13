@@ -1,0 +1,5 @@
+Use case: lighting-weather.
+Asset type: blackout variant of the SAME Dino Crisis 2 (2000) / original PlayStation / PSX prerendered game background.
+IMAGE 1 is the exact completed POWERED room to edit. IMAGE 2 is current lighting-state geometry reference.
+Preserve image 1's exact camera/crop, every structural pixel location, texture, equipment, wall, floor, doorway, window and object silhouette. Change ONLY power and lighting: fluorescent ceiling fixture OFF and dark, green CRT OFF with black screen/no glow, ALL yellow rack indicator dots OFF/dark, no powered LEDs anywhere. The small existing RED emergency fixture above the back door stays ON and casts simple subdued red illumination over adjacent wall and floor. Very weak blue-gray light from the existing window keeps paths faintly readable. No new lights, equipment or objects.
+Retain DINO CRISIS 2 (2000) aesthetic and PSX low-resolution mapped textures, limited palette, marked shadows and restrained dithering. No modern photorealism or blur. No text, people, animals, UI, border or watermark. Same 16:9 frame.

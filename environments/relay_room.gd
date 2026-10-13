@@ -8,9 +8,9 @@ const SOURCE := preload("res://environments/relay_room_source.tscn")
 const SCENE_PATH := "res://environments/relay_room.tscn"
 const KELEKEN := preload("res://actors/keleken/keleken.tscn")
 const PERIMETER := "res://environments/perimeter.tscn"
-const ART_POWERED := preload("res://assets/backgrounds/relay_room/art_powered_v01.png")
-const ART_OUTAGE := preload("res://assets/backgrounds/relay_room/art_outage_v01.png")
-const ART_WINDOW := preload("res://assets/backgrounds/relay_room/art_window_v01.png")
+const ART_POWERED := preload("res://assets/backgrounds/dc2_psx/relay_powered.png")
+const ART_OUTAGE := preload("res://assets/backgrounds/dc2_psx/relay_outage.png")
+const ART_WINDOW := preload("res://assets/backgrounds/dc2_psx/relay_window.png")
 const ART_SHADER := preload("res://systems/camera/relay_art_occluder.gdshader")
 ## One fixed framing from the south-west corner, under the ceiling, taking in
 ## the racks, the window, the terminal and the rear door.
