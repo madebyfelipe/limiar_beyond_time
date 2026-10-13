@@ -6,9 +6,9 @@ extends SceneTree
 ## Captures are written only when a renderer is available; the geometry source
 ## and the three shot definitions are written either way.
 const OUT := "res://assets/backgrounds/perimeter"
-const POSES := [Vector3(7,7,-11.5),Vector3(-7.4,7,-11.5),Vector3(7.4,7,-17)]
-const TARGETS := [Vector3(0,1,-4),Vector3(0,1,-14.5),Vector3(0,1.2,-24)]
-const FOVS := [54.0,54.0,52.0]
+const POSES := [Vector3(7,7,-11.5),Vector3(6,8,-6),Vector3(7.4,7,-17)]
+const TARGETS := [Vector3(0,1,-4),Vector3(1,1,-13),Vector3(0,1.2,-24)]
+const FOVS := [54.0,48.0,52.0]
 ## The walking corridor: banks at x = +-3.2, gate at z = 0, shed at z = -29.
 const TRAIL_LENGTH := 34.0
 ## Each framing was chosen to hold the whole walkable volume of its own camera

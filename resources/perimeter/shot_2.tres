@@ -5,6 +5,6 @@
 [resource]
 script = ExtResource("1_lgyvt")
 shot_id = &"perimeter_2"
-camera_position = Vector3(-7.4, 7, -11.5)
-camera_rotation_degrees = Vector3(-36.921574, -67.9321, 0)
-fov = 54.0
+camera_position = Vector3(6, 8, -6)
+camera_rotation_degrees = Vector3(-39.136406, 35.537678, 0)
+fov = 48.0

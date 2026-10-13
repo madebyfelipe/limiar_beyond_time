@@ -49,7 +49,7 @@ func _process(delta: float) -> void:
 func refresh() -> void:
 	if gauge == null:
 		return
-	visible = not get_tree().paused and not get_tree().root.has_node("DoorTransition")
+	visible = not get_tree().paused and not get_tree().root.has_node("DoorTransition") and not _letterboxed()
 	if is_instance_valid(player):
 		gauge.ratio = player.vitality / player.health.maximum
 		SupplyStock.ensure_loaded()
@@ -60,3 +60,10 @@ func refresh() -> void:
 	for interaction: Node in get_tree().get_nodes_in_group(&"approach_prompts"):
 		if interaction.player == player:
 			interaction.prompt.modulate.a = 1.0 if GamepadControls.shared.gamepad_active else 0.0
+
+## A cutscene's letterbox is down (CinematicBars): the picture is the scene's.
+func _letterboxed() -> bool:
+	for bars: Node in get_tree().get_nodes_in_group(&"cinematic_bars"):
+		if bars is CanvasItem and (bars as CanvasItem).is_visible_in_tree():
+			return true
+	return false

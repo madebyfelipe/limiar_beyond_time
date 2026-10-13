@@ -1,7 +1,7 @@
 extends SceneTree
 ## Phase 3 end to end: the relay shed door, the room's geometry, the terminal's
-## boot and log, the outage cutscene with the animal at the window, the walk
-## out of the rear door, the provisional yard behind the shed and the way back
+## boot and log, the letterboxed outage cutscene with the animal at the window,
+## control handed back and the player's walk out of the rear door, the provisional yard behind the shed and the way back
 ## in. Real Input for what the player drives; the cutscene runs faster.
 const TRAIL := "res://environments/perimeter.tscn"
 const ROOM := "res://environments/relay_room.tscn"
@@ -178,6 +178,9 @@ func run() -> void:
 	check(not scene.powered and scene.ceiling_light.light_energy == 0.0 and scene.screen_light.light_energy == 0.0,"The lights stayed on through the outage")
 	check(scene.emergency_light.light_energy > 0.0,"The emergency lamp did not take over")
 	check(scene.cutscene_camera.current,"The cutscene did not cut to the window")
+	check(scene.bars.visible and scene.bars.amount > 0.0 and scene.bars.top.size.y > 0.0,"The cutscene has no letterbox")
+	check(not player.control_enabled,"The player kept control inside the cutscene")
+	check(not scene.operation.hud.visible,"The HUD stayed over the letterbox")
 	check(not scene.terminal.can_interact(),"A dead terminal still offers access")
 	var seen: bool = false
 	for frame: int in range(900):
@@ -199,12 +202,27 @@ func run() -> void:
 		await tick()
 	check(seen,"The animal never showed in the window")
 
-	# --- Dylan walks out of the rear door on his own ---
-	for frame: int in range(1200):
+	# --- The bars lift and the player takes Dylan to the rear door ---
+	for frame: int in range(900):
+		if scene.beat == &"done":
+			break
+		await tick()
+	check(scene.beat == &"done","The cutscene never handed the room back")
+	check(player.control_enabled,"Control did not come back after the window")
+	check(scene.bars.amount == 0.0 and not scene.bars.visible,"The letterbox stayed after the cutscene")
+	check(scene.camera.current,"The room camera did not come back")
+	await tick(30)
+	check(scene.operation.hud.visible,"The HUD did not come back after the cutscene")
+	check(not root.has_node("DoorTransition"),"Dylan left on his own; the walk to the door is the player's")
+	await walk_to(Vector3(1.95,0,-1.3))
+	await walk_to(scene.REAR_APPROACH)
+	check(scene.rear_door.can_interact(),"No prompt at the rear door after the outage")
+	key(KEY_E)
+	for frame: int in range(300):
 		if root.has_node("DoorTransition"):
 			break
 		await tick()
-	check(root.has_node("DoorTransition"),"The cutscene did not take Dylan out of the rear door")
+	check(root.has_node("DoorTransition"),"E at the rear door did not take Dylan out")
 	if root.has_node("DoorTransition"):
 		check(root.get_node("DoorTransition").region_title.text == "BEHIND THE RELAY SHED","The exit cinematic named the wrong place")
 		await root.get_node("DoorTransition").finished

@@ -63,13 +63,26 @@ pula as capturas.
 | Enquadramento | Posição | Alvo | FOV | Cobre |
 | --- | --- | --- | --- | --- |
 | `perimeter_1` | (7; 7; −11,5) | (0; 1; −4) | 54° | `z` 0,4 … −9,5 |
-| `perimeter_2` | (−7,4; 7; −11,5) | (0; 1; −14,5) | 54° | `z` −9,4 … −19,6 |
+| `perimeter_2` | (6; 8; −6) | (1; 1; −13) | 48° | `z` −9,4 … −19,6 |
 | `perimeter_3` | (7,4; 7; −17) | (0; 1,2; −24) | 52° | `z` −19,5 … −26,8 |
 
 Cada pose foi escolhida por varredura: precisa conter todo o volume caminhável
 da própria zona em 1920 × 1080 com margem, manter Dylan entre ~110 e ~190 px de
 altura e deixar o banco e o ombro próximos livres da linha até o meio do corpo.
 O probe repete a parte da moldura a cada quadro durante a caminhada.
+
+**`perimeter_2` girada em 13/10/2026.** A pose original, em (−7,4; 7; −11,5), olhava
+o corredor de lado: subir a trilha era "baixo" na vista 1, "esquerda" na 2 e "cima"
+na 3, e quem soltava o direcional depois do corte perdia o rumo. A nova pose fica
+a sudeste do cercado e olha trilha acima, a 35,5° de guinada, perto dos 46,6° da
+vista 3: na 2 e na 3, cima é cima. Dylan fica entre 121 e 157 px em toda a zona.
+O corte 1 → 2 continua sendo o contraplano clássico (a vista 1 olha para o portão),
+amortecido pelo direcional travado enquanto segurado. `check_perimeter.gd` exige
+que a 2 olhe para o norte e concorde com a 3.
+
+A placa `art_cam02_v02.png` pertence à pose antiga e saiu de `ART_FILES`: a vista 2
+mostra geometria até a nova placa existir (`authored/ART_CAM02_V03_PROMPT.txt`,
+referência `geometry_cam02.png`).
 
 **Arte integrada em 12/10/2026.** As três placas em
 `assets/backgrounds/perimeter/authored/art_cam0{1,2,3}_v02.png` são carregadas

@@ -14,6 +14,8 @@ const HIPS := ":mixamorig_Hips"
 ##   plant    freeze the horizontal travel of the hips
 ##   unturn   remove the body rotation, leaving only the footwork
 ##   stitch   cross-fade the tail over the head so the window loops seamlessly
+##   optional skip with a note while the capture has not been downloaded yet;
+##            DylanVisual.play_scripted falls back for a missing clip
 const CLIPS := {
 	&"idle": {"file": "dylan_rig_idle", "loop": true},
 	&"walk": {"file": "walk", "loop": true},
@@ -25,8 +27,12 @@ const CLIPS := {
 	# "Dodging Right" (in place) and its mirror for the sidesteps.
 	&"dodge_right": {"file": "dodge_right", "loop": false, "from": 0.1, "to": 1.1, "plant": true},
 	&"dodge_left": {"file": "dodge_right", "loop": false, "from": 0.1, "to": 1.1, "plant": true, "mirror": true},
-	# "Dodging Back" (Jumping Backwards Dodge): the hop, without the idle around it.
-	&"dodge_back": {"file": "dodge_back", "loop": false, "from": 0.35, "to": 1.75, "plant": true},
+	# The backstep. Replaced on request: a new capture dropped in as
+	# dodge_back_v2.fbx takes over the slot; until then "Dodging Back" (Jumping
+	# Backwards Dodge) stays, the hop without the idle around it. Set the window
+	# of the new capture after looking at it (tools/render_dodge_candidates.gd).
+	&"dodge_back": {"file": "dodge_back", "loop": false, "from": 0.35, "to": 1.75, "plant": true,
+		"replacement": {"file": "dodge_back_v2", "loop": false, "plant": true}},
 	# "Stand To Roll": crouch, dive roll and the rise back to standing.
 	&"dodge_forward": {"file": "roll_stand", "loop": false, "from": 0.45, "to": 1.95, "plant": true},
 	# The capture walks up, opens and crosses in 6,37 s. Only the reach and the
@@ -38,12 +44,20 @@ const CLIPS := {
 	# turn_a turns to the right, turn_b is its mirror; measured from the hips.
 	&"turn_right": {"file": "turn_a", "loop": true, "from": 1.8, "to": 2.5, "plant": true, "unturn": true, "stitch": 0.25},
 	&"turn_left": {"file": "turn_b", "loop": true, "from": 1.8, "to": 2.5, "plant": true, "unturn": true, "stitch": 0.25},
+	# Relay room cutscene: Dylan starts back from the window when the animal
+	# looks in (Mixamo "Startled", In Place). Played once and held on its end.
+	&"startled": {"file": "startled", "loop": false, "plant": true, "optional": true},
 }
 
 func _init() -> void:
 	var library := AnimationLibrary.new()
 	for name: StringName in CLIPS:
 		var spec: Dictionary = CLIPS[name]
+		if spec.has("replacement") and ResourceLoader.exists(SOURCE % spec["replacement"]["file"]):
+			spec = spec["replacement"]
+		if spec.get("optional", false) and not ResourceLoader.exists(SOURCE % spec["file"]):
+			print("%s: skipped, %s.fbx not captured yet" % [name, spec["file"]])
+			continue
 		var scene: Node = (load(SOURCE % spec["file"]) as PackedScene).instantiate()
 		var player := scene.find_child("AnimationPlayer", true, false) as AnimationPlayer
 		var source: Animation = player.get_animation(player.get_animation_list()[0])
@@ -86,7 +100,7 @@ func _recentre(library: AnimationLibrary) -> void:
 	player.add_animation_library(&"", library)
 	var reference: Vector2 = await _stance(player, skeleton, &"idle")
 	for name: StringName in CLIPS:
-		if not CLIPS[name].get("plant", false):
+		if not library.has_animation(name) or not CLIPS[name].get("plant", false):
 			continue
 		var stance: Vector2 = await _stance(player, skeleton, name)
 		var shift: Vector2 = reference - stance

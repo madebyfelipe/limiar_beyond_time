@@ -70,7 +70,9 @@ func tick(count: int = 1) -> void:
 		var shot: ShotRig = scene.director.current_shot
 		check(scene.presentation.current_shot == shot and player.camera == shot.camera,"Camera presentation out of sync")
 		if scene.presentation.art_mode:
-			check(scene.background.visible and scene.background.texture == shot.definition.background,"Art plate out of sync at camera cut")
+			# A framing without a plate shows geometry, never the previous plate.
+			var painted: bool = shot.definition.background != null
+			check(scene.background.visible == painted and (not painted or scene.background.texture == shot.definition.background),"Art plate out of sync at camera cut")
 		for height: float in [0.0,1.8]:
 			var point: Vector3 = player.global_position+Vector3(0,height,0)
 			var pixel: Vector2 = shot.camera.unproject_position(point)
@@ -197,10 +199,21 @@ func run() -> void:
 	for label: String in ["Terrain","TrailBank","RockShoulder","GateLeaf","FallenPine","RelayShed"]:
 		check(scene.colliders.get_node_or_null(label) != null,"The trail lost the collider of "+label)
 	check(scene.art_available and scene.presentation.art_mode,"Perimeter did not start with its authored plates")
-	# The trail's three framings are painted; the yard behind the shed is not yet.
-	for shot: ShotRig in scene.shots.slice(0,3):
-		check(shot.definition.background != null,"Missing authored plate: "+String(shot.definition.shot_id))
-	check(scene.shots[3].definition.background == null,"The provisional rear yard gained a plate nobody authored")
+	# The entrance and the shed are painted. The pen view was turned and waits for
+	# its new plate; the yard behind the shed has none yet. A stale plate drawn
+	# for another projection would be worse than geometry.
+	for index: int in [0,2]:
+		check(scene.shots[index].definition.background != null,"Missing authored plate: "+String(scene.shots[index].definition.shot_id))
+	for index: int in [1,3]:
+		check(scene.shots[index].definition.background == null,"A plate is shown for a framing it was not painted for: "+String(scene.shots[index].definition.shot_id))
+	# Up the trail is up the screen in the pen view and at the shed alike, so
+	# the stick keeps its meaning across that cut.
+	var pen_forward: Vector3 = -scene.shots[1].camera.global_basis.z
+	var shed_forward: Vector3 = -scene.shots[2].camera.global_basis.z
+	pen_forward.y = 0.0
+	shed_forward.y = 0.0
+	check(pen_forward.normalized().dot(Vector3.FORWARD) > 0.75,"The pen view does not look up the trail: %v" % pen_forward)
+	check(pen_forward.normalized().dot(shed_forward.normalized()) > 0.9,"The pen and shed views disagree on screen-up: %v vs %v" % [pen_forward,shed_forward])
 	scene.set_art_mode(false)
 	check(not scene.background.visible,"Geometry comparison left the painted background visible")
 	scene.set_art_mode(true)

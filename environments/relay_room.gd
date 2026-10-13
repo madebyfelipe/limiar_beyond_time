@@ -2,7 +2,8 @@ extends Control
 ## Phase 3 — inside the relay shed. The geometry owns collision and, with no
 ## plate painted yet, also the look; the room is lit by its own lamps so the
 ## power cut can be seen. The terminal plays the operator's log, the power
-## dies, something passes the window and Dylan leaves by the rear door.
+## dies and something passes the window; then the player takes Dylan out by
+## the rear door.
 const SOURCE := preload("res://environments/relay_room_source.tscn")
 const SCENE_PATH := "res://environments/relay_room.tscn"
 const KELEKEN := preload("res://actors/keleken/keleken.tscn")
@@ -19,12 +20,11 @@ const FRONT_ARRIVAL := Vector3(1.8, 0.0, 1.35)
 const REAR_APPROACH := Vector3(2.3, 0.0, -1.75)
 const REAR_ARRIVAL := Vector3(2.3, 0.0, -1.35)
 const TERMINAL_APPROACH := Vector3(1.95, 0.0, -0.35)
-## Cutscene: the over-the-shoulder view on the window, the walk out past the
-## end of the desk, and the line the animal takes behind the north wall.
+## Cutscene: the over-the-shoulder view on the window and the line the animal
+## takes behind the north wall.
 const WINDOW_SHOT_POSITION := Vector3(2.15, 1.6, 0.55)
 const WINDOW_SHOT_TARGET := Vector3(0.65, 1.65, -2.3)
 const WINDOW_CENTRE := Vector3(0.65, 1.75, -2.3)
-const EXIT_PATH: Array[Vector3] = [Vector3(1.95, 0.0, -1.3), REAR_APPROACH]
 const ANIMAL_FROM := Vector3(-3.6, 0.0, -3.5)
 const ANIMAL_TO := Vector3(4.2, 0.0, -3.5)
 const ANIMAL_PAUSE_AT := Vector3(0.45, 0.0, -3.5)
@@ -46,9 +46,10 @@ var emergency_light: OmniLight3D
 var yard_light: OmniLight3D
 var cutscene_camera: Camera3D
 var animal: KelekenActor
+var bars: CinematicBars
 var powered: bool = true
 ## Cutscene beat, for probes and for anything that must not interrupt it:
-## "", "console", "outage", "window", "exit", "done".
+## "", "console", "outage", "window", "done".
 var beat: StringName = &""
 ## Probes speed the console and the cutscene; 1 is the authored pace.
 var cutscene_speed: float = 1.0
@@ -93,6 +94,8 @@ func _ready() -> void:
 	cutscene_camera.position = WINDOW_SHOT_POSITION
 	cutscene_camera.look_at(WINDOW_SHOT_TARGET)
 	cutscene_camera.fov = 48.0
+	bars = CinematicBars.new()
+	$Frame/Composition.add_child(bars)
 	front_door = _door(&"relay_front", FRONT_APPROACH, PI, "Perimeter Trail")
 	rear_door = _door(&"relay_rear", REAR_APPROACH, 0.0, "Behind the Relay Shed")
 	terminal = RelayTerminal.new()
@@ -218,6 +221,7 @@ func restart() -> void:
 	Phase.find(&"relay").rewind()
 	terminal.busy = false
 	_apply_power(true)
+	bars.amount = 0.0
 	if is_instance_valid(animal):
 		animal.queue_free()
 	operation.mark_safe()
@@ -256,11 +260,13 @@ func read_log() -> void:
 func _dylan() -> Node:
 	return player.visual.get_node("DylanVisual")
 
-## Lights fail, the red lamp takes over, the animal crosses the window and
-## Dylan leaves by the rear door. Control returns only on the other side.
+## Lights fail, the red lamp takes over and the animal crosses the window,
+## framed by the letterbox. Dylan starts back when it looks in; then the bars
+## lift and the player walks him to the rear door.
 func play_outage() -> void:
 	beat = &"outage"
 	MissionState.reach(MissionState.Stage.OUTAGE)
+	bars.set_shown(true, 0.5 / cutscene_speed)
 	for flicker: float in [0.0, 1.7, 0.0, 0.9, 0.0]:
 		ceiling_light.light_energy = flicker
 		await _wait(0.09)
@@ -273,7 +279,7 @@ func play_outage() -> void:
 	var to_window: Vector3 = WINDOW_CENTRE - player.global_position
 	var heading: float = atan2(-to_window.x, -to_window.z)
 	turn.tween_property(player.visual, "rotation:y", player.visual.rotation.y + angle_difference(player.visual.rotation.y, heading), 0.45 / cutscene_speed)
-	_dylan().play_scripted(&"startled_turn", &"idle")
+	_dylan().play_scripted(&"idle")
 	animal = KELEKEN.instantiate()
 	animal.name = "WindowKeleken"
 	animal.combat_enabled = false
@@ -287,38 +293,21 @@ func play_outage() -> void:
 	var cross := create_tween()
 	cross.tween_property(animal, "position", ANIMAL_PAUSE_AT, ANIMAL_FROM.distance_to(ANIMAL_PAUSE_AT) / 1.0 / cutscene_speed)
 	await cross.finished
-	# It stops in the lamp light, looks in, and moves on.
+	# It stops in the lamp light and looks in; Dylan starts back from the glass.
 	animal.visual.play_clip(&"look")
+	_dylan().play_scripted(&"startled", &"idle")
 	operation.show_notice("Something is circling the shed.", 3.0 / cutscene_speed)
 	await _wait(1.6)
 	animal.visual.play_clip(&"walk", 1.4)
 	var leave := create_tween()
 	leave.tween_property(animal, "position", ANIMAL_TO, ANIMAL_PAUSE_AT.distance_to(ANIMAL_TO) / 1.4 / cutscene_speed)
 	await _wait(1.2)
-	# Back to the room view: Dylan heads for the rear door on his own.
-	beat = &"exit"
+	# Back to the room view; the bars lift and the rear door is the player's.
 	camera.current = true
 	_dylan().end_interaction()
-	for point: Vector3 in EXIT_PATH:
-		await _walk_to(point)
-	player.autopilot = Vector3.ZERO
-	var face := create_tween()
-	face.tween_property(player.visual, "rotation:y", player.visual.rotation.y + angle_difference(player.visual.rotation.y, 0.0), 0.2)
-	await face.finished
+	await bars.set_shown(false, 0.5 / cutscene_speed).finished
 	if is_instance_valid(animal):
 		animal.queue_free()
 	beat = &"done"
-	# The door takes control away again for its own cinematic.
 	player.set_control_enabled(true)
-	rear_door.busy = false
-	rear_door.interact()
-
-func _walk_to(point: Vector3) -> void:
-	for frame: int in range(int(600 / cutscene_speed) + 60):
-		var offset: Vector3 = point - player.global_position
-		offset.y = 0.0
-		if offset.length() < 0.12:
-			break
-		player.autopilot = offset.normalized()
-		await get_tree().physics_frame
-	player.autopilot = Vector3.ZERO
+	operation.show_notice("Objective: %s" % MissionState.objective(), 4.0)

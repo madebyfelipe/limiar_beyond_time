@@ -13,13 +13,15 @@ do perímetro; `executar-rele.cmd` abre a sala direto.
    BIOS, boot do Arch Linux com linhas `[  OK  ]` e uma `[FAILED]` do uplink,
    login `operator`, `journalctl -u relay-log` e as cinco entradas do operador.
    E/Enter/disparo terminam o bloco em curso; nada é pulado sem aparecer.
-4. Depois do log o UPS acaba: o console colapsa como tubo, a etapa vira `OUTAGE`,
+4. Depois do log o UPS acaba e as barras pretas (`CinematicBars`, 12 % em cima e
+   embaixo, dentro da composição 16:9 e portanto sob o filtro) descem; o HUD sai de cena: o console colapsa como tubo, a etapa vira `OUTAGE`,
    a luz pisca e apaga, a tela e os LEDs morrem e a lâmpada vermelha de emergência
    pulsa.
 5. Corte por cima do ombro para a janela: um Keleken passa lá fora sob a lâmpada do
    pátio, para, olha para dentro e segue. Aviso: "Something is circling the shed."
-6. De volta à câmera da sala, Dylan anda sozinho até a porta dos fundos
-   (`PlayerController.autopilot`) e sai: a cinemática mostra **BEHIND THE RELAY SHED**.
+6. De volta à câmera da sala, as barras sobem, o HUD volta e o controle é do jogador,
+   com o objetivo "Leave by the rear door". A porta dos fundos destrava; **E** nela
+   leva para fora e a cinemática mostra **BEHIND THE RELAY SHED**.
 7. Na trilha, atrás do galpão: etapa `REAR_YARD`, fim do conteúdo autorado por ora.
    A porta dos fundos leva de volta à sala, que continua sem energia.
 
@@ -58,10 +60,12 @@ antigos continuam válidos. Não há terminal de salvamento na trilha nem no rel
 
 ## Animações
 
-Dylan usa os clipes que já tem. A sala pede por nome `terminal_type` (ao teclado) e
-`startled_turn` (ao virar para a janela) por `DylanVisual.play_scripted()`, que cai
-para `idle` enquanto esses clipes não existem. Basta adicioná-los a
-`tools/build_dylan_animations.gd` para entrarem.
+A sala pede por nome `terminal_type` (ao teclado) e `startled` (o susto, quando o
+animal para e olha pela janela) por `DylanVisual.play_scripted()`, que cai para
+`idle` enquanto o clipe não existe. `startled` já está declarado em
+`tools/build_dylan_animations.gd` como opcional: basta exportar do Mixamo "Startled"
+(In Place, FBX Binary, 30 fps, sem skin, no rig `dylan_mixamo`) para
+`assets/models/dylan_protagonist/mixamo/startled.fbx` e reconstruir a biblioteca.
 
 ## Verificação
 
