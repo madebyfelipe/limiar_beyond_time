@@ -6,7 +6,7 @@ signal back_requested
 signal gameplay_requested
 signal presentation_requested
 
-const SKIN := preload("res://assets/ui/retro_terminal/pause_menu_skin_v02.png")
+const SKIN := RetroScreen.MENU_SKIN
 const VIDEO_KEYS: Array[String] = ["window_mode", "resolution", "vsync", "fps_limit", "volume"]
 const KEYBOARD_KEYS: Array[String] = ["mouse_sensitivity", "mouse_invert_y"]
 const PAD_KEYS: Array[String] = ["stick_deadzone", "trigger_deadzone", "pad_invert_y"]
@@ -49,22 +49,8 @@ func _page(id: String, title: String, subtitle: String) -> RetroScreen:
 	var page := RetroScreen.new()
 	add_child(page)
 	page.build(SKIN)
-	var heading_back := ColorRect.new()
-	heading_back.position = Vector2(300, 126)
-	heading_back.size = Vector2(1072, 98)
-	heading_back.color = Color("071318")
-	heading_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	page.canvas.add_child(heading_back)
-	page.label_at(title, Rect2(322, 126, 1028, 54), 32)
-	page.label_at(subtitle, Rect2(322, 180, 1028, 40), 20)
-	var footer_back := ColorRect.new()
-	footer_back.position = Vector2(300, 788)
-	footer_back.size = Vector2(1072, 66)
-	footer_back.color = Color("071318")
-	footer_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	page.canvas.add_child(footer_back)
-	var hint: Label = page.label_at("", Rect2(312, 788, 1048, 66), 21)
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.heading(title, subtitle)
+	var hint: Label = page.footer()
 	hints.append(hint)
 	pages[id] = page
 	page.hide()
@@ -253,14 +239,9 @@ func _step(key: String, direction: int) -> void:
 func _build_capture() -> void:
 	var overlay := RetroScreen.new()
 	add_child(overlay)
-	overlay.build(null)
+	overlay.build(SKIN)
+	overlay.heading("INPUT BINDING", "Press the control you want to assign.")
 	capture_overlay = overlay
-	var panel := ColorRect.new()
-	panel.position = Vector2(250, 260)
-	panel.size = Vector2(1172, 412)
-	panel.color = Color("0c2228")
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	overlay.canvas.add_child(panel)
 	capture_label = overlay.label_at("", Rect2(300, 282, 1072, 254), 27)
 	capture_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	capture_confirm = overlay.button_at("SWAP", Rect2(300, 558, 520, 64), _confirm_capture, 26)

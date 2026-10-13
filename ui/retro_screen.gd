@@ -3,6 +3,7 @@ extends Control
 ## Fixed design coordinates shared by the generated skins and live controls.
 ## Uniform fitting keeps artwork, hit targets and text aligned at 4:3/16:9.
 const DESIGN := Vector2(1672, 941)
+const MENU_SKIN := preload("res://assets/ui/retro_terminal/pause_menu_skin_v03.png")
 var design_size: Vector2 = DESIGN
 var canvas: Control
 var backdrop: TextureRect
@@ -37,18 +38,22 @@ func build(texture: Texture2D, opaque: bool = true) -> void:
 	backdrop.size = design_size
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(backdrop)
-	if texture != null and texture.resource_path.ends_with("pause_menu_skin_v02.png"):
-		# Localized live lettering covers the Portuguese baked into the old skin.
-		var cover := ColorRect.new()
-		cover.position = Vector2(390, 88)
-		cover.size = Vector2(890, 142)
-		cover.color = Color("071318")
-		cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		canvas.add_child(cover)
-		var title := label_at("PAUSED", Rect2(390, 88, 890, 52), 36)
-		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	resized.connect(fit)
 	fit()
+
+## The skin has empty textured bands; runtime text never needs a cover patch.
+func heading(title: String, subtitle: String = "") -> void:
+	var caption := label_at(title, Rect2(300, 82, 1072, 60), 36)
+	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var description := label_at(subtitle, Rect2(300, 170, 1072, 54), 20)
+	description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+func footer() -> Label:
+	var hint := label_at("", Rect2(280, 814, 1112, 46), 19)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return hint
 
 func fit() -> void:
 	if canvas == null:

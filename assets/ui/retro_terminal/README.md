@@ -1,5 +1,15 @@
 # UI — referências Dino Crisis 2
 
+## Pausa e configurações — correção de 12/10/2026
+
+`pause_menu_skin_v03.png` é a skin ativa de pausa, apresentação, jogabilidade,
+configurações e remapeamento. Image_gen removeu os textos gravados e ampliou a
+moldura da v02 mantendo a textura CRT; prompt em
+`pause_menu_skin_v03.prompt.txt`. Cabeçalhos e instruções são labels reais em
+faixas vazias da imagem. Os retângulos sólidos que cobriam títulos e rodapé
+foram removidos. `RetroScreen.heading()` e `footer()` mantêm as mesmas margens
+e alinhamento nas páginas, com escala uniforme em 16:9 e 4:3.
+
 ## Versão ativa v04 — console de comandos
 
 O terminal atual é desenhado no Godot: texto verde, prompt, cursor e transcript

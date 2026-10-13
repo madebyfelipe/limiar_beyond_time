@@ -239,7 +239,8 @@ func _build_skin() -> void:
 	add_child(skin_layer)
 	screen = RetroScreen.new()
 	skin_layer.add_child(screen)
-	screen.build(preload("res://assets/ui/retro_terminal/pause_menu_skin_v02.png"))
+	screen.build(RetroScreen.MENU_SKIN)
+	screen.heading("PAUSED", "SIMULATION SUSPENDED")
 	resume_button = screen.button_at("RESUME", Rect2(424, 236, 824, 72), Callable(), 34)
 	restart_button = screen.button_at("RESTART", Rect2(424, 318, 824, 72), Callable(), 34)
 	gameplay_button = screen.button_at("", Rect2(424, 400, 824, 72), Callable(), 30)
@@ -260,14 +261,7 @@ func _build_skin() -> void:
 	settings_menu.gameplay_requested.connect(_on_gameplay_pressed)
 	settings_menu.presentation_requested.connect(_on_filter_pressed)
 	for page: RetroScreen in [screen, filter_screen, gameplay_screen]:
-		# Cover the keyboard legend printed on the skin with the current input.
-		var backing := ColorRect.new()
-		backing.position = Vector2(300, 790)
-		backing.size = Vector2(1072, 64)
-		backing.color = Color("071318")
-		backing.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		page.canvas.add_child(backing)
-		input_hints.append(page.label_at("", Rect2(312, 790, 1048, 64), 24))
+		input_hints.append(page.footer())
 	_refresh_input_hints()
 	skin_layer.hide()
 
@@ -283,12 +277,12 @@ func _build_filter_page() -> void:
 	RetroFilter.ensure_loaded()
 	filter_screen = RetroScreen.new()
 	skin_layer.add_child(filter_screen)
-	filter_screen.build(preload("res://assets/ui/retro_terminal/pause_menu_skin_v02.png"))
-	filter_screen.label_at("PRESENTATION", Rect2(300, 130, 1072, 70), 34)
+	filter_screen.build(RetroScreen.MENU_SKIN)
+	filter_screen.heading("PRESENTATION", "Adjust the picture and screen effects.")
 	# Seven rows and the way back have to end above the key hints printed at the
 	# foot of the skin (y ≈ 810), so the rows are 62 tall on a 68 pitch.
 	var rows: Array[Button] = []
-	var y: float = 236.0
+	var y: float = 250.0
 	pixel_button = filter_screen.option_at("PIXELATION", Rect2(300, y, 1072, 62), _on_pixel_pressed, 28)
 	rows.append(pixel_button)
 	y += 68.0
@@ -300,7 +294,7 @@ func _build_filter_page() -> void:
 		var button: RetroOption = filter_screen.option_at(String(row["name"]).to_upper(), Rect2(300, y, 1072, 62), func(direction: int) -> void: _toggle_effect(id, direction), 28)
 		effect_buttons[id] = button
 		rows.append(button)
-	y += 80.0
+	y += 68.0
 	rows.append(filter_screen.button_at("BACK", Rect2(300, y, 1072, 62), _close_filter_page, 28))
 	filter_screen.focus_ring(rows)
 	_update_filter_page()
@@ -310,8 +304,8 @@ func _build_filter_page() -> void:
 func _build_gameplay_page() -> void:
 	gameplay_screen = RetroScreen.new()
 	skin_layer.add_child(gameplay_screen)
-	gameplay_screen.build(preload("res://assets/ui/retro_terminal/pause_menu_skin_v02.png"))
-	gameplay_screen.label_at("GAMEPLAY", Rect2(300, 130, 1072, 70), 34)
+	gameplay_screen.build(RetroScreen.MENU_SKIN)
+	gameplay_screen.heading("GAMEPLAY", "Movement and aiming preferences.")
 	var rows: Array[Button] = []
 	var y: float = 236.0
 	scheme_button = gameplay_screen.option_at("CONTROLS", Rect2(300, y, 1072, 62), _on_scheme_pressed, 28)
