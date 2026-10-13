@@ -453,7 +453,9 @@ func run() -> void:
 	check(visual.pistol.global_position.distance_to(arm[1]) < 0.06 * prop_scale if arm.size() == 2 else false, "The pistol grip is detached from the aiming hand")
 	release_all()
 	await tick(30)
-	check(not visual.pistol.visible and visual.aim_pose.influence == 0.0, "The stance stayed on after lowering the gun")
+	check(visual.aim_pose.influence == 0.0, "The stance stayed on after lowering the gun")
+	# Lowered, the gun stays in the hand instead of vanishing.
+	check(visual.pistol.visible and visual.pistol.global_position.distance_to(visual.skeleton.global_transform * visual.skeleton.get_bone_global_pose(visual.skeleton.find_bone("mixamorig_RightHand")).origin) < 0.2, "The lowered gun left the hand")
 
 	# --- Modern, cursor on the floor: aims at what is under the mouse ---
 	AimSettings.modern = AimSettings.Modern.CURSOR

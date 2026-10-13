@@ -27,6 +27,13 @@ func run() -> void:
 	for name: String in ["aim_walk", "aim_walk_back", "strafe_left", "strafe_right", "terminal_type"]:
 		check(animator.get_animation(name).loop_mode == Animation.LOOP_LINEAR, "Cycle does not loop: " + name)
 
+	# The gun stays in the hand, lowered, while it is not aimed.
+	var wrist: int = visual.skeleton.find_bone("mixamorig_RightHand")
+	var held: float = visual.pistol.global_position.distance_to(visual.skeleton.global_transform * visual.skeleton.get_bone_global_pose(wrist).origin)
+	check(visual.pistol.visible, "The gun is hidden while it is not aimed")
+	check(held < 0.2, "The lowered gun is not in the hand: %.3f m from the wrist" % held)
+	check(visual.grip_pose.active and visual.grip_pose._bones.size() == 15, "The right hand is not closed around the grip")
+
 	# Run, let go: the stop plays, then the idle.
 	Input.action_press("move_up")
 	Input.action_press("run")

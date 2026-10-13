@@ -61,6 +61,16 @@ então esses ciclos tocam entre 0,6x e 1,1x.
 - Mirando, cada direção usa o ciclo de pistola correspondente. Se faltar um, cai
   para o ciclo desarmado.
 
+## Pistola sempre na mão
+
+Fora da mira, a pistola continua visível e presa ao osso da mão direita, abaixada.
+O encaixe (`PISTOL_GRIP`) é a posição de mira medida no espaço do osso da mão: varia
+3 mm entre direções, então baixar a arma a deixa onde a mão já a segurava. Entre as
+duas posições, a arma interpola junto com a influência da mira. `grip_pose.gd`
+fecha os dedos da mão direita com a pose do primeiro quadro do "Pistol Idle" e é
+carregado por `preload`, sem `class_name`, para funcionar antes de o editor
+reescanear o projeto.
+
 ## Validação
 
 `tests/check_dylan_transitions.gd` (`transicoes` no executor) cobre corrida até

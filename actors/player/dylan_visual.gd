@@ -3,6 +3,9 @@ extends Node3D
 ## tools/build_dylan_animations.gd. Physics remains on PlayerController.
 ## The captures face +Z and stand 0.976 tall; gameplay forward is -Z.
 const CLIPS: AnimationLibrary = preload("res://assets/models/dylan_protagonist/mixamo/dylan_clips.res")
+## Loaded by path rather than class name, so it works before the editor has
+## rescanned the project.
+const GRIP_POSE := preload("res://actors/player/grip_pose.gd")
 const PISTOL_MODEL: PackedScene = preload("res://assets/models/weapons/pistol/pistol_lowpoly.glb")
 const SOURCE_HEIGHT := 0.9761
 ## Ground speed each capture carries on its own, measured from the planted foot
@@ -33,10 +36,18 @@ const RUN_STOP_GRACE := 0.25
 const AIM_BLEND := 10.0
 ## The imported prop has its origin at the grip; the hand bone is the wrist.
 const PISTOL_HAND_OFFSET := 0.035
+## Where the gun sits in the right hand's bone space when it is not aimed:
+## the aimed placement measured in that space (2026-10-13; it varies by 3 mm
+## across headings), so lowering the gun leaves it exactly where the hand
+## holds it. The basis carries the prop's scale relative to the rig, 0,542.
+const PISTOL_GRIP := Transform3D(
+	Basis(Vector3(0.0353, 0.1015, -0.5314), Vector3(0.5398, -0.0422, 0.0278), Vector3(-0.0361, -0.5309, -0.1039)),
+	Vector3(-0.0063, 0.0401, -0.0365))
 var animator: AnimationPlayer
 var interaction_active: bool = false
 var locomotion: StringName = &"idle"
 var aim_pose: AimPose
+var grip_pose: SkeletonModifier3D
 var pistol: Node3D
 var muzzle: Node3D
 var _hand: int = -1
@@ -58,6 +69,9 @@ func _ready() -> void:
 	aim_pose.influence = 0.0
 	aim_pose.active = false
 	skeleton.add_child(aim_pose)
+	grip_pose = GRIP_POSE.new()
+	grip_pose.setup(skeleton, CLIPS.get_animation(&"aim_idle") if CLIPS.has_animation(&"aim_idle") else Animation.new())
+	skeleton.add_child(grip_pose)
 	_hand = skeleton.find_bone("mixamorig_RightHand")
 	pistol = PISTOL_MODEL.instantiate()
 	pistol.name = "Pistol"
@@ -177,16 +191,24 @@ func _update_aim(delta: float) -> void:
 	aim_pose.active = aim_pose.influence > 0.0
 	if _aiming():
 		aim_pose.direction = weapon.shot_direction()
-	pistol.visible = aim_pose.influence > 0.5
+	# The gun stays in the hand, lowered, whenever Dylan carries it.
+	pistol.visible = true
+	grip_pose.active = true
 
 func _place_pistol() -> void:
-	if not pistol.visible or _hand < 0:
+	if not pistol.visible or _hand < 0 or not is_inside_tree():
 		return
-	var hand: Vector3 = skeleton.global_transform * skeleton.get_bone_global_pose(_hand).origin
+	var wrist: Transform3D = skeleton.global_transform * skeleton.get_bone_global_pose(_hand)
+	var held: Transform3D = wrist * PISTOL_GRIP
+	if aim_pose.influence <= 0.0:
+		pistol.global_transform = held
+		return
+	var hand: Vector3 = wrist.origin
 	var along: Vector3 = aim_pose.direction.normalized()
 	var side: Vector3 = Vector3.UP if absf(along.dot(Vector3.UP)) < 0.95 else Vector3.FORWARD
 	var prop_scale: float = target_height / 1.8
-	pistol.global_transform = Transform3D(Basis.looking_at(along, side).scaled(Vector3.ONE * prop_scale), hand + along * PISTOL_HAND_OFFSET * prop_scale)
+	var aimed := Transform3D(Basis.looking_at(along, side).scaled(Vector3.ONE * prop_scale), hand + along * PISTOL_HAND_OFFSET * prop_scale)
+	pistol.global_transform = held.interpolate_with(aimed, aim_pose.influence)
 
 func _clip_for(motion: Vector2, speed: float, forward: Vector2) -> StringName:
 	if _aiming():
