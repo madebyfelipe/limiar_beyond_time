@@ -3,9 +3,8 @@ extends Control
 const SOURCE := preload("res://environments/exterior_source.tscn")
 const DEFINITIONS := [preload("res://resources/exterior/shot_1.tres"),preload("res://resources/exterior/shot_2.tres"),preload("res://resources/exterior/shot_3.tres"),preload("res://resources/exterior/shot_4.tres")]
 const ART_DIR := "res://assets/backgrounds/env_1/exterior_authored/"
-## One plate per framing. The north yard, added with the service gate, has no
-## plate yet: that framing shows its geometry while the other three paint.
-const ART_FILES := ["art_cam01_v01.png","art_cam02_v02.png","art_cam03_v01.png","art_cam04_v01.png"]
+## One plate per framing, including the north yard and its service gate.
+const ART_FILES := ["art_cam01_v01.png","art_cam02_v04.png","art_cam03_v02.png","art_cam04_v02.png"]
 const ZONE_CENTERS := [Vector3(0,2,22),Vector3(-2,2,7),Vector3(-5,2,3.5),Vector3(1,2,-4)]
 const ZONE_SIZES := [Vector3(7,6,16),Vector3(22,6,16),Vector3(8,6,10),Vector3(14,6,6)]
 ## North of the raised barrier the player is still on the road; south of it the

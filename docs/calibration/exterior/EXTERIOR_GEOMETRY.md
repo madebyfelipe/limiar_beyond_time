@@ -29,8 +29,17 @@ As três capturas `geometry_cam01.png` a `geometry_cam03.png`, de 1920×1080, fo
 Assets ativos na prévia, em `assets/backgrounds/env_1/exterior_authored/`:
 
 - `art_cam01_v01.png`: aproximação pela estrada.
-- `art_cam02_v02.png`: entrada/cancela; revisão que remove o poste adicional inventado na geração v01.
-- `art_cam03_v01.png`: entrada da guarita, escada e patamar.
+- `art_cam02_v04.png`: entrada/cancela com portão norte e materiais revisados em 12/10/2026.
+- `art_cam03_v02.png`: entrada da guarita, escada e patamar, com portão norte e materiais compatíveis com a vista 2.
+- `art_cam04_v02.png`: pátio norte, portão de serviço e continuidade para o perímetro.
+
+Revisão de 12/10/2026: a arte antiga da vista 2 ainda mostrava muro no lugar do
+portão recém-adicionado. A referência `geometry_cam02_gate.png` foi capturada da
+fonte atual, sem crop, por `tools/capture_north_yard.gd -- --yard`. O centro do
+portão projeta em (1484,82; 313,61) nessa referência de 1920×1080, dentro do
+recorte existente. A pintura recebeu o portão e uma limpeza de materiais;
+não foi necessário alterar câmera ou zona de corte. Prompts finais
+`ART_CAM02_CLEAN_PROMPT.txt` e `ART_CAM04_CLEAN_PROMPT.txt` junto aos PNGs.
 
 Prompts completos e correção estão nos arquivos `ART_CAM01_PROMPT.txt`, `ART_CAM02_PROMPT.txt`, `ART_CAM03_PROMPT.txt` e `ART_CAM02_FIX_PROMPT.txt`, neste diretório. Ferramenta integrada image_gen; sem CLI/API externa. Os originais ENV_1 e suas fichas permanecem separados deste estudo. A v01 da vista 2 é histórico e não é consumida pela cena.
 

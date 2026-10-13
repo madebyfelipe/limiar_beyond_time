@@ -71,9 +71,20 @@ da própria zona em 1920 × 1080 com margem, manter Dylan entre ~110 e ~190 px d
 altura e deixar o banco e o ombro próximos livres da linha até o meio do corpo.
 O probe repete a parte da moldura a cada quadro durante a caminhada.
 
-**Não há arte.** Os três enquadramentos rodam em geometria e o rótulo na tela diz
-isso. `ART_DIR`/`ART_FILES` em `environments/perimeter.gd` são o gancho: basta
-colocar as placas lá para a arte entrar, uma por enquadramento.
+**Arte integrada em 12/10/2026.** As três placas em
+`assets/backgrounds/perimeter/authored/art_cam0{1,2,3}_v02.png` são carregadas
+por `ART_DIR`/`ART_FILES` em `environments/perimeter.gd`. B alterna arte e
+geometria. Foram geradas com image_gen integrado, usando cada captura de
+geometria como referência de composição e o exterior existente como referência
+de materiais e clima. Prompts completos em `authored/ART_CAM0{1,2,3}_PROMPT.txt`.
+As câmeras, colisores e geometria de origem permanecem os mesmos.
+
+A revisão v02 usa uma direção comum em `authored/ART_DIRECTION.txt`: neve
+contínua, menos granulação artificial, materiais e exposição consistentes,
+sem pixelização pintada (o filtro do jogo cuida disso). A vista final do galpão
+foi usada como referência da vista central, eliminando a luminária duplicada
+e igualando a placa da porta, o tambor e os materiais. Prompts finais em
+`authored/ART_CAM0{1,2,3}_CLEAN_PROMPT.txt`.
 
 ## O Keleken
 
@@ -104,12 +115,25 @@ esteja lá.
 
 ## Limites
 
-- Sem arte, sem áudio e sem ponto de salvamento na trilha: o registro continua
+Validação da integração: `check_perimeter.gd` passou em headless e Forward+
+na RTX 5060 (2352 ticks, zero falhas), com imagens sincronizadas nos cortes,
+ida/volta pelo portão e alternância arte/geometria. Capturas em
+`.local/perimeter-art-*.png` inspecionadas nas três vistas e no pátio norte.
+`check_exterior.gd` headless também passou (4100 ticks, zero falhas).
+
+- Sem áudio e sem ponto de salvamento na trilha: o registro continua
   sendo feito no terminal da guarita, antes do portão.
 - O conteúdo termina na porta lacrada do relé. `RELAY` é fim de conteúdo, não
   fim de missão.
 - O quarto enquadramento do exterior (`exterior_4`, o pátio norte até o portão)
-  também é só geometria: as três placas originais continuam intactas e agora a
-  arte é avaliada por enquadramento, não pelo cenário inteiro.
-- Nenhuma inspeção visual em movimento foi feita nesta sessão além das capturas
-  de geometria; não houve exportação, medição de desempenho nem soak.
+  usa `assets/backgrounds/env_1/exterior_authored/art_cam04_v02.png`, com prompt
+  ao lado. `tools/capture_north_yard.gd` captura a fonte/câmera atuais sem
+  regenerá-las. A primeira tentativa mudou a perspectiva e foi descartada;
+  a versão integrada preserva o enquadramento elevado.
+- A vista da cancela usa `art_cam02_v04.png`: o trecho da parede de fundo agora
+  mostra o portão norte na projeção da geometria atual, também dentro do crop
+  existente. Prompts `ART_CAM02_GATE_PROMPT.txt` e `ART_CAM02_CLEAN_PROMPT.txt`.
+  `capture_north_yard.gd -- --yard` reproduz a referência sem crop para edição.
+- As placas são candidatas: a inspeção visual não equivale a uma medição
+  independente de erro em pixels. Neve, galhos e rochas têm contornos que podem
+  diferir dos volumes de oclusão. Não houve exportação, benchmark nem soak.

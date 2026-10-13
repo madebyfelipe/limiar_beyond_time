@@ -1,13 +1,13 @@
 extends Control
 ## Phase 2 — the perimeter trail, north of the guardhouse yard. Same contract as
 ## the exterior: one authored spatial source owns collision, three fixed
-## framings own the camera, and the plates are a later pass. No art exists for
-## these framings yet, so the level runs its geometry and says so on screen.
+## framings own the camera. Authored plates share the geometry's projection;
+## B switches between art and geometry for inspection.
 const SOURCE := preload("res://environments/perimeter_source.tscn")
 const DEFINITIONS := [preload("res://resources/perimeter/shot_1.tres"),preload("res://resources/perimeter/shot_2.tres"),preload("res://resources/perimeter/shot_3.tres")]
 ## Plate hook: dropping these files in turns art mode on, one framing at a time.
 const ART_DIR := "res://assets/backgrounds/perimeter/authored/"
-const ART_FILES := ["art_cam01_v01.png","art_cam02_v01.png","art_cam03_v01.png"]
+const ART_FILES := ["art_cam01_v02.png","art_cam02_v02.png","art_cam03_v02.png"]
 const ZONE_CENTERS := [Vector3(0,2,-5),Vector3(0,2,-15),Vector3(0,2,-25.5)]
 const ZONE_SIZES := [Vector3(14,6,11),Vector3(16,6,10),Vector3(14,6,12)]
 ## The service gate back to the yard, and where the player stands to use it.

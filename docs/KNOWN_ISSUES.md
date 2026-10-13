@@ -3,12 +3,10 @@
 
 ## Atualização — Fase 2 e estrutura de fase, 12/10/2026
 
-- **Trilha do perímetro é só geometria.** Os três enquadramentos novos não têm
-  placa pintada, e o rótulo na tela diz isso. Ver `PERIMETER.md`.
-- **O exterior ganhou um quarto enquadramento** (`exterior_4`, pátio norte até o
-  portão) também sem placa. A arte do exterior passou a ser avaliada **por
-  enquadramento**: as três placas originais continuam ativas, em vez de o
-  cenário inteiro cair para geometria por causa da quarta.
+- **Arte do perímetro e pátio norte integrada em 12/10/2026.** Três placas da
+  trilha e a quarta placa do exterior foram geradas com image_gen a partir
+  das capturas de geometria. B compara arte/geometria. Ainda são candidatas,
+  sem medição independente de alinhamento em pixels; ver `PERIMETER.md`.
 - **Sem salvamento na Fase 2.** O único terminal continua na guarita; quem
   morrer na trilha volta ao registro anterior. Não há áudio na trilha.
 - **O conteúdo termina na porta lacrada do relé.** `RELAY` é fim de conteúdo, não

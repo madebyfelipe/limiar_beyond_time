@@ -69,6 +69,8 @@ func tick(count: int = 1) -> void:
 		# A new area's framings have to hold the actor they were authored for.
 		var shot: ShotRig = scene.director.current_shot
 		check(scene.presentation.current_shot == shot and player.camera == shot.camera,"Camera presentation out of sync")
+		if scene.presentation.art_mode:
+			check(scene.background.visible and scene.background.texture == shot.definition.background,"Art plate out of sync at camera cut")
 		for height: float in [0.0,1.8]:
 			var point: Vector3 = player.global_position+Vector3(0,height,0)
 			var pixel: Vector2 = shot.camera.unproject_position(point)
@@ -119,6 +121,12 @@ func enter(expected: String) -> void:
 	scene = current_scene
 	player = scene.player
 
+func capture(label: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	await RenderingServer.frame_post_draw
+	check(root.get_texture().get_image().save_png("res://.local/perimeter-art-"+label+".png") == OK,"Could not capture "+label)
+
 func run() -> void:
 	create_timer(300).timeout.connect(func() -> void: quit(124))
 	root.size = Vector2i(1920,1080)
@@ -159,7 +167,11 @@ func run() -> void:
 	check(gate.target_scene == TRAIL,"The gate does not lead to the perimeter trail")
 	for point: Vector3 in TO_GATE:
 		await walk_to(point,true)
+		if point == Vector3(0.6,0,1):
+			await capture("yard-approach")
 	check(player.position.distance_to(scene.NORTH_GATE_APPROACH) < 0.3,"The gate approach is not walkable from the yard")
+	check(scene.shots[3].definition.background != null and scene.background.visible,"North yard plate is missing")
+	await capture("north-yard")
 	check(gate.can_interact(),"No prompt at the gate approach")
 	check(not gate.unlocked() and gate.prompt_text().contains("bolted"),"The gate does not read as bolted before the terminal")
 	key(KEY_E)
@@ -183,7 +195,14 @@ func run() -> void:
 	check(scene.shots.size() == 3 and scene.colliders.get_child_count() >= 18,"Spatial source or framings incomplete")
 	for label: String in ["Terrain","TrailBank","RockShoulder","GateLeaf","FallenPine","RelayShed"]:
 		check(scene.colliders.get_node_or_null(label) != null,"The trail lost the collider of "+label)
-	check(not scene.art_available and not scene.presentation.art_mode,"A plate appeared for a framing that has none authored")
+	check(scene.art_available and scene.presentation.art_mode,"Perimeter did not start with its authored plates")
+	for shot: ShotRig in scene.shots:
+		check(shot.definition.background != null,"Missing authored plate: "+String(shot.definition.shot_id))
+	scene.set_art_mode(false)
+	check(not scene.background.visible,"Geometry comparison left the painted background visible")
+	scene.set_art_mode(true)
+	check(scene.background.visible,"Art comparison did not restore the background")
+	await capture("entrance")
 	var animal: KelekenActor = scene.keleken
 	check(animal != null and animal.combat_enabled,"The animal is not on the trail, or cannot fight there")
 	check(scene.KELEKEN_BOUNDS.has_point(Vector2(animal.position.x,animal.position.z)),"The animal started outside its pen: %v" % animal.position)
@@ -204,6 +223,7 @@ func run() -> void:
 	inspect_frame = true
 	for point: Vector3 in UP_TRAIL:
 		await walk_to(point)
+		await capture(String(scene.director.current_shot.definition.shot_id)+"-"+str(int(-point.z)))
 	inspect_frame = false
 	check(cuts == [&"perimeter_2",&"perimeter_3"],"Missing or unstable cuts up the trail: %s" % str(cuts))
 	check(MissionState.stage == MissionState.Stage.RELAY,"Reaching the shed did not close the phase")
