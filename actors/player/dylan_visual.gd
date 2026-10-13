@@ -166,7 +166,8 @@ func _rate_for(clip: StringName, speed: float) -> float:
 	if clip == &"idle" or clip == &"aim_idle":
 		return 1.0
 	if clip == &"turn_left" or clip == &"turn_right":
-		return clampf(absf(player.turn_input) * player.config.tank_turn_speed / NATIVE_TURN, 0.5, 2.0)
+		# The faster tank pivot needs 3,38x playback at full input.
+		return clampf(absf(player.turn_input) * player.config.tank_turn_speed / NATIVE_TURN, 0.5, 4.0)
 	return clampf(speed / NATIVE_SPEED.get(clip, NATIVE_SPEED[&"walk"]), 0.6, 2.0)
 
 func play_door_interaction() -> void:

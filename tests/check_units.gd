@@ -69,7 +69,7 @@ func movement_reference() -> void:
 func contracts() -> void:
 	var config: PlayerConfig = load("res://actors/player/default_player_config.tres")
 	check(config.walk_speed == 1.8 and config.run_speed == 3.8 and config.acceleration == 26.0 and config.deceleration == 40.0 and config.gravity == 20.0,"PlayerConfig drifted from the architecture contract")
-	check(config.tank_turn_speed == 1.5 and config.tank_reverse_factor == 0.45,"Tank steering drifted from the architecture contract")
+	check(config.tank_turn_speed == 3.0 and config.tank_reverse_factor == 0.45,"Tank steering drifted from the architecture contract")
 	for action: String in ["move_left","move_right","move_up","move_down","run","pause","toggle_diagnostics"]:
 		check(InputMap.has_action(action) and not InputMap.action_get_events(action).is_empty(),"Input action missing: %s" % action)
 	var escape := InputEventKey.new()

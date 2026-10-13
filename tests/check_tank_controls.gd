@@ -23,13 +23,15 @@ func release_all() -> void:
 	for action: String in ["move_left", "move_right", "move_up", "move_down", "run"]:
 		Input.action_release(action)
 
-## Where the two feet stand, in world metres.
+## Feet centre in metres relative to the steered body. World-space positions
+## also move when an off-centre stance rotates, which is not a sideways jump.
 func feet_centre(visual: Node) -> Vector2:
 	var skeleton: Skeleton3D = visual.skeleton
 	var total := Vector2.ZERO
 	for bone: String in ["mixamorig_LeftToeBase", "mixamorig_RightToeBase"]:
 		var world: Vector3 = skeleton.global_transform * skeleton.get_bone_global_pose(skeleton.find_bone(bone)).origin
-		total += Vector2(world.x, world.z)
+		var local: Vector3 = visual.get_parent().to_local(world)
+		total += Vector2(local.x, local.z)
 	return total / 2.0
 
 ## Angle between the direction the rendered body faces and the steered heading.
@@ -61,6 +63,7 @@ func run() -> void:
 	await tick(30)
 	# The pivot capture must be the one matching the side being turned to.
 	check(visual.locomotion == &"turn_left", "Turning left played '%s'" % visual.locomotion)
+	check(visual.animator.speed_scale > 3.3, "Pivot animation lagged behind the faster turn")
 	# A window cut from the middle of a captured turn starts already rotated and
 	# already stepped aside. Both would show up here, as a body pointing away
 	# from where it is steered and as feet landing somewhere else.
@@ -69,7 +72,7 @@ func run() -> void:
 	release_all()
 	await tick(6)
 	var turned: float = angle_difference(heading, player.visual.rotation.y)
-	check(turned > 0.5, "Holding left did not turn Dylan on the spot: %f rad" % turned)
+	check(absf(turned - 1.5) < 0.06, "Half-second left turn should cover 1.5 rad: %f rad" % turned)
 	check(origin.distance_to(player.global_position) < 0.12, "Turning in place moved the body %f m" % origin.distance_to(player.global_position))
 	# Driving follows the body, not the camera.
 	var facing: Vector3 = player.facing()
@@ -101,7 +104,7 @@ func run() -> void:
 	press("move_right")
 	await tick(30)
 	check(visual.locomotion == &"turn_right", "Turning right played '%s'" % visual.locomotion)
-	check(angle_difference(0.0, player.visual.rotation.y) < -0.3, "Right turn did not rotate the body clockwise")
+	check(absf(angle_difference(0.0, player.visual.rotation.y) + 1.5) < 0.06, "Half-second right turn should cover -1.5 rad")
 	release_all()
 	await tick(6)
 	# --- Stopping is deliberate, not a slide ---

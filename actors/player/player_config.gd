@@ -11,10 +11,9 @@ extends Resource
 @export_range(0.1, 100.0) var deceleration: float = 40.0
 @export_range(0.1, 100.0) var gravity: float = 20.0
 @export_range(0.1, 30.0) var rotation_speed: float = 10.0
-## Tank steering: how fast holding left/right turns Dylan on the spot. 1,5 rad/s
-## is 86°/s, so a half turn takes about two seconds, and it keeps the pivot
-## capture (0,887 rad/s on its own) inside a believable playback rate.
-@export_range(0.5, 6.0) var tank_turn_speed: float = 1.5
+## Shared by keyboard/gamepad steering and manual aiming in tank mode.
+## 3 rad/s is 172°/s: a half turn takes about 1,05 s at full input.
+@export_range(0.5, 6.0) var tank_turn_speed: float = 3.0
 ## Backing up is a fraction of the walking speed, close to the 0,61 m/s the
 ## backward capture carries.
 @export_range(0.1, 1.0) var tank_reverse_factor: float = 0.45

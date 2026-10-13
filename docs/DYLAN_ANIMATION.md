@@ -39,7 +39,7 @@ Andando de ré, Dylan usa captura própria (`walk_back`), não o ciclo para a fr
 2. **Guinada cancelada** (`unturn`): quem gira o corpo é o controlador, então da captura fica só o trabalho de pés. O cancelamento é absoluto, não relativo ao início da janela — ver a correção de 11/10/2026 abaixo. Guinada medida depois: **0,0°**, contra 10,4° de oscilação natural do idle.
 3. **Emenda costurada** (`stitch` 0,25): o fim é cruzado sobre o começo com interpolação esférica, o que fecha o loop. A emenda caiu de **109° para 1°**, somados onze ossos.
 
-`turn_a` gira para a direita e `turn_b`, espelhado, para a esquerda — medido pela direção que o quadril aponta, não pelo nome do arquivo. A cadência segue `turn_input`, com 0,887 rad/s de giro próprio da captura contra os 1,5 rad/s do `tank_turn_speed`.
+`turn_a` gira para a direita e `turn_b`, espelhado, para a esquerda — medido pela direção que o quadril aponta, não pelo nome do arquivo. Desde 12/10/2026, `tank_turn_speed` vale **3 rad/s** (antes 1,5), por pedido de giro mais rápido: meia-volta em 1,05 s. A cadência segue `turn_input`, com 0,887 rad/s de giro próprio da captura e reprodução de 3,38x em entrada máxima; o limite exclusivo dos clipes de pivô passou de 2x para 4x. Caminhada e corrida mantêm seus limites. O probe compara a base dos pés no espaço do corpo para distinguir deslocamento lateral da rotação legítima de uma postura fora do eixo.
 
 **Correção de 11/10/2026 — o pivô jogava o corpo para o lado.** O usuário relatou que, ao girar no modo tanque, o boneco saltava para a esquerda. Eram dois defeitos somados, ambos de recortar uma janela do meio de uma captura:
 
