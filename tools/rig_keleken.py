@@ -238,7 +238,26 @@ CLIPS = {
     "alert": {"frames": 36, "loop": False},
     "attack_beak": {"frames": 30, "loop": False, "hit_start": .42, "hit_end": .58},
     "recover": {"frames": 30, "loop": False},
+    # Reaction to a round: a sharp recoil that settles back on the rest pose.
+    "hit": {"frames": 15, "loop": False},
+    # Staggers, the legs give way under the planted feet, the neck comes down.
+    # Ends lying, not on the rest pose: it is held by the actor once it plays.
+    "death": {"frames": 48, "loop": False},
 }
+
+def recoil(k, phase):
+    """Shared by hit and the first beat of death: thrown back and up."""
+    translate_world("pelvis", (.03 * k, -.07 * k, .03 * k))
+    rotate_world_axis("chest", (1, 0, 0), .18 * k)
+    rotate_world_axis("neck_01", (1, 0, 0), .32 * k)
+    rotate_world_axis("neck_02", (1, 0, 0), .12 * k)
+    rotate_world_axis("head", (1, 0, 0), -.25 * k)
+    # A shake of the head that dies out with the reaction.
+    rotate_world_axis("head", (0, 0, 1), .15 * math.sin(3 * math.pi * phase) * (1 - phase))
+    rotate_world_axis("jaw", (1, 0, 0), .12 + .3 * k)
+    for side, sign in [("L", 1), ("R", -1)]:
+        rotate_world_axis(f"wing_01.{side}", (0, 1, 0), sign * .3 * k)
+    rotate_world_axis("tail_01", (1, 0, 0), .15 * k)
 
 def pose_clip(clip, phase, info):
     for pb in rig.pose.bones:
@@ -330,6 +349,32 @@ def pose_clip(clip, phase, info):
         rotate_world_axis("neck_02", (1, 0, 0), -.12 * amount)
         rotate_world_axis("head", (1, 0, 0), .18 * amount)
         rotate_world_axis("jaw", (1, 0, 0), .18 * max(amount, 0))
+    elif clip == "hit":
+        # Two thirds of the death's stagger: a flinch, not a knock-back.
+        k = .65 * (smooth(phase / .2) if phase < .2 else 1. - smooth((phase - .2) / .8))
+        recoil(k, phase)
+    elif clip == "death":
+        # Stagger: the hit's recoil, held a moment before the body goes.
+        k = (smooth(phase / .12) if phase < .12 else 1.) * (1. - smooth(min(1., max(0., (phase - .2) / .3))))
+        recoil(k, min(phase / .3, 1.))
+        # Collapse: the pelvis sinks to sitting height over the planted feet,
+        # pitches forward and rolls a little onto its right side.
+        c = smooth(min(1., max(0., (phase - .2) / .5)))
+        translate_world("pelvis", (.06 * c, .05 * c, -.54 * c))
+        rotate_world_axis("pelvis", (1, 0, 0), -.15 * c)
+        rotate_world_axis("pelvis", (0, 1, 0), .35 * c)
+        rotate_world_axis("chest", (0, 1, 0), .15 * c)
+        # The neck falls last and the head comes to rest on its side.
+        n = smooth(min(1., max(0., (phase - .45) / .55)))
+        for name, angle in [("neck_01", -.55), ("neck_02", -.35), ("neck_03", -.25), ("neck_04", -.2)]:
+            rotate_world_axis(name, (1, 0, 0), angle * n)
+        rotate_world_axis("head", (1, 0, 0), .4 * n)
+        rotate_world_axis("head", (0, 1, 0), .9 * n)
+        rotate_world_axis("jaw", (1, 0, 0), .35 * n)
+        for side, sign in [("L", 1), ("R", -1)]:
+            # Toes stay flat: curling them on planted feet drives them underground.
+            rotate_world_axis(f"wing_01.{side}", (0, 1, 0), sign * .25 * c)
+        rotate_world_axis("tail_01", (1, 0, 0), -.2 * c)
 
 rig.animation_data_create()
 source_actions = {}

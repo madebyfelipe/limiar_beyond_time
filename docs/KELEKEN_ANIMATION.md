@@ -32,6 +32,10 @@ Altura da cópia de estudo: 2,4 m, base no chão e frente −Z. Pode ser ajustad
 | alert | 1,2 s | Ameaça com asas/pescoço |
 | attack_beak | 1,0 s | Antecipação, golpe e retorno; janela de acerto apenas registrada no manifesto |
 | recover | 1,0 s | Recuperação |
+| hit | 0,5 s | Recuo ao levar tiro; volta à pose de repouso (12/10/2026) |
+| death | 1,6 s | Cambaleia, pernas dobram sobre os pés plantados, pescoço desce ao chão; termina deitado (12/10/2026) |
+
+**Atualização de 12/10/2026 — opções tipo Mixamo reavaliadas.** Não há serviço aberto equivalente ao Mixamo com corrida/ataque/morte de ave. Mesh2Motion (MIT/CC0) refez o rig Bird com asas e bico, mas os clipes de ave seguem focados em voo, idle e walk. Truebones Zoo (gratuito com cupom, royalty-free, não open source) é o candidato a doador de corrida/ataque, ainda não baixado. Tripo (tipo "avian") e Anything World são pagos/fechados. Decisão: `hit` e `death` foram autorados neste gerador; doador externo fica para avaliação. Validação: 9 clipes, cabeça a 0,61 m e pelve a 0,55 m no fim da morte, pés deslizando 3 mm, pele acima do chão. `tools/capture_keleken_pose.gd` renderiza poses para revisão.
 
 Nenhuma hitbox de ataque ou IA predatória foi instalada. O IK é usado para autoria/bake; não existe IK de terreno em execução. Os pés foram validados no piso plano da cena de estudo e a instância exterior permanece no trecho plano da estrada. As penas e a anatomia do modelo ainda limitam o acabamento visual.
 

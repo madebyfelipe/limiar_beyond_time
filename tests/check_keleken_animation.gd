@@ -40,11 +40,19 @@ func run() -> void:
 		for influence in range(4):
 			sum += arrays[Mesh.ARRAY_WEIGHTS][vertex * 4 + influence]
 		check(absf(sum - 1) < .001, "Unnormalized weights at vertex %d" % vertex)
-	var durations := {&"idle": 6.4, &"walk": 1.2, &"run": .8, &"look": 2.4, &"alert": 1.2, &"attack_beak": 1., &"recover": 1.}
+	var durations := {&"idle": 6.4, &"walk": 1.2, &"run": .8, &"look": 2.4, &"alert": 1.2, &"attack_beak": 1., &"recover": 1., &"hit": .5, &"death": 1.6}
+	# Counted from the exported library, so an extra or missing clip shows up.
+	var visual_clip_count: int = visual.animator.get_animation_list().size()
+	check(visual_clip_count == durations.size(), "Exported %d clips, expected %d" % [visual_clip_count, durations.size()])
 	for clip: StringName in durations:
 		check(visual.animator.has_animation(clip), "Missing " + str(clip))
+		if not visual.animator.has_animation(clip):
+			continue
 		var duration := visual.animator.get_animation(clip).length
 		check(absf(duration - float(durations[clip])) < .001, "Wrong duration for %s: %.4f" % [clip, duration])
+		# Death ends lying down by design; every other clip loops or returns.
+		if clip == &"death":
+			continue
 		set_pose(visual, clip, 0)
 		var first: Array[Transform3D] = []
 		for bone in skeleton.get_bone_count():
@@ -119,6 +127,30 @@ func run() -> void:
 		print("KELEKEN_CONTACT %s drift=%.4f height_error=%.4f min_skin_y=%.4f" % [clip, worst_drift, worst_y, min_skin_y])
 		visual.play_clip(clip, speed * 1.5, 0)
 		check(absf(visual.animator.speed_scale - 1.5) < .001, "Cadence does not follow speed")
+	# The hit must move the body visibly at its peak, not only exist.
+	set_pose(visual, &"hit", .1)
+	var recoil: float = skeleton.get_bone_global_pose(skeleton.find_bone("head")).origin.distance_to(skeleton.get_bone_global_rest(skeleton.find_bone("head")).origin)
+	check(recoil > .08, "Hit reaction barely moves the head: %.3f m" % recoil)
+	# Death: the head comes down near the ground, the feet stay where they stood
+	# and the skin does not sink through the floor.
+	set_pose(visual, &"death", 0)
+	var toes_before: Array[Vector3] = []
+	for side: String in ["L", "R"]:
+		toes_before.append(skeleton.get_bone_global_pose(skeleton.find_bone("toes." + side)).origin)
+	set_pose(visual, &"death", 1.6)
+	var head_end: Vector3 = skeleton.get_bone_global_pose(skeleton.find_bone("head")).origin
+	var pelvis_end: Vector3 = skeleton.get_bone_global_pose(skeleton.find_bone("pelvis")).origin
+	var toe_slide := 0.0
+	for index: int in range(2):
+		toe_slide = maxf(toe_slide, skeleton.get_bone_global_pose(skeleton.find_bone("toes." + ["L", "R"][index])).origin.distance_to(toes_before[index]))
+	var lowest := INF
+	for vertex in arrays[Mesh.ARRAY_VERTEX].size():
+		lowest = minf(lowest, deform(mesh, skeleton, arrays, vertex).y)
+	check(head_end.y < .7, "Dead head stays up at %.2f m" % head_end.y)
+	check(pelvis_end.y < .7, "Dead body does not go down: pelvis %.2f m" % pelvis_end.y)
+	check(toe_slide < .05, "Feet slide while dying: %.3f m" % toe_slide)
+	check(lowest > -.06, "Dead body sinks through the floor: %.3f m" % lowest)
+	print("KELEKEN_DEATH head_y=%.3f pelvis_y=%.3f toe_slide=%.4f lowest=%.4f hit_recoil=%.3f" % [head_end.y, pelvis_end.y, toe_slide, lowest, recoil])
 	visual.play_clip(&"attack_beak", -1, 0)
 	visual.animator.advance(1.2)
 	check(visual.clip == &"idle", "One-shot did not return to idle")
@@ -154,5 +186,5 @@ func run() -> void:
 		check(worst < .22, "Runtime toe drift %s %.3f m/s" % [clip, worst])
 		check(absf(study.actor.position.y) < .015, "Collision lifts or sinks the visual origin")
 		print("KELEKEN_RUNTIME %s drift=%.4f samples=%d" % [clip, worst, samples])
-	print("KELEKEN animation bones=24 clips=%d failures=%d" % [durations.size(), failures])
+	print("KELEKEN animation bones=24 clips=%d failures=%d" % [visual_clip_count, failures])
 	quit(1 if failures else 0)

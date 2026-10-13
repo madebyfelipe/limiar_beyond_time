@@ -25,8 +25,14 @@ var attack_elapsed: float = 0.0
 var attack_cooldown: float = 0.0
 var attack_hit: bool = false
 var _death_tween: Tween
+## Wounds and stains, parented to the level so they stay where they fell.
+var blood: BloodEffects
 
 func _ready() -> void:
+	blood = BloodEffects.new()
+	blood.name = "KelekenBlood"
+	# The actor is still being added to its parent; the stains join it next frame.
+	_attach_blood.call_deferred()
 	health = Health.new()
 	health.name = "Health"
 	add_child(health)
@@ -49,6 +55,15 @@ func _ready() -> void:
 	health.died.connect(_die)
 	home = position
 
+func _attach_blood() -> void:
+	if get_parent() != null and blood.get_parent() == null:
+		get_parent().add_child(blood)
+
+func _exit_tree() -> void:
+	# The stains outlive a body that dies in place, but not one taken away.
+	if is_queued_for_deletion() and is_instance_valid(blood) and blood.get_parent() == null:
+		blood.free()
+
 func reset_combat() -> void:
 	if _death_tween != null:
 		_death_tween.kill()
@@ -61,6 +76,8 @@ func reset_combat() -> void:
 	velocity = Vector3.ZERO
 	drive_velocity = Vector3.ZERO
 	visual.rotation = Vector3.ZERO
+	if blood != null:
+		blood.clear()
 	# Deferred death changes must be flushed before enabling the body again.
 	set_deferred("collision_layer", 2)
 	health.restore()
@@ -135,9 +152,11 @@ func _strike() -> void:
 	if offset.length() <= attack_range + 0.15 and (basis * Vector3.FORWARD).dot(offset.normalized()) > 0.65 and _clear_sight(player.global_position + Vector3.UP * 1.2):
 		player.take_damage(attack_damage)
 
-func _on_hit(_damage: float, _point: Vector3, _direction: Vector3) -> void:
+func _on_hit(_damage: float, point: Vector3, direction: Vector3) -> void:
 	if not combat_enabled or state == State.DEAD:
 		return
+	if blood != null and blood.is_inside_tree():
+		blood.wound(point, direction)
 	state = State.HURT
 	state_left = 0.25
 	attack_cooldown = 0.5
@@ -145,15 +164,20 @@ func _on_hit(_damage: float, _point: Vector3, _direction: Vector3) -> void:
 	if _active_player():
 		last_seen = player.global_position
 		memory_left = memory_duration
-	visual.play_clip(&"recover", -1.0, 0.05)
+	visual.play_clip(&"hit" if visual.animator.has_animation(&"hit") else &"recover", -1.0, 0.05)
 
 func _die() -> void:
 	state = State.DEAD
 	drive_velocity = Vector3.ZERO
 	velocity = Vector3.ZERO
 	set_deferred("collision_layer", 0)
+	if blood != null and blood.is_inside_tree():
+		blood.pool(global_position)
+	if visual.animator.has_animation(&"death"):
+		visual.play_clip(&"death", -1.0, 0.06)
+		return
 	visual.animator.pause()
-	# The rig has no death clip yet; fall the visual while keeping physics upright.
+	# Without a death clip, fall the visual while keeping physics upright.
 	_death_tween = create_tween()
 	_death_tween.tween_property(visual, "rotation:z", -PI * 0.48, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 

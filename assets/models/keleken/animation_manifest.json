@@ -66,6 +66,14 @@
     "recover": {
       "frames": 30,
       "loop": false
+    },
+    "hit": {
+      "frames": 15,
+      "loop": false
+    },
+    "death": {
+      "frames": 48,
+      "loop": false
     }
   }
 }

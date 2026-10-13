@@ -34,8 +34,13 @@ A bicada prepara o ataque, fixa a direção e aplica **25 de dano uma vez** em
 o impacto. Tiros usam a Hurtbox do inimigo (100 HP), interrompem a bicada e
 podem matá-lo; o corpo morto deixa de bloquear passagem e atrair a mira.
 
-**Q / △ / Y** inicia uma esquiva de 0,32 s a 7 m/s, com 0,24 s de
-invulnerabilidade e intervalo de 0,85 s. A direção segue o movimento no esquema
+Cada tiro no Keleken toca o clipe `hit` (recuo de 0,5 s), espirra sangue no
+sentido do disparo e deixa manchas no chão em volta; a morte toca `death`
+(1,6 s, pernas dobram e o pescoço desce ao chão) e espalha uma poça. As manchas
+ficam no nível, até 40, e somem no reinício (`BloodEffects`).
+
+**Q / △ / Y** inicia uma esquiva de 0,55 s a 4,07 m/s (os mesmos 2,24 m), com
+0,41 s de invulnerabilidade e intervalo de 1,05 s. A direção segue o movimento no esquema
 câmera e os eixos do corpo no tanque; sem direção, Dylan recua. A colisão limita
 o deslocamento. A esquiva interrompe a mira e impede disparos durante o movimento.
 
@@ -189,12 +194,13 @@ modificador.
   de caminhada para frente: as pernas não acompanham o deslize. Faltam do Mixamo:
   `aim_idle`, `strafe_left`, `strafe_right`, caminhada mirada para frente/trás,
   disparo e recarga.
-- Sem som de disparo, sem cápsulas, sem marca de impacto.
+- Sem som de disparo e sem cápsulas. Só o Keleken sangra; tiros em parede ou
+  alvo de treino não deixam marca.
 - O carregador não vai para o salvamento; uma sessão retomada começa com o
   carregador cheio. A reserva vai (é o `SupplyStock`).
 - Dodge now uses retargeted Mixamo captures; see [Dodge and gamepad](DODGE_AND_GAMEPAD.md).
-  Hit reactions and death remain procedural. Keleken falls through a visual
-  transform because its rig has no dedicated death clip. Pursuit uses local
+  Dylan's hit reactions and death remain procedural. Keleken has authored
+  `hit` and `death` clips since 2026-10-12. Pursuit uses local
   obstacle avoidance, without global navigation through complex routes.
 - No estande, o HUD do terminal mostra "PISTOLA: NÃO" e o objetivo da estrada,
   porque a arma é emprestada e o estande não tem objetivo próprio.

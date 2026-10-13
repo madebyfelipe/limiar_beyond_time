@@ -182,9 +182,25 @@ func run() -> void:
 	check(player.weapon.fire(), "Pistol did not fire at the enemy")
 	check(enemy.health.current < enemy.health.maximum, "Shot did not damage Keleken")
 	check(enemy.state == KelekenActor.State.HURT, "Shot did not interrupt the enemy")
+	# The wound bleeds: one spray, and stains that land on the trail floor, near
+	# the animal and along the round's travel, never in the air.
+	check(enemy.blood != null and enemy.blood.get_parent() == enemy.get_parent(), "Blood does not live in the level")
+	check(enemy.blood.sprays == 1, "The shot did not spray blood: %d" % enemy.blood.sprays)
+	check(enemy.visual.clip == &"hit", "The shot did not play the hit reaction: %s" % enemy.visual.clip)
+	await capture("blood-wound")
+	var wound_stains: int = enemy.blood.stains.size()
+	check(wound_stains >= 2, "The wound left %d stains on the floor" % wound_stains)
+	for stain: MeshInstance3D in enemy.blood.stains:
+		check(absf(stain.global_position.y - BloodEffects.LIFT) < 0.02 and stain.global_position.distance_to(enemy.global_position) < 3.0, "Stain off the floor or far from the wound: %v" % stain.global_position)
 	enemy.hurtbox.take_hit(1000.0, enemy.global_position, Vector3.FORWARD)
 	await tick(3)
 	check(enemy.state == KelekenActor.State.DEAD and not enemy.health.alive(), "Enemy did not die")
+	check(enemy.visual.clip == &"death", "The body did not play its death: %s" % enemy.visual.clip)
+	check(enemy.blood.stains.size() > wound_stains + 1, "The body left no pool")
+	await tick(60)
+	await capture("blood-pool")
+	# Past the 1,6 s clip: a finished death must hold its last pose, not idle.
+	check(enemy.visual.clip == &"death", "The dead body got back up: %s" % enemy.visual.clip)
 	check(enemy.hurtbox.collision_layer == 0 and not enemy.hurtbox.is_in_group(Hurtbox.GROUP), "Dead enemy remains targetable")
 	check(enemy.collision_layer == 0, "Dead enemy still blocks movement")
 
@@ -205,6 +221,7 @@ func run() -> void:
 	await tick(3)
 	check(player.vitality == 100.0 and player.control_enabled and not player.is_dead(), "Restart did not revive Dylan")
 	check(enemy.state == KelekenActor.State.PATROL and enemy.health.alive() and enemy.hurtbox.collision_layer == Hurtbox.LAYER, "Restart did not revive Keleken")
+	check(enemy.blood.stains.is_empty(), "Restart left the old blood on the trail")
 	check(not trail.operation.hud.death_message.visible, "Restart kept the death screen")
 
 	player.restore_vitality(45.0)
