@@ -18,6 +18,7 @@ var controlled_player: PlayerController
 var latch: AudioStreamPlayer
 var creak: AudioStreamPlayer
 var playing: bool = false
+var region_title: Label
 
 func _ready() -> void:
 	layer = 100
@@ -51,6 +52,22 @@ func _ready() -> void:
 	retro_filter = preload("res://systems/rendering/retro_filter.tscn").instantiate()
 	retro_filter.allow_mode_input = false
 	cinema_frame.add_child(retro_filter)
+	region_title = Label.new()
+	region_title.name = "DestinationName"
+	region_title.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	region_title.anchor_top = 0.85
+	region_title.anchor_bottom = 0.95
+	region_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	region_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	region_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	region_title.add_theme_color_override("font_color", Color("dce6df"))
+	region_title.add_theme_color_override("font_shadow_color", Color.BLACK)
+	region_title.add_theme_constant_override("shadow_offset_x", 2)
+	region_title.add_theme_constant_override("shadow_offset_y", 2)
+	region_title.add_theme_font_override("font", RetroScreen.font())
+	cinema_frame.add_child(region_title)
+	cinema_frame.resized.connect(func() -> void:
+		region_title.add_theme_font_size_override("font_size", maxi(16, roundi(cinema_frame.size.y / 1080.0 * 32.0))))
 	curtain = ColorRect.new()
 	curtain.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	curtain.color = Color.BLACK
@@ -101,6 +118,9 @@ func _build_door() -> void:
 	light.omni_range = 7
 	world.add_child(light)
 	var frame_material := _material(Color("515f62"), 0.5)
+	frame_material.albedo_texture = preload("res://assets/textures/doors/painted_steel_v01.png")
+	frame_material.uv1_triplanar = true
+	frame_material.uv1_scale = Vector3.ONE * 0.7
 	_box(world, Vector3(-0.64, 1.1, 0), Vector3(0.15, 2.35, 0.16), frame_material)
 	_box(world, Vector3(0.64, 1.1, 0), Vector3(0.15, 2.35, 0.16), frame_material)
 	_box(world, Vector3(0, 2.24, 0), Vector3(1.43, 0.15, 0.16), frame_material)
@@ -110,10 +130,11 @@ func _build_door() -> void:
 	world.add_child(hinge)
 	var steel := ShaderMaterial.new()
 	steel.shader = preload("res://systems/interaction/door_steel.gdshader")
+	steel.set_shader_parameter("steel_texture", preload("res://assets/textures/doors/painted_steel_v01.png"))
 	_box(hinge, Vector3(0.55, 1.075, 0), Vector3(1.1, 2.15, 0.075), steel)
 	_box(hinge, Vector3(0.55, 1.64, 0.045), Vector3(0.39, 0.48, 0.045), frame_material)
 	_box(hinge, Vector3(0.55, 1.64, 0.072), Vector3(0.31, 0.39, 0.014), _material(Color("0b1318")))
-	_box(hinge, Vector3(0.55, 0.64, 0.048), Vector3(0.92, 0.8, 0.012), _material(Color("283b41"), 0.4))
+	_box(hinge, Vector3(0.55, 0.64, 0.048), Vector3(0.92, 0.8, 0.012), steel)
 	var chrome := _material(Color("a1a8a1"), 0.85)
 	_box(hinge, Vector3(0.93, 0.99, 0.065), Vector3(0.075, 0.23, 0.025), chrome)
 	handle = Node3D.new()
@@ -142,10 +163,11 @@ func _fade(alpha: float, seconds: float) -> void:
 	tween.tween_property(curtain, "modulate:a", alpha, seconds)
 	await tween.finished
 
-func begin(destination: PackedScene, returning_outside: bool, source_player: PlayerController) -> void:
+func begin(destination: PackedScene, returning_outside: bool, source_player: PlayerController, destination_name: String = "") -> void:
 	if playing:
 		return
 	playing = true
+	region_title.text = (destination_name if not destination_name.is_empty() else destination.resource_path.get_file().get_basename().capitalize()).to_upper()
 	controlled_player = source_player
 	var carried_vitality: float = source_player.vitality
 	var carried_supplies: Dictionary = SupplyStock.snapshot()

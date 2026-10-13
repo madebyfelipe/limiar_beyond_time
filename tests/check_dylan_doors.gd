@@ -106,6 +106,8 @@ func travel(room: Node, expected: String, number: int) -> void:
 	if not root.has_node("DoorTransition"):
 		return
 	var transition: Node = root.get_node("DoorTransition")
+	var expected_title: String = "GUARDHOUSE" if expected.ends_with("save_room.tscn") else "GUARDHOUSE YARD"
+	check(transition.region_title.text == expected_title, "Cinematic displayed the wrong destination")
 	# The first stage precedes the test's connection.
 	check(RetroFilter.is_effect_on(RetroFilter.Effect.CURVE), "Door cinematic did not inherit the chosen presentation")
 	check(float(transition.retro_filter.effect.material.get_shader_parameter("curve")) > 0.0, "Door cinematic lost the preset's curvature")

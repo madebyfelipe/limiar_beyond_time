@@ -58,6 +58,7 @@ func _ready() -> void:
 	doorway.approach = Vector3(-2.4, 0.0, 0.55)
 	doorway.facing = PI / 2
 	doorway.target_scene = "res://environments/exterior.tscn"
+	doorway.destination_name = "Guardhouse Yard"
 	doorway.entry_id = &"guardhouse_door"
 	doorway.returning_outside = true
 	add_child(doorway)

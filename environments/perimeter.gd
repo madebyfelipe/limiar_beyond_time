@@ -115,6 +115,7 @@ func _ready() -> void:
 	gate.facing = PI
 	gate.entry_id = &"north_gate"
 	gate.target_scene = Phase.find(&"guardhouse").entry_scene
+	gate.destination_name = "Guardhouse Yard"
 	gate.returning_outside = true
 	add_child(gate)
 	operation = LevelOperation.new()

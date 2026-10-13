@@ -4,6 +4,8 @@ extends ApproachPrompt
 
 @export var facing: float = 0.0
 @export var target_scene: String
+## Player-facing name displayed by the opening cinematic.
+@export var destination_name: String = ""
 @export var returning_outside: bool = false
 ## Names this doorway for the level on the other side, which may be reachable
 ## through more than one of them and has to know where to put the player.
@@ -35,4 +37,4 @@ func interact() -> void:
 	var transition := preload("res://systems/interaction/door_transition.gd").new()
 	transition.name = "DoorTransition"
 	get_tree().root.add_child(transition)
-	transition.begin(destination, returning_outside, player)
+	transition.begin(destination, returning_outside, player, destination_name)

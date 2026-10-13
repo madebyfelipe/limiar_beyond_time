@@ -1,11 +1,21 @@
 shader_type spatial;
 render_mode specular_schlick_ggx;
+uniform sampler2D steel_texture : source_color, filter_linear_mipmap, repeat_enable;
+uniform float texture_scale = 0.7;
 varying vec3 surface;
-void vertex() { surface = VERTEX; }
+varying vec3 local_normal;
+void vertex() {
+	surface = VERTEX;
+	local_normal = NORMAL;
+}
 void fragment() {
-	float grain = fract(sin(dot(floor(surface.xy * 430.0), vec2(12.9898, 78.233))) * 43758.5453);
-	float wear = smoothstep(0.85, 1.0, grain);
-	ALBEDO = mix(vec3(0.11, 0.16, 0.18), vec3(0.22, 0.25, 0.25), grain * 0.3 + wear * 0.25);
+	// Object-space projection keeps the grain fixed while the hinge rotates.
+	vec3 weights = pow(abs(local_normal), vec3(4.0));
+	weights /= max(dot(weights, vec3(1.0)), 0.0001);
+	vec3 p = surface * texture_scale;
+	ALBEDO = texture(steel_texture, p.yz).rgb * weights.x
+		+ texture(steel_texture, p.xz).rgb * weights.y
+		+ texture(steel_texture, p.xy).rgb * weights.z;
 	METALLIC = 0.45;
-	ROUGHNESS = 0.68;
+	ROUGHNESS = 0.76;
 }

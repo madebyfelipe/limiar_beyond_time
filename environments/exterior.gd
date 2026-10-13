@@ -117,6 +117,7 @@ func _ready() -> void:
 	doorway.approach = Vector3(-4.45, 0.6, 3.7)
 	doorway.facing = 0.0
 	doorway.target_scene = "res://environments/save_room.tscn"
+	doorway.destination_name = "Guardhouse"
 	add_child(doorway)
 	operation = LevelOperation.new()
 	operation.name = "Operation"
@@ -133,6 +134,7 @@ func _ready() -> void:
 	north_gate.facing = 0.0
 	north_gate.entry_id = &"yard_gate"
 	north_gate.phase_id = &"perimeter"
+	north_gate.destination_name = "Perimeter Trail"
 	north_gate.open_hint = "North gate"
 	north_gate.locked_hint = "North gate bolted"
 	north_gate.refused.connect(func() -> void: operation.show_notice("The north gate stays bolted until your progress is recorded at the terminal.",3.0))

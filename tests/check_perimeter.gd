@@ -111,6 +111,8 @@ func enter(expected: String) -> void:
 	check(root.has_node("DoorTransition"),"E did not start the gate cinematic")
 	if not root.has_node("DoorTransition"):
 		return
+	var expected_title: String = "PERIMETER TRAIL" if expected == TRAIL else "GUARDHOUSE YARD"
+	check(root.get_node("DoorTransition").region_title.text == expected_title,"Gate cinematic displayed the wrong destination")
 	await root.get_node("DoorTransition").finished
 	await tick(4)
 	check(current_scene.scene_file_path == expected,"Wrong level after the gate: %s" % current_scene.scene_file_path)
