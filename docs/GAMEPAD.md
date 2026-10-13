@@ -24,7 +24,7 @@ Detalhes em [SETTINGS.md](SETTINGS.md).
 | Alvo anterior / próximo | L1 / R1 | LB / RB |
 | Pausar / retomar | Options | Menu / Start |
 | Diagnóstico | Clique no touchpad | F3 no teclado; remapeável |
-| Percorrer filtros | Share | Back / View |
+| Abrir a maleta | Share | Back / View |
 | Navegar no menu | Analógico esquerdo ou direcional | Analógico esquerdo ou direcional |
 | Confirmar / voltar no menu | ✕ / ○ | A / B |
 
@@ -52,7 +52,7 @@ Detalhes em [SETTINGS.md](SETTINGS.md).
 ## Terminal sem teclado
 
 ✕ junto à mesa abre o terminal. ←/→ selecionam `help`, `save`, `shop`,
-`buy ammo`, `buy medkit`, `buy weapon`, `inventory`, `status`, `clear` e `exit`.
+`buy ammo`, `buy shells`, `buy medkit`, `buy weapon`, `buy shotgun`, `inventory`, `status`, `clear` e `exit`.
 ✕ executa o comando exibido. ↑/↓ percorrem o histórico; L1/R1 rolam o texto;
 ○ ou Options saem. Os atalhos usam o mesmo processamento dos comandos digitados,
 incluindo preços, estoque, verificações e salvamento.

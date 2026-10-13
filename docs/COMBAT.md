@@ -98,10 +98,12 @@ controlador lê a mira do quadro corrente.
 | Recarregar | R |
 | Próximo alvo (tanque) | Tab |
 
-Sem arma não há mira: a pistola é a que o terminal da guarita vende (`SupplyStock.weapon`,
-do trabalho de UI do Codex). O estande empresta a arma (`practice`) e não gasta o
-estoque real. A reserva de munição **é** `SupplyStock.ammo`; o carregador é estático
-em `PlayerWeapon.magazine` e atravessa portas.
+Sem arma não há mira: a arma precisa estar na maleta (`Inventory`). O terminal da
+guarita vende a pistola e a shotgun e as entrega no baú da sala. O estande empresta
+a arma (`practice`) e não gasta o estoque real. A reserva de munição é a pilha da
+maleta indicada por `WeaponDefinition.ammo_item` (cartuchos de pistola ou de
+shotgun); o carregador é estático em `PlayerWeapon.magazine` e atravessa portas.
+Ver [INVENTORY.md](INVENTORY.md).
 
 ## Esquema tanque — Resident Evil / Dino Crisis
 

@@ -26,6 +26,8 @@ var diagnostics: DiagnosticsOverlay
 var notice: Label
 var notice_timer: Timer
 var hud: GameHud
+## The attaché case, opened by the inventory action (I / Back-Share).
+var inventory_menu: InventoryMenu
 var weapon_readout: WeaponReadout
 ## Last place the actor stood on the floor; where the safety net returns them.
 var last_safe: Transform3D
@@ -37,6 +39,13 @@ func _ready() -> void:
 	hud = GameHud.new()
 	hud.player = player
 	hud_layer.add_child(hud)
+	var case_layer := CanvasLayer.new()
+	case_layer.layer = 15
+	add_child(case_layer)
+	inventory_menu = InventoryMenu.new()
+	inventory_menu.name = "InventoryMenu"
+	inventory_menu.player = player
+	case_layer.add_child(inventory_menu)
 	# A Control under a plain Node lays out against the window, which is what the
 	# menu wants; the readout and the notice get the frame as parent instead.
 	pause_menu = PAUSE_MENU.instantiate()
@@ -86,6 +95,11 @@ func _ready() -> void:
 		lock_indicator.name = "LockIndicator"
 		lock_indicator.weapon = player.weapon
 		frame.add_child(lock_indicator)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"inventory") and not event.is_echo() and not get_tree().paused and player.can_use_weapon() and not get_tree().root.has_node("DoorTransition"):
+		get_viewport().set_input_as_handled()
+		inventory_menu.open()
 
 func _physics_process(_delta: float) -> void:
 	if player.is_dead():

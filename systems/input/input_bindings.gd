@@ -8,7 +8,7 @@ const GAMEPAD := "gamepad"
 const ACTIONS := {
 	"move_up": "FORWARD", "move_down": "BACKWARD", "move_left": "LEFT", "move_right": "RIGHT",
 	"run": "RUN", "interact": "INTERACT", "aim": "ERGUER ARMA", "fire": "FIRE", "reload": "RELOAD", "switch_weapon": "SWITCH WEAPON",
-	"dodge": "DODGE", "use_med_kit": "USE MED KIT",
+	"dodge": "DODGE", "use_med_kit": "USE MED KIT", "inventory": "INVENTORY",
 	"next_target": "NEXT TARGET", "lock_previous_target": "PREVIOUS TARGET", "lock_next_target": "NEXT (WHEEL)",
 	"pause": "PAUSE", "toggle_diagnostics": "DIAGNOSTICS", "cycle_retro_filter": "FILTER",
 	"aim_up": "MIRA PARA CIMA", "aim_down": "MIRA PARA BAIXO", "aim_left": "MIRA À LEFT", "aim_right": "MIRA À RIGHT",
@@ -60,6 +60,12 @@ static func ensure_loaded() -> void:
 				if kind == GAMEPAD and action == "toggle_diagnostics" and not file.has_section_key("bindings_gamepad", "use_med_kit") and decoded.size() == 2:
 					if decoded[0] is InputEventJoypadButton and decoded[1] is InputEventJoypadButton and decoded[0].button_index == JOY_BUTTON_TOUCHPAD and decoded[1].button_index == JOY_BUTTON_RIGHT_STICK:
 						decoded.remove_at(1)
+				# Profiles from before the case kept Back/Share on the filter;
+				# that button opens the inventory now, the filter keeps F4.
+				if kind == GAMEPAD and action == "cycle_retro_filter" and not file.has_section_key("bindings_gamepad", "inventory"):
+					for index: int in range(decoded.size() - 1, -1, -1):
+						if decoded[index] is InputEventJoypadButton and decoded[index].button_index == JOY_BUTTON_BACK:
+							decoded.remove_at(index)
 				_replace(action, kind, decoded)
 
 static func _isolated_probe_required() -> bool:

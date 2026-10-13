@@ -16,10 +16,15 @@ durante a sessão. Abrir o terminal ou pressionar Enter com a linha vazia não s
 | `help` / `help buy` | Lista os comandos ou explica um comando. |
 | `save` | Grava posição, orientação, objetivo e estoque no registro existente. |
 | `shop` | Lista produtos, preços e créditos. |
-| `buy ammo` | Compra 30 cartuchos por 300 créditos. |
+| `buy ammo` | Compra 30 cartuchos de pistola por 300 créditos. |
+| `buy shells` | Compra 10 cartuchos de shotgun por 400 créditos. |
 | `buy medkit` | Compra um kit médico por 500 créditos. |
 | `buy weapon` | Adquire a pistola por 1800 créditos, uma vez. |
-| `inventory` | Mostra créditos e suprimentos atuais. |
+| `buy shotgun` | Adquire a shotgun por 2200 créditos, uma vez. |
+| `inventory` | Mostra créditos, a maleta e o que espera no baú. |
+
+Toda compra é **entregue no baú de suprimentos** da sala, não direto na maleta.
+Ver [INVENTORY.md](INVENTORY.md).
 | `status` | Mostra objetivo e último registro salvo. |
 | `clear` | Limpa a tela, mantendo o histórico de comandos. |
 | `exit` | Fecha o terminal e retoma a exploração. |

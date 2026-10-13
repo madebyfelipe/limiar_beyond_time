@@ -25,7 +25,8 @@ existentes. A mesma pausa e o HUD também foram ligados ao percurso técnico de 
 
 ## Dados apresentados
 
-O estoque inicial é 2400 créditos, 90 cartuchos, zero kits e nenhuma pistola.
+O estoque inicial é 2400 créditos e a maleta vazia; compras vão para o baú da sala
+(ver [INVENTORY.md](INVENTORY.md)). O parágrafo abaixo é histórico.
 AMMO custa 300 e acrescenta 30 cartuchos; MED KIT custa 500 e acrescenta um kit;
 WEAPON custa 1800 e registra a pistola. Créditos insuficientes, limites de estoque
 ou uma pistola já adquirida desativam BUY. A aquisição da arma não implementa
