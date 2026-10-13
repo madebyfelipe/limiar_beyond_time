@@ -29,10 +29,12 @@ release and press aim again to raise the gun. Collision remains on the character
 body, with a short invulnerability window and recovery cooldown. Medical kits
 restore up to 50 vitality and consume stock only when healing is possible.
 
-Ground-cursor, assisted and mouse target-lock aiming use the custom 48px cursor.
-Lowering the weapon, pausing, death, scene removal and door interaction restore
-the normal pointer. Free mouse aiming retains its hidden-pointer behavior.
-The smaller world reticle shows the actual shot endpoint; red indicates a target.
+All aim modes now hide the pointer and show a red weapon laser with a surface
+impact dot, inspired by Ground Zero. Absolute mouse modes still read the hidden
+pointer position. Lowering the weapon, pausing, death, scene removal and door
+interaction restore the previous pointer mode. Reloading hides the laser.
+The beam stops at geometry and its thickness follows the retro pixel setting.
+Research and validation: [GROUND_ZERO_CONTROLS.md](GROUND_ZERO_CONTROLS.md).
 
 ## Animation provenance
 

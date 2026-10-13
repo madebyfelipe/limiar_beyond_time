@@ -20,7 +20,6 @@ signal target_changed(target: Hurtbox)
 
 const DEFAULT_DEFINITION := preload("res://resources/combat/pistol.tres")
 const WORLD_MASK := 1
-const AIM_CURSOR = preload("res://assets/ui/aim_cursor.svg")
 ## Shots and sight lines leave from the chest: this fraction of the body's
 ## collision height, 1,2 m on the 1,8 m Dylan of the levels and 1,6 m on the
 ## 2,4 m rig of the studies. The ray starts on the body axis, not at the hand,
@@ -80,7 +79,8 @@ var _fire_requires_release: bool = false
 var _active_mode: AimSettings.Modern
 var _active_tank: bool
 var _stick_cycle_ready: bool = true
-var custom_cursor_active: bool = false
+var aim_cursor_hidden: bool = false
+var _mouse_mode_before_aim: Input.MouseMode = Input.MOUSE_MODE_VISIBLE
 
 func _ready() -> void:
 	# Ahead of the body, so the controller reads this frame's aim.
@@ -198,9 +198,12 @@ func _raise() -> void:
 	aiming = true
 	gamepad_aim = GamepadControls.shared.gamepad_active
 	_stick_cycle_ready = true
-	custom_cursor_active = not gamepad_aim and not ControlScheme.is_tank() and AimSettings.modern != AimSettings.Modern.FREE
-	if custom_cursor_active and DisplayServer.get_name() != "headless":
-		Input.set_custom_mouse_cursor(AIM_CURSOR, Input.CURSOR_ARROW, Vector2(24, 24))
+	# Absolute mouse aiming still reads the pointer; only its crosshair is hidden.
+	# The weapon's laser is now the aiming feedback for every input device.
+	_mouse_mode_before_aim = Input.mouse_mode
+	aim_cursor_hidden = true
+	if not _scripted():
+		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	heading = player.visual.rotation.y
 	pitch = 0.0
 	turn_input = 0.0
@@ -219,22 +222,19 @@ func _raise() -> void:
 		_set_target(nearest)
 	elif AimSettings.modern == AimSettings.Modern.FREE and not gamepad_aim:
 		_window_anchor = get_tree().root.get_mouse_position()
-		if not _scripted():
-			Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	elif uses_locked_aim() and player.camera != null:
 		_set_target(_pick_locked(player.camera))
 
 func _lower() -> void:
-	if custom_cursor_active and DisplayServer.get_name() != "headless":
-		Input.set_custom_mouse_cursor(null)
-	custom_cursor_active = false
+	if aim_cursor_hidden and not _scripted():
+		Input.mouse_mode = _mouse_mode_before_aim
+	aim_cursor_hidden = false
+	_marker_mesh.clear_surfaces()
 	aiming = false
 	gamepad_aim = false
 	pitch = 0.0
 	turn_input = 0.0
 	_set_target(null)
-	if Input.mouse_mode == Input.MOUSE_MODE_HIDDEN:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _exit_tree() -> void:
 	if aiming:
@@ -540,32 +540,87 @@ func _finish_reload() -> void:
 
 # --- Feedback -----------------------------------------------------------------
 
-## A reticle where the gun would hit right now: red over a target, mint on
-## anything else, so a wall in the way shows before the trigger is pulled.
+## Use the shot's impact, with a visible beam starting at the imported gun tip.
+## A second ray clips the offset tip's path too. A muzzle pushed through cover
+## cannot project a laser from the far side of that cover.
+func laser_trace() -> Dictionary:
+	if not aiming or is_reloading():
+		return {}
+	var origin: Vector3 = muzzle()
+	var start: Vector3 = muzzle_marker.global_position if is_instance_valid(muzzle_marker) and muzzle_marker.is_inside_tree() else origin
+	if origin.distance_squared_to(start) > 0.0001 and not _ray(origin, start, WORLD_MASK).is_empty():
+		return {}
+	var end: Vector3 = origin + shot_direction() * definition.reach
+	var hit: Dictionary = _ray(origin, end, WORLD_MASK | Hurtbox.LAYER)
+	if not hit.is_empty():
+		end = hit.position
+	var tip_hit: Dictionary = _ray(start, end, WORLD_MASK | Hurtbox.LAYER)
+	if not tip_hit.is_empty():
+		hit = tip_hit
+		end = tip_hit.position
+	return {"start": start, "end": end, "hit": hit}
+
+## Thin red ribbon and a small illuminated dot only on a real hit surface.
+## Depth testing keeps both hidden behind scene geometry.
 func _draw_marker() -> void:
 	_marker_mesh.clear_surfaces()
 	var camera: Camera3D = player.camera
 	if not aiming or camera == null or not camera.is_inside_tree():
 		return
-	var origin: Vector3 = muzzle()
-	var direction: Vector3 = shot_direction()
-	var hit: Dictionary = _ray(origin, origin + direction * definition.reach, WORLD_MASK | Hurtbox.LAYER)
-	var point: Vector3 = hit.position if not hit.is_empty() else origin + direction * minf(definition.reach, 6.0)
-	var on_target: bool = not hit.is_empty() and hit.collider is Hurtbox
+	var trace: Dictionary = laser_trace()
+	if trace.is_empty():
+		return
+	var start: Vector3 = trace.start
+	var point: Vector3 = trace.end
+	var hit: Dictionary = trace.hit
 	var right: Vector3 = camera.global_basis.x
 	var up: Vector3 = camera.global_basis.y
-	var radius: float = 0.07 + 0.007 * camera.global_position.distance_to(point)
-	var material := _line_material(Color(1.0, 0.3, 0.25) if on_target else Color(0.66, 0.95, 0.88))
-	_marker_mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
+	var along: Vector3 = point - start
+	if along.length_squared() < 0.0001:
+		return
+	var side: Vector3 = along.cross(camera.global_position - (start + point) * 0.5).normalized()
+	if side.is_zero_approx():
+		side = right
+	# Measure in the internal viewport pixels so the retro downscale cannot
+	# break a subpixel beam into disconnected dots.
+	var width: float = _laser_pixel_size(camera, (start + point) * 0.5) * 0.7
+	side *= width
+	_marker_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _laser_material())
+	for vertex: Vector3 in [start - side, start + side, point + side, start - side, point + side, point - side]:
+		_marker_mesh.surface_add_vertex(vertex)
+	_marker_mesh.surface_end()
+	if hit.is_empty():
+		return
+	# Lift slightly off the collider to avoid z-fighting with its surface.
+	point += (hit.normal as Vector3) * 0.012
+	var radius: float = _laser_pixel_size(camera, point) * 1.4
+	_marker_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _laser_material())
 	for step: int in range(16):
 		var a: float = TAU * step / 16.0
 		var b: float = TAU * (step + 1) / 16.0
+		_marker_mesh.surface_add_vertex(point)
 		_marker_mesh.surface_add_vertex(point + (right * cos(a) + up * sin(a)) * radius)
 		_marker_mesh.surface_add_vertex(point + (right * cos(b) + up * sin(b)) * radius)
-	for axis: Vector3 in [right, -right, up, -up]:
-		_marker_mesh.surface_add_vertex(point + axis * radius * 1.35)
-		_marker_mesh.surface_add_vertex(point + axis * radius * 1.9)
 	_marker_mesh.surface_end()
+
+var _laser_paint: StandardMaterial3D
+
+func _laser_pixel_size(camera: Camera3D, point: Vector3) -> float:
+	var depth: float = maxf(camera.near, -camera.to_local(point).z)
+	var pixels: float = 1.0
+	if RetroFilter.enabled:
+		var virtual_size: Vector2 = RetroFilter.PIXEL_STEPS[RetroFilter.pixel_step]["size"]
+		if virtual_size.x > 0.0:
+			pixels = maxf(1.0, camera.get_viewport().get_visible_rect().size.x / virtual_size.x)
+	return camera.project_position(Vector2.ZERO, depth).distance_to(camera.project_position(Vector2(pixels, 0), depth))
+
+func _laser_material() -> StandardMaterial3D:
+	if _laser_paint == null:
+		_laser_paint = StandardMaterial3D.new()
+		_laser_paint.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_laser_paint.albedo_color = Color(1.0, 0.06, 0.035)
+		_laser_paint.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return _laser_paint
 
 func _show_tracer(end: Vector3) -> void:
 	var start: Vector3 = muzzle_marker.global_position if muzzle_marker != null and muzzle_marker.is_inside_tree() else muzzle()

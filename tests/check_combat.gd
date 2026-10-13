@@ -75,6 +75,58 @@ func capture_locked(name: String) -> void:
 	DirAccess.make_dir_recursive_absolute("res://.local")
 	check(root.get_texture().get_image().save_png("res://.local/lock-%s.png" % name) == OK, "Lock capture failed")
 
+func check_laser() -> void:
+	AimSettings.tank_auto_target = true
+	await fresh(ControlScheme.Mode.TANK)
+	check(weapon.laser_trace().is_empty(), "Lowered gun projected a laser")
+	Input.action_press("aim")
+	await tick(30)
+	var trace: Dictionary = weapon.laser_trace()
+	check(not trace.is_empty(), "Raised gun has no laser")
+	if trace.is_empty():
+		return
+	check((trace.start as Vector3).distance_to(weapon.muzzle_marker.global_position) < 0.001, "Laser did not start at the gun tip")
+	check(trace.hit.get("collider") == board(&"low").hurtbox, "Laser missed the selected board")
+	weapon._draw_marker()
+	check(weapon._marker_mesh.get_surface_count() == 2, "Laser must show a beam and impact dot")
+	check(not weapon._laser_material().no_depth_test, "Laser can render through cover")
+	await capture_locked("laser-target")
+	trace = weapon.laser_trace()
+	check(weapon.fire(), "Laser comparison shot failed")
+	check((trace.end as Vector3).distance_to(weapon.last_shot.end) < 0.025, "Laser dot disagrees with the shot impact")
+	check(weapon.reload(), "Laser reload check did not start reloading")
+	weapon._draw_marker()
+	check(weapon.laser_trace().is_empty() and weapon._marker_mesh.get_surface_count() == 0, "Reload kept the laser visible")
+	weapon.interrupt_input()
+	check(not weapon.aim_cursor_hidden, "Interrupted laser aim did not restore the cursor")
+
+	AimSettings.tank_auto_target = false
+	await fresh(ControlScheme.Mode.TANK)
+	player.visual.rotation.y = yaw_to(board(&"hidden").hurtbox.aim_point())
+	Input.action_press("aim")
+	await tick(30)
+	trace = weapon.laser_trace()
+	check(not trace.is_empty() and trace.hit.get("collider") is StaticBody3D, "Laser crossed the cover wall")
+	await capture_locked("laser-wall")
+	# Model a barrel clipping through the wall; no beam may emerge behind it.
+	var original_tip: Node3D = weapon.muzzle_marker
+	var probe_tip := Node3D.new()
+	range_scene.world.add_child(probe_tip)
+	probe_tip.global_position = Vector3(0, weapon.muzzle().y, -4)
+	weapon.muzzle_marker = probe_tip
+	check(weapon.laser_trace().is_empty(), "A barrel through cover projected a laser behind the wall")
+	# Empty air gets a beam, but never a floating impact dot.
+	probe_tip.global_position = weapon.muzzle()
+	weapon.pitch = PI * 0.5
+	trace = weapon.laser_trace()
+	check(not trace.is_empty() and trace.hit.is_empty(), "Upward laser should hit empty air")
+	weapon._draw_marker()
+	check(weapon._marker_mesh.get_surface_count() == 1, "Empty air displayed a false impact dot")
+	weapon.muzzle_marker = original_tip
+	probe_tip.free()
+	weapon.interrupt_input()
+	check(weapon._marker_mesh.get_surface_count() == 0, "Interrupted aim left a laser on screen")
+
 func check_locked(camera: Camera3D) -> void:
 	AimSettings.modern = AimSettings.Modern.LOCKED
 	await fresh(ControlScheme.Mode.CAMERA_RELATIVE)
@@ -269,6 +321,7 @@ func run() -> void:
 	weapon.practice = true
 
 	# --- Tank: auto-aim takes the nearest board in sight, never the one behind the wall ---
+	await check_laser()
 	AimSettings.tank_auto_target = true
 	await fresh(ControlScheme.Mode.TANK)
 	var start: Vector3 = player.global_position

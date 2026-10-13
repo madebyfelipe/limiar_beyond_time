@@ -8,10 +8,10 @@ extends RefCounted
 ## four ways. They are options rather than one design because each suits a
 ## different player, and the user asked for them to be selectable.
 enum Modern {
-	## The system cursor stays visible; Dylan aims at the floor point under it.
+	## Dylan aims at the floor point under the hidden pointer; the laser shows it.
 	## Walking keeps the gun on that spot of the world.
 	CURSOR,
-	## No cursor: a reticle circles Dylan and the mouse swings it around him.
+	## Relative mouse motion swings the laser's heading around Dylan.
 	## Walking keeps the gun pointing the same way relative to Dylan.
 	FREE,
 	## The cursor of CURSOR, pulled onto a visible target when it passes close.

@@ -1,5 +1,5 @@
 extends Control
-## Selection belongs to the enemy; the existing 3D ring shows the actual shot.
+## Selection belongs to the enemy; the weapon laser shows the actual shot.
 
 var weapon: PlayerWeapon
 var marker_position: Vector2

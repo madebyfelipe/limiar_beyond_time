@@ -111,7 +111,7 @@ corpo encara a mira — é isso que permite andar de lado.
 
 | Modo | Como o mouse vira rumo | Ao andar | No corte de câmera |
 | --- | --- | --- | --- |
-| **Cursor no chão** | Cursor visível. Raio da câmera pelo cursor: se cai num alvo, mira **nele** (altura incluída); senão, no ponto do chão. | A arma fica presa àquele **ponto do mundo**; o rumo gira conforme Dylan passa por ele. | Segue o cursor na nova câmera. |
+| **Cursor no chão** | Posição absoluta do mouse, com ponteiro oculto e laser visível. Raio da câmera pelo cursor: se cai num alvo, mira **nele** (altura incluída); senão, no ponto do chão. | A arma fica presa àquele **ponto do mundo**; o rumo gira conforme Dylan passa por ele. | Segue o cursor na nova câmera. |
 | **Livre 360** (padrão) | Cursor escondido e devolvido ao lugar a cada quadro. O rumo vive **no mundo**; o movimento do mouse o empurra ao longo de um círculo de 220 px em volta do Dylan na tela. | O rumo fica **fixo em relação ao Dylan**. | **Não muda.** |
 | **Assistida** | O do cursor; se um alvo visível estiver a menos de 20° do rumo, a mira é puxada para ele. | Como cursor. | Como cursor. |
 | **Alvo travado** | Ao segurar direito, seleciona o alvo sob/próximo do cursor. Roda/Tab troca; mover o mouse conserva a seleção. | Acompanha o inimigo no mundo. | Mantém o alvo; seta indica quando sai da tela. |
