@@ -7,6 +7,9 @@ const CLIPS: AnimationLibrary = preload("res://assets/models/dylan_protagonist/m
 ## rescanned the project.
 const GRIP_POSE := preload("res://actors/player/grip_pose.gd")
 const PISTOL_MODEL: PackedScene = preload("res://assets/models/weapons/pistol/pistol_lowpoly.glb")
+const RIFLE_MODEL: PackedScene = preload("res://assets/models/weapons/rifle/rifle_lowpoly.glb")
+## The rifle's origin is its pistol grip; this pushes it into the palm.
+const RIFLE_HAND_OFFSET := 0.03
 const SOURCE_HEIGHT := 0.9761
 ## Ground speed each capture carries on its own, measured from the planted foot
 ## travelling backwards under the hips. Playback follows the real speed, so the
@@ -14,7 +17,9 @@ const SOURCE_HEIGHT := 0.9761
 ## The pistol captures were measured the same way against the walk's foot
 ## (2026-10-13): stance-foot speed under the hips, scaled by walk 1,48.
 const NATIVE_SPEED := {&"walk": 1.48, &"run": 2.73, &"walk_back": 0.61,
-	&"aim_walk": 2.06, &"aim_walk_back": 1.14, &"strafe_left": 1.72, &"strafe_right": 1.76}
+	&"aim_walk": 2.06, &"aim_walk_back": 1.14, &"strafe_left": 1.72, &"strafe_right": 1.76,
+	&"rifle_walk": 0.92, &"rifle_run": 2.60, &"rifle_walk_back": 0.72, &"rifle_aim_walk": 1.46,
+	&"rifle_aim_walk_back": 1.47, &"rifle_strafe_left": 1.43, &"rifle_strafe_right": 1.40}
 ## Turn rate of the pivot capture, in rad/s, measured over its own window.
 const NATIVE_TURN := 0.887
 ## Below this cosine the body is travelling backwards rather than forwards.
@@ -50,7 +55,10 @@ var aim_pose: AimPose
 var grip_pose: SkeletonModifier3D
 var pistol: Node3D
 var muzzle: Node3D
+var rifle: Node3D
+var rifle_muzzle: Node3D
 var _hand: int = -1
+var _support_hand: int = -1
 var _dodge_clip: StringName = &"dodge_right"
 ## The transition or reaction playing over locomotion, if any.
 var _one_shot: StringName = &""
@@ -79,6 +87,13 @@ func _ready() -> void:
 	pistol.visible = false
 	add_child(pistol)
 	muzzle = pistol.find_child("Muzzle", true, false) as Node3D
+	rifle = RIFLE_MODEL.instantiate()
+	rifle.name = "Rifle"
+	rifle.top_level = true
+	rifle.visible = false
+	add_child(rifle)
+	rifle_muzzle = rifle.find_child("Muzzle", true, false) as Node3D
+	_support_hand = skeleton.find_bone("mixamorig_LeftHand")
 	# After the modifiers, so the gun sits in the hand the stance has placed.
 	skeleton.skeleton_updated.connect(_place_pistol)
 	player.damaged.connect(_on_damaged)
@@ -122,12 +137,13 @@ func _process(delta: float) -> void:
 	var motion := Vector2(player.get_real_velocity().x, player.get_real_velocity().z)
 	var speed: float = motion.length()
 	var forward: Vector3 = player.facing()
-	var next: StringName = _clip_for(motion, speed, Vector2(forward.x, forward.z))
-	_idle_time = _idle_time + delta if next == &"idle" else 0.0
-	_since_run = 0.0 if next == &"run" else _since_run + delta
-	if _one_shot == &"" and next == &"idle":
-		if _since_run < RUN_STOP_GRACE and locomotion != &"idle" and animator.has_animation(&"run_stop"):
-			_play_one_shot(&"run_stop", 0.1)
+	var base: StringName = _clip_for(motion, speed, Vector2(forward.x, forward.z))
+	var next: StringName = _armed(base)
+	_idle_time = _idle_time + delta if base == &"idle" else 0.0
+	_since_run = 0.0 if base == &"run" else _since_run + delta
+	if _one_shot == &"" and base == &"idle":
+		if _since_run < RUN_STOP_GRACE and locomotion != next and animator.has_animation(_armed(&"run_stop")):
+			_play_one_shot(_armed(&"run_stop"), 0.1)
 		elif _idle_time > IDLE_LOOK_AFTER and animator.has_animation(&"idle_look"):
 			_idle_time = 0.0
 			_play_one_shot(&"idle_look", 0.3)
@@ -178,6 +194,18 @@ func _dodge_heading(clip: StringName, direction: Vector3) -> float:
 			return atan2(-direction.z, direction.x) + PI
 	return atan2(-direction.z, direction.x)
 
+## Whether the gun in hand is held in both hands (the rifle).
+func _two_handed() -> bool:
+	return player.weapon != null and player.weapon.definition.two_handed and player.weapon.is_armed()
+
+## The rifle version of a clip while the rifle is in hand, when it exists.
+func _armed(clip: StringName) -> StringName:
+	if _two_handed():
+		var variant := StringName("rifle_" + clip)
+		if animator.has_animation(variant):
+			return variant
+	return clip
+
 func _aiming() -> bool:
 	return player.can_use_weapon() and player.weapon != null and player.weapon.aiming and not interaction_active
 
@@ -185,18 +213,29 @@ func _update_aim(delta: float) -> void:
 	var weapon: PlayerWeapon = player.weapon
 	if weapon == null:
 		return
-	weapon.muzzle_marker = muzzle
-	var goal: float = 1.0 if _aiming() else 0.0
+	var two_handed: bool = _two_handed()
+	weapon.muzzle_marker = rifle_muzzle if two_handed else muzzle
+	# The rifle captures already raise it to the shoulder; the straight-arm
+	# pistol stance is only laid over the one-handed gun.
+	var goal: float = 1.0 if _aiming() and not two_handed else 0.0
 	aim_pose.influence = move_toward(aim_pose.influence, goal, AIM_BLEND * delta)
 	aim_pose.active = aim_pose.influence > 0.0
 	if _aiming():
 		aim_pose.direction = weapon.shot_direction()
 	# The gun stays in the hand, lowered, whenever Dylan carries it.
-	pistol.visible = true
-	grip_pose.active = true
+	var armed: bool = weapon.is_armed()
+	pistol.visible = armed and not two_handed
+	rifle.visible = armed and two_handed
+	# The rifle captures close the fingers themselves.
+	grip_pose.active = armed and not two_handed
 
 func _place_pistol() -> void:
-	if not pistol.visible or _hand < 0 or not is_inside_tree():
+	if _hand < 0 or not is_inside_tree():
+		return
+	if rifle.visible:
+		_place_rifle()
+		return
+	if not pistol.visible:
 		return
 	var wrist: Transform3D = skeleton.global_transform * skeleton.get_bone_global_pose(_hand)
 	var held: Transform3D = wrist * PISTOL_GRIP
@@ -209,6 +248,18 @@ func _place_pistol() -> void:
 	var prop_scale: float = target_height / 1.8
 	var aimed := Transform3D(Basis.looking_at(along, side).scaled(Vector3.ONE * prop_scale), hand + along * PISTOL_HAND_OFFSET * prop_scale)
 	pistol.global_transform = held.interpolate_with(aimed, aim_pose.influence)
+
+## Grip in the right hand, barrel through the left: every rifle capture holds
+## it in both hands, lowered or at the shoulder, so the hands give its line.
+func _place_rifle() -> void:
+	var grip: Vector3 = skeleton.global_transform * skeleton.get_bone_global_pose(_hand).origin
+	var support: Vector3 = skeleton.global_transform * skeleton.get_bone_global_pose(_support_hand).origin
+	var along: Vector3 = (support - grip).normalized()
+	if along.is_zero_approx():
+		along = -model.global_basis.z
+	var side: Vector3 = Vector3.UP if absf(along.dot(Vector3.UP)) < 0.95 else Vector3.FORWARD
+	var prop_scale: float = target_height / 1.8
+	rifle.global_transform = Transform3D(Basis.looking_at(along, side).scaled(Vector3.ONE * prop_scale), grip + along * RIFLE_HAND_OFFSET * prop_scale)
 
 func _clip_for(motion: Vector2, speed: float, forward: Vector2) -> StringName:
 	if _aiming():
@@ -241,7 +292,7 @@ func _aim_clip_for(motion: Vector2, speed: float, forward: Vector2) -> StringNam
 	return &"aim_walk" if animator.has_animation(&"aim_walk") else &"walk"
 
 func _rate_for(clip: StringName, speed: float) -> float:
-	if clip == &"idle" or clip == &"aim_idle":
+	if str(clip).ends_with("idle"):
 		return 1.0
 	if clip == &"turn_left" or clip == &"turn_right":
 		# The faster tank pivot needs 3,38x playback at full input.

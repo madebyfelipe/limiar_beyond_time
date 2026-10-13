@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://systems/combat/weapon_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"rifle"
+display_name = "RIFLE"
+damage = 40.0
+fire_interval = 0.2
+magazine = 30
+reload_time = 2.4
+reach = 60.0
+two_handed = true

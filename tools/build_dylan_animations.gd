@@ -73,6 +73,20 @@ const CLIPS := {
 	&"aim_walk_back": {"file": "pistol_walk_back", "loop": true, "plant": true, "optional": true},
 	&"strafe_left": {"file": "pistol_strafe_left", "loop": true, "plant": true, "optional": true},
 	&"strafe_right": {"file": "pistol_strafe_right", "loop": true, "plant": true, "optional": true},
+	# Rifle, held in both hands (2026-10-13). Lowered: "Rifle Idle" (Two Hand
+	# Rifle Idle), "Rifle Walk"/"Rifle Run" and "Backwards Rifle Walk" with the
+	# rifle down, "Rifle Run To Stop". Raised: "Rifle Aiming Idle" and the
+	# 8-way "Rifle Walk Forward/Backward/Left/Right".
+	&"rifle_idle": {"file": "rifle_idle", "loop": true, "plant": true, "optional": true},
+	&"rifle_walk": {"file": "rifle_walk", "loop": true, "plant": true, "optional": true},
+	&"rifle_run": {"file": "rifle_run", "loop": true, "plant": true, "optional": true},
+	&"rifle_walk_back": {"file": "rifle_walk_back", "loop": true, "plant": true, "optional": true},
+	&"rifle_run_stop": {"file": "rifle_run_stop", "loop": false, "plant": true, "optional": true},
+	&"rifle_aim_idle": {"file": "rifle_aim_idle", "loop": true, "plant": true, "optional": true},
+	&"rifle_aim_walk": {"file": "rifle_aim_walk", "loop": true, "plant": true, "optional": true},
+	&"rifle_aim_walk_back": {"file": "rifle_aim_walk_back", "loop": true, "plant": true, "optional": true},
+	&"rifle_strafe_left": {"file": "rifle_strafe_left", "loop": true, "plant": true, "optional": true},
+	&"rifle_strafe_right": {"file": "rifle_strafe_right", "loop": true, "plant": true, "optional": true},
 }
 
 ## Bones whose tracks a "stand" clip takes from the idle.

@@ -7,7 +7,7 @@ const KEYBOARD := "keyboard"
 const GAMEPAD := "gamepad"
 const ACTIONS := {
 	"move_up": "FORWARD", "move_down": "BACKWARD", "move_left": "LEFT", "move_right": "RIGHT",
-	"run": "RUN", "interact": "INTERACT", "aim": "ERGUER ARMA", "fire": "FIRE", "reload": "RELOAD",
+	"run": "RUN", "interact": "INTERACT", "aim": "ERGUER ARMA", "fire": "FIRE", "reload": "RELOAD", "switch_weapon": "SWITCH WEAPON",
 	"dodge": "DODGE", "use_med_kit": "USE MED KIT",
 	"next_target": "NEXT TARGET", "lock_previous_target": "PREVIOUS TARGET", "lock_next_target": "NEXT (WHEEL)",
 	"pause": "PAUSE", "toggle_diagnostics": "DIAGNOSTICS", "cycle_retro_filter": "FILTER",

@@ -17,8 +17,12 @@ extends Node3D
 signal fired(shot: Dictionary)
 signal ammo_changed
 signal target_changed(target: Hurtbox)
+signal weapon_changed
 
 const DEFAULT_DEFINITION := preload("res://resources/combat/pistol.tres")
+const RIFLE_DEFINITION := preload("res://resources/combat/rifle.tres")
+## The guns Dylan can carry, in the order the switch cycles through them.
+const ARSENAL: Array[WeaponDefinition] = [DEFAULT_DEFINITION, RIFLE_DEFINITION]
 const WORLD_MASK := 1
 ## Shots and sight lines leave from the chest: this fraction of the body's
 ## collision height, 1,2 m on the 1,8 m Dylan of the levels and 1,6 m on the
@@ -46,6 +50,9 @@ const LOCK_PICK_RADIUS := 0.04
 ## Rounds in the magazine. Static, so a door does not refill or empty it; -1
 ## is a gun not yet drawn, which comes loaded.
 static var magazine: int = -1
+## The gun in hand across scenes, and what each holstered one still holds.
+static var equipped: StringName = &"pistol"
+static var spare_magazines: Dictionary = {}
 
 var aiming: bool = false
 ## Capture the aim's input source until L2/right mouse is released. A resting
@@ -118,16 +125,77 @@ func _overlay_mesh(mesh: ImmediateMesh) -> MeshInstance3D:
 ## Loaded, ready to fire and lowered: what a restart hands back.
 func reset_state() -> void:
 	interrupt_input()
-	magazine = definition.magazine
+	# Refill the gun in hand, which may not have been settled into yet.
+	var held: WeaponDefinition = _definition(equipped)
+	magazine = (held if held != null else definition).magazine
+	spare_magazines.clear()
 	cooldown = 0.0
 	reload_left = 0.0
 	ammo_changed.emit()
 
 func is_armed() -> bool:
+	return owns(definition)
+
+## Whether Dylan has this gun: everything on the range, purchases elsewhere.
+func owns(candidate: WeaponDefinition) -> bool:
 	if practice:
 		return true
 	SupplyStock.ensure_loaded()
-	return SupplyStock.weapon
+	return SupplyStock.rifle if candidate.id == &"rifle" else SupplyStock.weapon
+
+## Puts the next owned gun in hand. Raising, firing and reloading stop, so the
+## switch can never leave a half-finished reload on either magazine.
+func switch_weapon() -> bool:
+	if not player.can_use_weapon():
+		return false
+	var at: int = ARSENAL.find(_definition(definition.id))
+	for step: int in range(1, ARSENAL.size()):
+		var candidate: WeaponDefinition = ARSENAL[(at + step) % ARSENAL.size()]
+		if owns(candidate):
+			equip(candidate)
+			return true
+	return false
+
+func equip(next: WeaponDefinition) -> void:
+	if next.id == definition.id:
+		return
+	interrupt_combat()
+	_take(next, true)
+
+func _take(next: WeaponDefinition, keep_current: bool) -> void:
+	if keep_current:
+		spare_magazines[definition.id] = magazine
+	definition = next
+	equipped = next.id
+	magazine = int(spare_magazines.get(next.id, next.magazine))
+	spare_magazines.erase(next.id)
+	cooldown = 0.0
+	ammo_changed.emit()
+	weapon_changed.emit()
+
+## Back in the hand that left the last scene, or on to the only gun owned.
+## Checked every frame rather than at _ready: a scene may turn practice on, or
+## a purchase may arrive, after the weapon has entered the tree.
+func _settle() -> void:
+	if equipped != definition.id:
+		var carried: WeaponDefinition = _definition(equipped)
+		if carried != null and owns(carried):
+			# The static magazine already belongs to the gun carried over.
+			definition = carried
+			ammo_changed.emit()
+			weapon_changed.emit()
+			return
+	if not owns(definition):
+		for candidate: WeaponDefinition in ARSENAL:
+			if owns(candidate):
+				_take(candidate, false)
+				return
+
+func _definition(id: StringName) -> WeaponDefinition:
+	for candidate: WeaponDefinition in ARSENAL:
+		if candidate.id == id:
+			return candidate
+	return null
 
 func reserve() -> int:
 	if practice:
@@ -162,6 +230,7 @@ func uses_locked_aim() -> bool:
 	return not ControlScheme.is_tank() and (AimSettings.pad_target_lock if gamepad_aim else AimSettings.modern == AimSettings.Modern.LOCKED)
 
 func _physics_process(delta: float) -> void:
+	_settle()
 	if _active_mode != AimSettings.modern or _active_tank != ControlScheme.is_tank():
 		interrupt_input()
 		_active_mode = AimSettings.modern
@@ -183,6 +252,8 @@ func _physics_process(delta: float) -> void:
 		_lower()
 	if able and Input.is_action_just_pressed(&"reload"):
 		reload()
+	if player.can_use_weapon() and Input.is_action_just_pressed(&"switch_weapon"):
+		switch_weapon()
 	if aiming:
 		if ControlScheme.is_tank():
 			_aim_tank(delta)
