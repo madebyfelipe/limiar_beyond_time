@@ -27,6 +27,10 @@ var spawn_transform: Transform3D
 ## Optional: a PlayerWeapon child. While its gun is up it owns where Dylan
 ## points, and this body only follows.
 var weapon: PlayerWeapon
+## Cutscenes walk Dylan by setting a world-space direction here while control
+## is off: the body accelerates, turns and animates exactly as if a stick held
+## it, so a scripted walk needs no clips or physics of its own.
+var autopilot: Vector3 = Vector3.ZERO
 
 func _ready() -> void:
 	spawn_transform = global_transform
@@ -133,6 +137,7 @@ func reset_to(target: Transform3D) -> void:
 	desired_direction = Vector3.ZERO
 	turn_input = 0.0
 	dodge_left = 0.0
+	autopilot = Vector3.ZERO
 	visual.rotation = Vector3.ZERO
 	movement_reference.reset()
 
@@ -168,7 +173,14 @@ func _physics_process(delta: float) -> void:
 	var held: bool = control_enabled and (not input.is_zero_approx() or Input.is_action_pressed("move_left") or Input.is_action_pressed("move_right") or Input.is_action_pressed("move_up") or Input.is_action_pressed("move_down"))
 	var tank: bool = ControlScheme.is_tank()
 	var aiming: bool = weapon != null and weapon.aiming
-	if tank and aiming:
+	var scripted: bool = not control_enabled and not autopilot.is_zero_approx()
+	if scripted:
+		turn_input = 0.0
+		movement_reference.reset()
+		desired_direction = Vector3(autopilot.x, 0.0, autopilot.z).normalized()
+		# Turning follows the free-movement rule below, whatever the scheme.
+		tank = false
+	elif tank and aiming:
 		# Resident Evil: a raised gun plants the feet. The weapon turns the body,
 		# by hand or onto a target, and the pivot clips follow its turn input.
 		turn_input = weapon.turn_input
@@ -183,11 +195,11 @@ func _physics_process(delta: float) -> void:
 	else:
 		turn_input = 0.0
 		desired_direction = movement_reference.direction_for(input, camera, held)
-	var speed: float = config.run_speed if Input.is_action_pressed("run") else config.walk_speed
+	var speed: float = config.run_speed if Input.is_action_pressed("run") and not scripted else config.walk_speed
 	if aiming:
 		speed = config.walk_speed * config.aim_move_factor
 	# Tank reverse is a careful step back, never a full run.
-	if tank and not aiming and input.y > 0.0:
+	if tank and not aiming and not scripted and input.y > 0.0:
 		speed = config.walk_speed * config.tank_reverse_factor
 	var rate: float = config.acceleration if not desired_direction.is_zero_approx() else config.deceleration
 	var horizontal: Vector3 = Vector3(velocity.x, 0, velocity.z).move_toward(desired_direction * speed, rate * delta)

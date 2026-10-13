@@ -123,8 +123,9 @@ ida/volta pelo portão e alternância arte/geometria. Capturas em
 
 - Sem áudio e sem ponto de salvamento na trilha: o registro continua
   sendo feito no terminal da guarita, antes do portão.
-- O conteúdo termina na porta lacrada do relé. `RELAY` é fim de conteúdo, não
-  fim de missão.
+- Desde 12/10/2026 (noite) a porta do relé abre para a Fase 3 (`RELAY_ROOM.md`),
+  e a saída pelos fundos do galpão leva ao enquadramento provisório `perimeter_4`,
+  só geometria, com limites invisíveis. O conteúdo termina ali (`REAR_YARD`).
 - O quarto enquadramento do exterior (`exterior_4`, o pátio norte até o portão)
   usa `assets/backgrounds/env_1/exterior_authored/art_cam04_v02.png`, com prompt
   ao lado. `tools/capture_north_yard.gd` captura a fonte/câmera atuais sem

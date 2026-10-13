@@ -175,6 +175,17 @@ func play_door_interaction() -> void:
 	animator.speed_scale = 1.0
 	animator.play(&"door_interact", 0.12)
 
+## A cutscene gesture by clip name. Captures still to be brought from Mixamo
+## (typing, a startled turn) fall back to `fallback`, so a scene can name the
+## clip it wants today and pick it up as soon as the build tool adds it.
+## Returns the clip actually played.
+func play_scripted(clip: StringName, fallback: StringName = &"idle") -> StringName:
+	var chosen: StringName = clip if animator.has_animation(clip) else fallback
+	interaction_active = true
+	animator.speed_scale = 1.0
+	animator.play(chosen, 0.2)
+	return chosen
+
 func end_interaction() -> void:
 	interaction_active = false
 	locomotion = &"idle"

@@ -138,14 +138,15 @@ func run() -> void:
 
 	# --- The declared chain ---
 	var chain: Array[Phase] = Phase.chain()
-	check(chain.size() == 2,"The phase chain no longer declares two phases")
+	check(chain.size() == 3,"The phase chain no longer declares three phases")
+	check(Phase.after(&"perimeter") == Phase.find(&"relay") and Phase.find(&"relay").opens_at == MissionState.Stage.RELAY,"The relay phase does not follow the trail")
 	var guardhouse: Phase = Phase.find(&"guardhouse")
 	var perimeter: Phase = Phase.find(&"perimeter")
 	check(guardhouse != null and perimeter != null,"The chain lost one of its phases")
 	check(ResourceLoader.exists(guardhouse.entry_scene) and ResourceLoader.exists(perimeter.entry_scene),"A phase points at a scene that does not exist")
 	check(perimeter.entry_scene == TRAIL and guardhouse.entry_scene == EXTERIOR,"A phase points at the wrong entry scene")
 	check(guardhouse.last_stage == perimeter.opens_at,"Phase 2 does not open on the stage that closes Phase 1")
-	check(Phase.after(&"guardhouse") == perimeter and Phase.after(&"perimeter") == null,"The chain order is broken")
+	check(Phase.after(&"guardhouse") == perimeter and Phase.after(&"relay") == null,"The chain order is broken")
 	check(Phase.of_stage(MissionState.Stage.ROAD) == guardhouse and Phase.of_stage(MissionState.Stage.DONE) == guardhouse,"Phase 1 stages map elsewhere")
 	check(Phase.of_stage(MissionState.Stage.PERIMETER) == perimeter and Phase.of_stage(MissionState.Stage.RELAY) == perimeter,"Phase 2 stages map elsewhere")
 	check(Phase.current() == guardhouse,"A fresh run does not start in Phase 1")
@@ -192,12 +193,14 @@ func run() -> void:
 	check(player.position.distance_to(scene.GATE_ARRIVAL) < 0.2,"Arrival is not at the gate: %v" % player.position)
 	check(absf(angle_difference(player.visual.rotation.y,0.0)) < 0.2,"Arrival does not face up the trail")
 	check(scene.director.current_shot == scene.shots[0],"Arrival selected the wrong framing")
-	check(scene.shots.size() == 3 and scene.colliders.get_child_count() >= 18,"Spatial source or framings incomplete")
+	check(scene.shots.size() == 4 and scene.colliders.get_child_count() >= 18,"Spatial source or framings incomplete")
 	for label: String in ["Terrain","TrailBank","RockShoulder","GateLeaf","FallenPine","RelayShed"]:
 		check(scene.colliders.get_node_or_null(label) != null,"The trail lost the collider of "+label)
 	check(scene.art_available and scene.presentation.art_mode,"Perimeter did not start with its authored plates")
-	for shot: ShotRig in scene.shots:
+	# The trail's three framings are painted; the yard behind the shed is not yet.
+	for shot: ShotRig in scene.shots.slice(0,3):
 		check(shot.definition.background != null,"Missing authored plate: "+String(shot.definition.shot_id))
+	check(scene.shots[3].definition.background == null,"The provisional rear yard gained a plate nobody authored")
 	scene.set_art_mode(false)
 	check(not scene.background.visible,"Geometry comparison left the painted background visible")
 	scene.set_art_mode(true)
@@ -230,6 +233,10 @@ func run() -> void:
 	check(perimeter.closed(),"The chain does not report Phase 2 as closed")
 	var north: Vector3 = await push(Vector3.FORWARD)
 	check(north.z > -26.6,"The relay shed let the player through: %v" % north)
+	# The shed door opens now that the phase is closed, from the foot of its step.
+	check(scene.relay_door.unlocked() and scene.relay_door.target_scene == "res://environments/relay_room.tscn","The relay door does not lead into the shed")
+	await walk_to(scene.RELAY_APPROACH)
+	check(scene.relay_door.can_interact() and scene.relay_door.prompt_text().contains("Relay shed door"),"No prompt at the relay shed door")
 
 	# --- Restart is a fresh attempt of this phase only ---
 	var record: Dictionary = SaveGame.write("res://environments/save_room.tscn",Vector3(0,0,0),0.0,MissionState.Stage.DONE,100.0)

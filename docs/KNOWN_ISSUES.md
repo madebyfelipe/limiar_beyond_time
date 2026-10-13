@@ -1,6 +1,21 @@
 # Limitações e pendências
 
 
+## Atualização — sala do relé, sangue e esquiva, 12/10/2026 (noite)
+
+- **Fase 3, sala do relé**: porta do galpão abre, terminal com boot do Arch e
+  log do operador, queda de energia, Keleken na janela, saída automática pelos
+  fundos. Ver `RELAY_ROOM.md`. Sala e pátio atrás do galpão sem placa pintada;
+  o pátio é **saída provisória** até existir a área externa nova.
+- **O conteúdo agora termina atrás do galpão** (`REAR_YARD`), não mais na porta
+  lacrada do relé. As menções abaixo à porta lacrada como fim são históricas.
+- Log do operador é texto provisório; sem áudio na sala.
+- Faltam do Mixamo os clipes `terminal_type` e `startled_turn`, além dos de mira;
+  a sala já os pede por nome. O Claude in Chrome não estava conectado nesta sessão,
+  então nada foi baixado.
+- **Esquiva mais lenta**: 0,55 s, mesmos 2,24 m. **Sangue** no Keleken e clipes
+  `hit`/`death` autorados. Ver `COMBAT.md` e `KELEKEN_ANIMATION.md`.
+
 ## Atualização — Fase 2 e estrutura de fase, 12/10/2026
 
 - **Arte do perímetro e pátio norte integrada em 12/10/2026.** Três placas da
