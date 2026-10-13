@@ -23,10 +23,14 @@ extends Resource
 ## arrives on a target in a fraction of a second, as in the games it follows.
 @export_range(1.0, 40.0) var aim_turn_speed: float = 9.0
 
-@export var dodge_speed: float = 7.0
-@export var dodge_duration: float = 0.32
-@export var dodge_invulnerability: float = 0.24
-@export var dodge_cooldown: float = 0.85
+## The escape keeps its 2,24 m but takes 0,55 s instead of 0,32 s, so the
+## captured roll, hop and sidesteps play at 2–2,7x instead of 3–4,7x and read
+## as movements rather than snaps. Invulnerability keeps its 3/4 share and the
+## gap between the end of one dodge and the next stays at about 0,5 s.
+@export var dodge_speed: float = 4.07
+@export var dodge_duration: float = 0.55
+@export var dodge_invulnerability: float = 0.41
+@export var dodge_cooldown: float = 1.05
 @export var hit_invulnerability: float = 0.65
 @export var hit_stun: float = 0.18
 @export var med_kit_healing: float = 50.0

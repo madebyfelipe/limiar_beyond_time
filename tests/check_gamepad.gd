@@ -201,7 +201,8 @@ func run() -> void:
 	check(weapon.uses_locked_aim() and weapon.target != null, "Default pad aim depended on mouse mode")
 	await tap(JOY_BUTTON_Y)
 	check(player.dodge_left > 0.0 and not weapon.aiming, "Triangle/Y did not dodge and cancel targeting")
-	await tick(25)
+	# Past the 0,55 s escape: a kit cannot be used mid-dodge.
+	await tick(36)
 	check(not weapon.aiming, "Dodge re-raised a held aim trigger")
 	neutral()
 	await tick(4)

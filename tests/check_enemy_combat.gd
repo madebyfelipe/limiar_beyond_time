@@ -127,7 +127,8 @@ func run() -> void:
 	check(player.dodge_left > 0.0, "Dodge input did not start evasion")
 	check(not player.take_damage(25.0), "Dodge did not grant immunity")
 	check(not player.start_dodge(), "Dodge could be retriggered without cooldown")
-	await tick(20)
+	# 0,55 s of escape at 60 Hz, plus margin.
+	await tick(36)
 	check(player.position.distance_to(start) > 1.0, "Dodge did not move Dylan")
 	check(player.vitality == 100.0, "Bicada hit the evading player")
 	check(player.dodge_left == 0.0, "Dodge did not end")
@@ -143,7 +144,7 @@ func run() -> void:
 	Input.action_press("move_right")
 	check(player.start_dodge(), "Camera-relative dodge did not start")
 	Input.action_release("move_right")
-	await tick(25)
+	await tick(36)
 	check(player.position.x < 2.5, "Dodge passed through the trail boundary")
 	check(player.dodge_left == 0.0, "Camera-relative dodge did not end")
 	ControlScheme.set_mode(ControlScheme.Mode.TANK)

@@ -55,7 +55,10 @@ forward and sideways components), and the model is turned so the capture's own
 travel lines up with the committed world-space direction. A neutral dodge is a
 backstep and therefore uses the hop. The build tool removes horizontal hip
 travel; physics owns travel and the animation samples the current dodge time,
-so each window is compressed into the 0.32 s escape.
+so each window is compressed into the escape. Since 2026-10-12 the escape lasts
+0.55 s instead of 0.32 s, at 4.07 m/s instead of 7, keeping the same 2.24 m:
+the captures now play at 2–2.7x instead of 3–4.7x. Invulnerability is 0.41 s
+and the cooldown 1.05 s, preserving the previous proportions.
 
 Also evaluated and rejected: the four **Standing Dodge** captures of the Pro
 Longbow pack (the only matching four-direction set, but recorded side-on in an
