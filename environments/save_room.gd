@@ -7,6 +7,9 @@ const SCENE_PATH := "res://environments/save_room.tscn"
 ## Closest spot the 1,8 m capsule can stand to the keyboard, measured against
 ## the room's own colliders; the chair keeps it just west of the monitor.
 const TERMINAL_APPROACH := Vector3(-0.05, 0.0, -1.25)
+## In front of the SupplyChest box already in the room's geometry, on its east
+## face (the box spans x −2,875…−2,125), clear of the door's approach circle.
+const CRATE_APPROACH := Vector3(-1.7, 0.0, 1.82)
 @onready var world: Node3D = $Frame/Composition/Actors/WorldViewport/World
 @onready var background: TextureRect = $Frame/Composition/Background
 @onready var camera: Camera3D = $Frame/Composition/Actors/WorldViewport/World/Camera
@@ -18,6 +21,7 @@ var art_mode: bool = false
 var overview: bool = false
 var doorway: DoorInteraction
 var terminal: TerminalInteraction
+var crate: ItemChest
 var operation: LevelOperation
 ## True when this session started from a stored record instead of the spawn.
 var resumed: bool = false
@@ -69,6 +73,15 @@ func _ready() -> void:
 	terminal.scene_path = SCENE_PATH
 	terminal.saved.connect(_on_saved)
 	add_child(terminal)
+	# The first supply crate: ammunition for both guns, and whatever the
+	# terminal sells is delivered here.
+	crate = ItemChest.new()
+	crate.name = "SupplyCrate"
+	crate.player = player
+	crate.approach = CRATE_APPROACH
+	crate.radius = 0.6
+	crate.crate_id = ChestStore.DELIVERY
+	add_child(crate)
 	operation = LevelOperation.new()
 	operation.name = "Operation"
 	operation.player = player

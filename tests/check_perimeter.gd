@@ -180,7 +180,15 @@ func run() -> void:
 	key(KEY_E)
 	await tick(3)
 	check(not root.has_node("DoorTransition"),"A bolted gate still travelled")
-	check(scene.operation.notice.visible,"The bolted gate gave no reason")
+	check(MessageBox.is_open(self) and paused,"The bolted gate gave no reason")
+	var reason: String = " ".join(PackedStringArray((get_nodes_in_group(&"message_boxes")[0] as MessageBox).pages)) if MessageBox.is_open(self) else ""
+	check(reason.contains("bolted") and reason.contains("TERMINAL"),"The bolted gate does not say to save first: %s" % reason)
+	for page: int in range(8):
+		if not MessageBox.is_open(self):
+			break
+		key(KEY_E)
+		await tick(3)
+	check(not MessageBox.is_open(self) and not paused,"The gate message did not let the game go")
 	# The terminal closes Phase 1; only then does the gate open.
 	MissionState.reach(MissionState.Stage.YARD)
 	MissionState.reach(MissionState.Stage.TERMINAL)

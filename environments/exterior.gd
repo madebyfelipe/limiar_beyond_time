@@ -136,7 +136,7 @@ func _ready() -> void:
 	north_gate.destination_name = "Perimeter Trail"
 	north_gate.open_hint = "North gate"
 	north_gate.locked_hint = "North gate bolted"
-	north_gate.refused.connect(func() -> void: operation.show_notice("The north gate stays bolted until your progress is recorded at the terminal.",3.0))
+	north_gate.refused.connect(_on_north_gate_refused)
 	add_child(north_gate)
 	_update_label()
 
@@ -200,3 +200,9 @@ func _update_label() -> void:
 	instructions.text = "EXTERIOR · %s · %s
 %s · Shift run · Q dodge · H med kit · E door/gate · B art/geometry · F4 filter · T controls (%s) · F3 diagnostics · R restart · Esc pause
 %s" % [shot_name,"CANDIDATE ART — alignment under review" if presentation.art_mode else "3D GEOMETRY",movement,ControlScheme.label(),MissionState.objective()]
+
+## Said in the message strip, like any other thing the game has to tell.
+func _on_north_gate_refused() -> void:
+	north_gate.busy = true
+	await MessageBox.say(self, ["The north gate is bolted.", "Record your progress at the %s before going on." % MessageBox.item("GUARDHOUSE TERMINAL")])
+	north_gate.busy = false
