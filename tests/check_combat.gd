@@ -263,14 +263,14 @@ func check_locked(camera: Camera3D) -> void:
 	await tick(2)
 	check(weapon.target == null, "Pointer outside the viewport selected a target")
 	weapon.practice = false
-	SupplyStock.weapon = true
-	SupplyStock.ammo = 3
+	Inventory.set_count(&"pistol", 1)
+	Inventory.set_count(&"handgun_ammo", 3)
 	PlayerWeapon.magazine = 0
 	Input.action_press("fire")
 	await tick(2)
 	check(weapon.is_reloading(), "Held trigger on empty did not start reload")
 	await tick(175)
-	check(SupplyStock.ammo == 0 and PlayerWeapon.magazine == 0 and not weapon.is_reloading(), "Held fire/reload created ammo or reloaded without stock")
+	check(Inventory.count(&"handgun_ammo") == 0 and PlayerWeapon.magazine == 0 and not weapon.is_reloading(), "Held fire/reload created ammo or reloaded without stock")
 	release_all()
 	SupplyStock.reset()
 	weapon.practice = true
@@ -313,7 +313,7 @@ func run() -> void:
 	# --- No gun, no aiming ---
 	await fresh(ControlScheme.Mode.TANK)
 	weapon.practice = false
-	SupplyStock.weapon = false
+	Inventory.set_count(&"pistol", 0)
 	Input.action_press("aim")
 	await tick(5)
 	check(not weapon.aiming, "Dylan raised a gun he does not own")
@@ -401,15 +401,15 @@ func run() -> void:
 	# --- Reloading draws on the real stock ---
 	await fresh(ControlScheme.Mode.TANK)
 	weapon.practice = false
-	SupplyStock.weapon = true
-	SupplyStock.ammo = 5
+	Inventory.set_count(&"pistol", 1)
+	Inventory.set_count(&"handgun_ammo", 5)
 	PlayerWeapon.magazine = 0
 	Input.action_press("aim")
 	await tick()
 	check(not weapon.fire(), "An empty gun fired")
 	check(weapon.is_reloading(), "Pulling the trigger on empty did not reload")
 	await tick(int(weapon.definition.reload_time * 60.0) + 2)
-	check(PlayerWeapon.magazine == 5 and SupplyStock.ammo == 0, "Reload gave %d rounds and left %d in stock" % [PlayerWeapon.magazine, SupplyStock.ammo])
+	check(PlayerWeapon.magazine == 5 and Inventory.count(&"handgun_ammo") == 0, "Reload gave %d rounds and left %d in stock" % [PlayerWeapon.magazine, Inventory.count(&"handgun_ammo")])
 	for i: int in range(5):
 		weapon.fire()
 		await tick(22)

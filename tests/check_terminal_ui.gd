@@ -65,6 +65,13 @@ func click(control: Control) -> void:
 		event.pressed = down
 		root.push_input(event, true)
 
+## What the guardhouse crate holds of one item: purchases are delivered there.
+func crate_count(id: StringName) -> int:
+	for item: Dictionary in ChestStore.contents(ChestStore.DELIVERY):
+		if item["id"] == id:
+			return int(item["count"])
+	return 0
+
 func run() -> void:
 	SaveGame.clear()
 	SupplyStock.reset()
@@ -108,7 +115,7 @@ func run() -> void:
 	check(menu.input_field.text == "inventory", "Tab did not complete a command")
 	press(KEY_ENTER)
 	await tick()
-	check(menu.output.text.contains("ROUNDS 90"), "Inventory did not report real stock")
+	check(menu.output.text.contains("CASE\n  (empty)") and menu.output.text.contains("HANDGUN AMMO     30") and menu.output.text.contains("SHOTGUN SHELLS   10"), "Inventory did not report the case and the crate")
 	menu.input_field.text = "buy me"
 	press(KEY_TAB)
 	check(menu.input_field.text == "buy medkit", "Tab did not complete a product")
@@ -128,9 +135,12 @@ func run() -> void:
 	await command("shop")
 	check(menu.output.text.contains("medkit") and menu.output.text.contains("1800"), "Shop did not list products")
 	await command("  BuY    AMMO  ")
-	check(SupplyStock.credits == 2100 and SupplyStock.ammo == 120, "Case/whitespace or AMMO purchase failed")
+	check(SupplyStock.credits == 2100 and crate_count(&"handgun_ammo") == 60, "Case/whitespace or AMMO purchase failed")
+	check(menu.output.text.contains("Delivered to the supply crate"), "A purchase did not say where it went")
 	await command("comprar med kit")
-	check(SupplyStock.credits == 1600 and SupplyStock.med_kits == 1, "Portuguese alias or multiword product failed")
+	check(SupplyStock.credits == 1600 and crate_count(&"med_kit") == 1, "Portuguese alias or multiword product failed")
+	await command("buy shells")
+	check(SupplyStock.credits == 1200 and crate_count(&"shotgun_shells") == 20, "Shells purchase failed")
 	var acquired: Dictionary = SupplyStock.snapshot()
 	await command("buy weapon")
 	check(SupplyStock.snapshot() == acquired and menu.output.text.contains("Not enough credits"), "Unaffordable buy changed stock")
@@ -222,7 +232,7 @@ func run() -> void:
 	check(legacy.save(SaveGame.path) == OK, "Legacy record failed")
 	SupplyStock.loaded = false
 	SupplyStock.ensure_loaded()
-	check(SupplyStock.credits == 2400 and SupplyStock.ammo == 90 and not SupplyStock.weapon, "Legacy defaults broke")
+	check(SupplyStock.credits == 2400 and Inventory.entries.is_empty() and not SupplyStock.weapon, "Legacy defaults broke")
 	SaveGame.clear()
 	SupplyStock.reset()
 	MissionState.reset()

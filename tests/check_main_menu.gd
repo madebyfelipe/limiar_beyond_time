@@ -110,7 +110,7 @@ func run() -> void:
 	await tap(KEY_ENTER)
 	await tick(90)
 	check(current_scene.scene_file_path == MainMenu.GAME_SCENE, "New Game must launch the exterior")
-	check(SupplyStock.credits == 2400 and SupplyStock.med_kits == 0 and not SupplyStock.weapon, "New Game must reset inventory")
+	check(SupplyStock.credits == 2400 and Inventory.entries.is_empty() and not SupplyStock.weapon, "New Game must reset inventory")
 	check(MissionState.stage == MissionState.Stage.ROAD, "New Game must reset the objective")
 	check(FileAccess.get_file_as_string(SaveGame.path) == saved_file, "New Game must preserve the existing save file")
 	# Entering the guardhouse during a new game cannot restore the old run.

@@ -6,6 +6,8 @@ extends Resource
 ## Stable name used by saves, the shop and the visual.
 @export var id: StringName = &"pistol"
 @export var display_name: String = "PISTOL"
+## Inventory item the gun reloads from; each gun has its own ammunition.
+@export var ammo_item: StringName = &"handgun_ammo"
 @export_range(0.0, 1000.0) var damage: float = 25.0
 ## Seconds between shots: the trigger is pulled once per press, never held.
 @export_range(0.05, 3.0) var fire_interval: float = 0.32

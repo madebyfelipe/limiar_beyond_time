@@ -108,18 +108,18 @@ func restore_vitality(value: float) -> void:
 	health.current = clampf(value, 1.0, health.maximum)
 	health.changed.emit(health.current, health.maximum)
 
-func use_med_kit() -> bool:
-	if not can_use_weapon() or get_tree().paused or get_tree().root.has_node("DoorTransition"):
+## `from_case`: used from the inventory menu, which pauses the game itself.
+func use_med_kit(from_case: bool = false) -> bool:
+	if not can_use_weapon() or (get_tree().paused and not from_case) or get_tree().root.has_node("DoorTransition"):
 		return false
-	SupplyStock.ensure_loaded()
-	if SupplyStock.med_kits <= 0:
+	if not Inventory.has(&"med_kit"):
 		combat_message.emit("No med kits. Buy supplies at the terminal.")
 		return false
 	var previous_vitality := vitality
 	if not health.heal(config.med_kit_healing):
 		combat_message.emit("Vitality is already full.")
 		return false
-	SupplyStock.med_kits -= 1
+	Inventory.take(&"med_kit", 1)
 	combat_message.emit("Med kit used · +%d vitality" % int(vitality - previous_vitality))
 	return true
 

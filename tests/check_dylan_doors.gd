@@ -157,7 +157,7 @@ func run() -> void:
 	await capture("exterior-door")
 	RetroFilter.set_effect(exterior.get_node("FilterLayer/RetroFilter"), RetroFilter.Effect.CURVE, true)
 	exterior.player.restore_vitality(55.0)
-	SupplyStock.med_kits = 2
+	Inventory.set_count(&"med_kit", 2)
 	await travel(exterior, "res://environments/save_room.tscn", 0)
 	var inside: Node = current_scene
 	check(inside.player.position.distance_to(Vector3(-2.4,0,0.55)) < 0.15, "Interior arrival outside entrance")

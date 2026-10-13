@@ -155,19 +155,19 @@ func run() -> void:
 	ControlScheme.set_mode(ControlScheme.Mode.TANK)
 	player.reset_combat()
 	player.restore_vitality(30.0)
-	SupplyStock.med_kits = 2
+	Inventory.set_count(&"med_kit", 2)
 	Input.action_press("use_med_kit")
 	await tick(2)
 	Input.action_release("use_med_kit")
 	await tick(2)
-	check(player.vitality == 80.0 and SupplyStock.med_kits == 1, "Kit input did not heal 50 and consume one kit")
-	check(player.use_med_kit() and player.vitality == 100.0 and SupplyStock.med_kits == 0, "Kit healing did not cap at maximum")
-	SupplyStock.med_kits = 1
-	check(not player.use_med_kit() and SupplyStock.med_kits == 1, "Full health wasted a kit")
+	check(player.vitality == 80.0 and Inventory.count(&"med_kit") == 1, "Kit input did not heal 50 and consume one kit")
+	check(player.use_med_kit() and player.vitality == 100.0 and Inventory.count(&"med_kit") == 0, "Kit healing did not cap at maximum")
+	Inventory.set_count(&"med_kit", 1)
+	check(not player.use_med_kit() and Inventory.count(&"med_kit") == 1, "Full health wasted a kit")
 	player.restore_vitality(40.0)
-	SupplyStock.med_kits = 0
+	Inventory.set_count(&"med_kit", 0)
 	check(not player.use_med_kit() and player.vitality == 40.0, "Missing kit healed the player")
-	SupplyStock.med_kits = 1
+	Inventory.set_count(&"med_kit", 1)
 	player.set_control_enabled(false)
 	check(not player.use_med_kit(), "Disabled control allowed healing")
 	player.set_control_enabled(true)
@@ -210,7 +210,7 @@ func run() -> void:
 	check(enemy.collision_layer == 0, "Dead enemy still blocks movement")
 
 	player.reset_combat()
-	SupplyStock.med_kits = 1
+	Inventory.set_count(&"med_kit", 1)
 	player.take_damage(1000.0)
 	await tick(3)
 	check(player.is_dead() and not player.control_enabled and player.vitality == 0.0, "Lethal damage did not disable Dylan")
@@ -230,13 +230,13 @@ func run() -> void:
 	check(not trail.operation.hud.death_message.visible, "Restart kept the death screen")
 
 	player.restore_vitality(45.0)
-	SupplyStock.med_kits = 3
+	Inventory.set_count(&"med_kit", 3)
 	var record := SaveGame.write("res://environments/perimeter.tscn", player.position, 0.0, MissionState.Stage.PERIMETER, player.vitality)
 	check(not record.is_empty(), "Combat state could not be saved")
 	player.restore_vitality(100.0)
-	SupplyStock.med_kits = 0
+	Inventory.set_count(&"med_kit", 0)
 	check(SaveGame.resume(player, "res://environments/perimeter.tscn"), "Combat save could not resume")
-	check(player.vitality == 45.0 and SupplyStock.med_kits == 3, "Resume did not restore health and medical inventory")
+	check(player.vitality == 45.0 and Inventory.count(&"med_kit") == 3, "Resume did not restore health and medical inventory")
 	SaveGame.clear()
 	release()
 	trail.queue_free()

@@ -206,10 +206,10 @@ func run() -> void:
 	check(not weapon.aiming, "Dodge re-raised a held aim trigger")
 	neutral()
 	await tick(4)
-	SupplyStock.med_kits = 1
+	Inventory.set_count(&"med_kit", 1)
 	player.vitality = 40.0
 	await tap(JOY_BUTTON_RIGHT_STICK)
-	check(player.vitality == 90.0 and SupplyStock.med_kits == 0, "R3/RS did not consume and apply a medical kit")
+	check(player.vitality == 90.0 and Inventory.count(&"med_kit") == 0, "R3/RS did not consume and apply a medical kit")
 	await tap(JOY_BUTTON_START)
 	await tap(JOY_BUTTON_DPAD_DOWN)
 	await tap(JOY_BUTTON_DPAD_DOWN)

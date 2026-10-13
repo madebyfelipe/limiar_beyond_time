@@ -136,12 +136,9 @@ func reset_state() -> void:
 func is_armed() -> bool:
 	return owns(definition)
 
-## Whether Dylan has this gun: everything on the range, purchases elsewhere.
+## Whether Dylan has this gun: everything on the range, the case elsewhere.
 func owns(candidate: WeaponDefinition) -> bool:
-	if practice:
-		return true
-	SupplyStock.ensure_loaded()
-	return SupplyStock.shotgun if candidate.id == &"shotgun" else SupplyStock.weapon
+	return practice or Inventory.has(candidate.id)
 
 ## Puts the next owned gun in hand (`direction` -1 for the previous one).
 ## Raising, firing and reloading stop, so the switch can never leave a
@@ -201,8 +198,7 @@ func _definition(id: StringName) -> WeaponDefinition:
 func reserve() -> int:
 	if practice:
 		return 999
-	SupplyStock.ensure_loaded()
-	return SupplyStock.ammo
+	return Inventory.count(definition.ammo_item)
 
 func is_reloading() -> bool:
 	return reload_left > 0.0
@@ -629,7 +625,7 @@ func _finish_reload() -> void:
 	reload_left = 0.0
 	var taken: int = mini(definition.magazine - magazine, reserve())
 	if not practice:
-		SupplyStock.ammo -= taken
+		Inventory.take(definition.ammo_item, taken)
 	magazine += taken
 	ammo_changed.emit()
 

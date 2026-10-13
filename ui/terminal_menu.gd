@@ -8,15 +8,15 @@ const COMMANDS := ["help", "save", "shop", "buy", "inventory", "status", "clear"
 const ALIASES := {"ajuda": "help", "salvar": "save", "loja": "shop", "comprar": "buy", "inventario": "inventory", "estado": "status", "limpar": "clear", "sair": "exit"}
 const USAGE := {
 	"help": "help [command]", "save": "save", "shop": "shop",
-	"buy": "buy ammo | medkit | weapon | shotgun", "inventory": "inventory",
+	"buy": "buy ammo | shells | medkit | weapon | shotgun", "inventory": "inventory",
 	"status": "status", "clear": "clear", "exit": "exit",
 }
 const HELP := {
 	"help": "List commands or explain a command.",
 	"save": "Save progress and supplies at this terminal.",
 	"shop": "List products, prices and credits.",
-	"buy": "Buy a product. Example: buy ammo",
-	"inventory": "Show available supplies.",
+	"buy": "Buy a product; it is delivered to the supply crate. Example: buy ammo",
+	"inventory": "Show the attaché case and what waits in the crate.",
 	"status": "Show the objective and latest save.",
 	"clear": "Clear the screen; keep command history.",
 	"exit": "Close the session and return to the game.",
@@ -25,7 +25,7 @@ const MAX_LINES := 300
 const MAX_HISTORY := 100
 ## Every console operation is available without typing; the same dispatcher
 ## handles these shortcuts and written commands, including save/buy checks.
-const PAD_COMMANDS := ["help", "save", "shop", "buy ammo", "buy medkit", "buy weapon", "buy shotgun", "inventory", "status", "clear", "exit"]
+const PAD_COMMANDS := ["help", "save", "shop", "buy ammo", "buy shells", "buy medkit", "buy weapon", "buy shotgun", "inventory", "status", "clear", "exit"]
 var pad_command_index: int = 0
 var pad_hint: Label
 var _pad_axis_direction: Dictionary = {}
@@ -214,13 +214,13 @@ func _help(args: PackedStringArray) -> void:
 		write_line("Usage: help [command]")
 
 func _shop() -> void:
-	write_line("SUPPLIES — CREDITS %d\n  ammo     300   30 rounds\n  medkit   500   1 med kit\n  weapon  1800   pistol\n  shotgun 2200   shotgun, 2 shells\nUse buy <product>. Use save to store purchases." % SupplyStock.credits)
+	write_line("SUPPLIES — CREDITS %d\n  ammo     300   30 handgun rounds\n  shells   400   10 shotgun shells\n  medkit   500   1 med kit\n  weapon  1800   pistol\n  shotgun 2200   shotgun, 2 shells\nUse buy <product>. Purchases go to the supply crate by the door.\nUse save to store purchases." % SupplyStock.credits)
 
 func _buy(args: PackedStringArray) -> void:
 	var product: String = " ".join(args)
-	var products := {"ammo": 0, "magazine": 0, "medkit": 1, "med kit": 1, "recovery": 1, "weapon": 2, "pistol": 2, "shotgun": 3}
+	var products := {"ammo": 0, "magazine": 0, "rounds": 0, "medkit": 1, "med kit": 1, "recovery": 1, "weapon": 2, "pistol": 2, "shotgun": 3, "shells": 4, "shell": 4}
 	if not products.has(product):
-		write_line("Usage: buy ammo | medkit | weapon | shotgun")
+		write_line("Usage: buy ammo | shells | medkit | weapon | shotgun")
 		return
 	var index: int = int(products[product])
 	if index == 2 and SupplyStock.weapon:
@@ -230,12 +230,19 @@ func _buy(args: PackedStringArray) -> void:
 	elif SupplyStock.credits < int(SupplyStock.ITEMS[index]["price"]):
 		write_line("Not enough credits. Balance: %d." % SupplyStock.credits)
 	elif SupplyStock.buy(index):
-		write_line("%s purchased. Balance: %d.\nUse save to store supplies." % [SupplyStock.ITEMS[index]["name"], SupplyStock.credits])
+		write_line("%s purchased. Balance: %d.\nDelivered to the supply crate. Use save to store supplies." % [SupplyStock.ITEMS[index]["name"], SupplyStock.credits])
 	else:
-		write_line("Purchase unavailable: stock limit reached.")
+		write_line("Purchase unavailable.")
 
 func _inventory() -> void:
-	write_line("CREDITS %d\nROUNDS %d\nMED KITS %d\nPISTOL %s\nSHOTGUN %s" % [SupplyStock.credits, SupplyStock.ammo, SupplyStock.med_kits, "OWNED" if SupplyStock.weapon else "NOT OWNED", "OWNED" if SupplyStock.shotgun else "NOT OWNED"])
+	var case_lines := PackedStringArray()
+	for id: StringName in Inventory.ITEMS:
+		if Inventory.has(id):
+			case_lines.append("  %-16s %d" % [Inventory.item_name(id), Inventory.count(id)])
+	var crate_lines := PackedStringArray()
+	for item: Dictionary in ChestStore.contents(ChestStore.DELIVERY):
+		crate_lines.append("  %-16s %d" % [Inventory.item_name(item["id"]), item["count"]])
+	write_line("CREDITS %d\nCASE\n%s\nSUPPLY CRATE\n%s" % [SupplyStock.credits, "\n".join(case_lines) if not case_lines.is_empty() else "  (empty)", "\n".join(crate_lines) if not crate_lines.is_empty() else "  (empty)"])
 
 func _status() -> void:
 	write_line("OBJECTIVE: " + MissionState.objective())
@@ -262,7 +269,7 @@ func _complete() -> void:
 		if String(ALIASES.get(command, command)) != "buy":
 			return
 		prefix = raw.substr(command.length() + 1).strip_edges()
-		for product: String in ["ammo", "medkit", "weapon"]:
+		for product: String in ["ammo", "shells", "medkit", "weapon", "shotgun"]:
 			if product.begins_with(prefix):
 				candidates.append(product)
 	else:

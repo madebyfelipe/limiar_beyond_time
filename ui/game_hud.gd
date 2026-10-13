@@ -52,10 +52,9 @@ func refresh() -> void:
 	visible = not get_tree().paused and not get_tree().root.has_node("DoorTransition") and not _letterboxed()
 	if is_instance_valid(player):
 		gauge.ratio = player.vitality / player.health.maximum
-		SupplyStock.ensure_loaded()
 		var family := InputBindings.GAMEPAD if GamepadControls.shared.gamepad_active else InputBindings.KEYBOARD
 		var ps := GamepadControls.shared.playstation
-		supplies.text = "%s · DODGE%s    %s · MED KIT ×%d" % [InputBindings.binding_label("dodge", family, 0, ps), " (cooldown)" if player.dodge_cooldown_left > 0.0 else "", InputBindings.binding_label("use_med_kit", family, 0, ps), SupplyStock.med_kits]
+		supplies.text = "%s · DODGE%s    %s · MED KIT ×%d" % [InputBindings.binding_label("dodge", family, 0, ps), " (cooldown)" if player.dodge_cooldown_left > 0.0 else "", InputBindings.binding_label("use_med_kit", family, 0, ps), Inventory.count(&"med_kit")]
 		death_message.visible = player.is_dead()
 	for interaction: Node in get_tree().get_nodes_in_group(&"approach_prompts"):
 		if interaction.player == player:

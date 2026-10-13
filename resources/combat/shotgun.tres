@@ -6,6 +6,7 @@
 script = ExtResource("1")
 id = &"shotgun"
 display_name = "SHOTGUN"
+ammo_item = &"shotgun_shells"
 damage = 14.0
 fire_interval = 0.5
 magazine = 2
