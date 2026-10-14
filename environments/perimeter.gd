@@ -44,6 +44,15 @@ const RELAY_Z := -24.0
 const KELEKEN_HOME := Vector3(0.6,0.06,-14.5)
 const KELEKEN_HOMES: Array[Vector3] = [KELEKEN_HOME, Vector3(-1.3,0.06,-17.6)]
 const KELEKEN_BOUNDS := Rect2(-2.3,-19.0,4.6,8.5)
+## Floating health packs, by PickupStore id, on the floor point each hovers
+## over. One inside the animals' patrol, between the trough and the feed sacks;
+## one past the fallen pine, on the side its passage does not lead to; one in
+## the west corner of the yard behind the shed, across it from the rear door.
+const HEALTH_PACKS := {
+	&"trail_pen": Vector3(2.0,0.06,-14.9),
+	&"trail_shed": Vector3(-1.5,0.06,-24.5),
+	&"rear_yard": Vector3(-4.2,0.06,-35.4),
+}
 @onready var world: Node3D = $Frame/Composition/Actors/WorldViewport/World
 @onready var background: TextureRect = $Frame/Composition/Background
 @onready var player: PlayerController = $Frame/Composition/Actors/WorldViewport/World/Player
@@ -64,6 +73,7 @@ var keleken: KelekenActor
 var keleken_wander: KelekenWander
 var kelekens: Array[KelekenActor] = []
 var keleken_wanders: Array[KelekenWander] = []
+var health_packs: Array[HealthPack] = []
 
 func _ready() -> void:
 	instructions.visible = OS.get_cmdline_args().has("--debug-instructions")
@@ -194,6 +204,14 @@ func _ready() -> void:
 		keleken_wanders.append(wander)
 	keleken = kelekens[0]
 	keleken_wander = keleken_wanders[0]
+	for id: StringName in HEALTH_PACKS:
+		var pack: HealthPack = preload("res://actors/pickups/health_pack.tscn").instantiate()
+		pack.name = "HealthPack_" + String(id)
+		pack.pack_id = id
+		pack.player = player
+		pack.position = HEALTH_PACKS[id]
+		world.add_child(pack)
+		health_packs.append(pack)
 	_update_label()
 
 ## Three ways in: the yard gate, the relay shed's front door coming back out,
@@ -225,9 +243,10 @@ func _place_in_rear_yard() -> void:
 ## camera, the animal and the objective go back to its start, while the phases
 ## already closed stay closed and the stored record is left alone. Out behind
 ## the shed the relay is already behind the player, so a restart there keeps
-## the yard and the objective.
+## the yard and the objective. Health packs taken since the last save are back.
 func restart() -> void:
 	player.reset_to_start()
+	PickupStore.rewind(HEALTH_PACKS.keys())
 	for wander: KelekenWander in keleken_wanders:
 		wander.reset()
 	if MissionState.stage >= MissionState.Stage.OUTAGE:

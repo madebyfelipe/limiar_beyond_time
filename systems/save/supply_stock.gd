@@ -22,6 +22,8 @@ static var loaded: bool = false
 static func ensure_loaded() -> void:
 	if not loaded:
 		restore(SaveGame.read().get("supplies", {}))
+		# Read straight from the file: this is what the record holds.
+		PickupStore.mark_recorded()
 
 static func restore(value: Variant) -> void:
 	# First, so the case and crates below can read without reloading the file.
@@ -32,6 +34,7 @@ static func restore(value: Variant) -> void:
 	# Saves from before the shotgun replaced the rifle keep the long gun.
 	shotgun = bool(data.get("shotgun", data.get("rifle", false)))
 	ChestStore.restore(data.get("chests", {}))
+	PickupStore.restore(data.get("pickups", []))
 	if data.has("case"):
 		Inventory.restore(data["case"])
 		return
@@ -49,10 +52,12 @@ static func restore(value: Variant) -> void:
 
 static func snapshot() -> Dictionary:
 	ensure_loaded()
-	return {"credits": credits, "weapon": weapon, "shotgun": shotgun, "case": Inventory.snapshot(), "chests": ChestStore.snapshot()}
+	return {"credits": credits, "weapon": weapon, "shotgun": shotgun, "case": Inventory.snapshot(), "chests": ChestStore.snapshot(), "pickups": PickupStore.snapshot()}
 
 static func reset() -> void:
 	restore({})
+	# A new game: nothing taken and nothing on record.
+	PickupStore.mark_recorded()
 
 static func available(index: int) -> bool:
 	ensure_loaded()

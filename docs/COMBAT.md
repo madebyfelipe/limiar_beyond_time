@@ -62,6 +62,10 @@ na guarita com `buy medkit`, antes de sair pelo portão. O HUD mostra quantidade
 os dois comandos podem ser configurados nas telas de controles. R3/RS passa
 a ser cura; o diagnóstico mantém F3 e o touchpad do PS4.
 
+Desde 13/10/2026 (issue #3) a trilha tem três **health packs flutuantes**: encostar
+recupera 25 de vida na hora e consome o pack; com a vida cheia ele fica onde está.
+Posições, registro e Reiniciar em [HEALTH_PACKS.md](HEALTH_PACKS.md).
+
 As portas conservam saúde e suprimentos. `save` registra saúde junto com o
 estoque; registros anteriores sem saúde começam com 100 HP. Reiniciar recupera
 a vida e o carregador, preservando o estoque atual de kits e reserva.

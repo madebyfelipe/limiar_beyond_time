@@ -75,6 +75,8 @@ static func write(scene: String, position: Vector3, facing: float, stage: int, v
 		file.set_value(SECTION, key, record[key])
 	if file.save(path) != OK:
 		return {}
+	# What is taken now is on record: a restart no longer gives it back.
+	PickupStore.mark_recorded()
 	return record
 
 static func clear() -> void:
@@ -96,6 +98,7 @@ static func resume(player: PlayerController, scene: String) -> bool:
 	MissionState.restore(int(record["stage"]))
 	AreaMap.restore(record.get("map", []))
 	SupplyStock.restore(record.get("supplies", {}))
+	PickupStore.mark_recorded()
 	player.restore_vitality(float(record.get("vitality", 100.0)))
 	return true
 
