@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShotDefinition" format=3]
+
+[ext_resource type="Script" path="res://systems/camera/shot_definition.gd" id="1_a7puw"]
+
+[resource]
+script = ExtResource("1_a7puw")
+shot_id = &"service_yard_arm"
+camera_position = Vector3(-19.8, 11, -55.275)
+camera_rotation_degrees = Vector3(-45.285053, -90, 0)
+fov = 30.0

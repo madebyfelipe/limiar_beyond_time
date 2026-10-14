@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ShotDefinition" format=3]
+
+[ext_resource type="Script" path="res://systems/camera/shot_definition.gd" id="1_cjabu"]
+
+[resource]
+script = ExtResource("1_cjabu")
+shot_id = &"service_yard_mid"
+camera_position = Vector3(-21.25, 10.5, -41.25)
+camera_rotation_degrees = Vector3(-31.772203, -90, 0)
+fov = 32.0

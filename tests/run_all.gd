@@ -26,6 +26,7 @@ const PROBES: Array[Dictionary] = [
 	{"name": "sala-geometria", "script": "res://tests/check_save_room.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "exterior-geometria", "script": "res://tests/check_exterior.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "perimetro", "script": "res://tests/check_perimeter.gd", "args": HEADLESS_FIXED, "summary": "PERIMETER ticks="},
+	{"name": "patio-servico", "script": "res://tests/check_service_yard.gd", "args": HEADLESS_FIXED, "summary": "SERVICE_YARD ticks="},
 	{"name": "rele", "script": "res://tests/check_relay_room.gd", "args": HEADLESS_FIXED, "summary": "RELAY_ROOM ticks="},
 	{"name": "dylan-portas", "script": "res://tests/check_dylan_doors.gd", "args": HEADLESS_FIXED, "summary": " failures=0"},
 	{"name": "cinematica-passagem", "script": "res://tests/check_passage_cinematic.gd", "args": HEADLESS_FIXED, "summary": "PASSAGE_CINEMATIC failures=0"},
