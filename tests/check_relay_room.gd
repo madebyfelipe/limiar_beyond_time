@@ -191,14 +191,21 @@ func run() -> void:
 	check(scene.bars.visible and scene.bars.amount > 0.0 and scene.bars.top.size.y > 0.0,"The cutscene has no letterbox")
 	check(not player.control_enabled,"The player kept control inside the cutscene")
 	check(not scene.operation.hud.visible,"The HUD stayed over the letterbox")
+	check(scene.animal.target_length == CryopteryxVisual.DEFAULT_LENGTH, "The window animal differs from the study scale")
+	for mesh: MeshInstance3D in scene.animal.model.find_children("*", "MeshInstance3D", true, false):
+		var ink := mesh.material_override as StandardMaterial3D
+		check(ink != null and ink.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED and ink.albedo_color == Color.BLACK and ink.albedo_texture == null, "The window animal reveals its texture or lighting")
 	check(not scene.terminal.can_interact(),"A dead terminal still offers access")
 	var seen: bool = false
+	# The clips the animal went through while the window was on screen.
+	var clips: Dictionary = {}
 	for frame: int in range(900):
 		if scene.beat != &"window":
 			break
 		if is_instance_valid(scene.animal):
 			# The head must pass inside the window opening as the camera sees it.
-			var head: Vector3 = scene.animal.visual.skeleton.global_transform * scene.animal.visual.skeleton.get_bone_global_pose(scene.animal.visual.skeleton.find_bone("head")).origin
+			var head: Vector3 = scene.animal.skeleton.global_transform * scene.animal.skeleton.get_bone_global_pose(scene.animal.skeleton.find_bone("head")).origin
+			clips[scene.animal.clip] = true
 			var cam: Camera3D = scene.cutscene_camera
 			var pixel: Vector2 = cam.unproject_position(head)
 			var sill: Vector2 = cam.unproject_position(Vector3(0.65,1.45,-2.3))
@@ -211,6 +218,7 @@ func run() -> void:
 				seen = true
 		await tick()
 	check(seen,"The animal never showed in the window")
+	check(clips.has(&"walk") and clips.has(&"idle") and clips.has(&"attack") and clips.has(&"run"),"The animal did not prowl in, stop, snap and bolt: %s" % [clips.keys()])
 
 	# --- The bars lift and the player takes Dylan to the rear door ---
 	for frame: int in range(900):

@@ -6,7 +6,6 @@ extends Control
 ## the rear door.
 const SOURCE := preload("res://environments/relay_room_source.tscn")
 const SCENE_PATH := "res://environments/relay_room.tscn"
-const KELEKEN := preload("res://actors/keleken/keleken.tscn")
 const PERIMETER := "res://environments/perimeter.tscn"
 const ART_POWERED := preload("res://assets/backgrounds/dc2_psx/relay_powered.png")
 const ART_OUTAGE := preload("res://assets/backgrounds/dc2_psx/relay_outage.png")
@@ -31,9 +30,17 @@ const WINDOW_SHOT_TARGET := Vector3(0.65, 1.65, -2.3)
 const WINDOW_CENTRE := Vector3(0.65, 1.75, -2.3)
 ## How far behind his right shoulder Dylan's look-over-shoulder capture looks.
 const LOOK_BACK_DEGREES := 130.0
-const ANIMAL_FROM := Vector3(-3.6, 0.0, -3.5)
-const ANIMAL_TO := Vector3(4.2, 0.0, -3.5)
-const ANIMAL_PAUSE_AT := Vector3(0.45, 0.0, -3.5)
+## Same size as the study. The yard is lower than the room floor, keeping the
+## enlarged head inside the existing 1.45–2.05 m window opening.
+const WINDOW_ANIMAL_LENGTH := CryopteryxVisual.DEFAULT_LENGTH
+## Its line behind the north wall, by the model's origin under the hips. The
+## head leads that point by about 2.9 units, so it stops short of the pane.
+const ANIMAL_FROM := Vector3(-6.1, -1.65, -3.5)
+const ANIMAL_PAUSE_AT := Vector3(-3.15, -1.65, -3.5)
+const ANIMAL_TO := Vector3(5.0, -1.65, -3.5)
+## It prowls in and bolts out, in metres per second.
+const ANIMAL_PROWL := 1.3
+const ANIMAL_BOLT := 4.4
 
 @onready var world: Node3D = $Frame/Composition/Actors/WorldViewport/World
 @onready var background: TextureRect = $Frame/Composition/Background
@@ -51,7 +58,7 @@ var screen_light: OmniLight3D
 var emergency_light: OmniLight3D
 var yard_light: OmniLight3D
 var cutscene_camera: Camera3D
-var animal: KelekenActor
+var animal: CryopteryxVisual
 var bars: CinematicBars
 var powered: bool = true
 ## Cutscene beat, for probes and for anything that must not interrupt it:
@@ -331,29 +338,31 @@ func play_outage() -> void:
 	var heading: float = atan2(-to_window.x, -to_window.z) + deg_to_rad(LOOK_BACK_DEGREES)
 	turn.tween_property(player.visual, "rotation:y", player.visual.rotation.y + angle_difference(player.visual.rotation.y, heading), 0.45 / cutscene_speed)
 	_dylan().play_scripted(&"idle")
-	animal = KELEKEN.instantiate()
-	animal.name = "WindowKeleken"
-	animal.combat_enabled = false
+	# Only its picture: no body, no collision, nothing that hunts.
+	animal = CryopteryxVisual.new()
+	animal.name = "WindowCryopteryx"
+	animal.target_length = WINDOW_ANIMAL_LENGTH
+	animal.silhouette = true
 	world.add_child(animal)
-	animal.set_physics_process(false)
-	animal.collision_layer = 0
-	animal.collision_mask = 0
 	animal.position = ANIMAL_FROM
 	animal.rotation.y = -PI / 2
-	animal.visual.play_clip(&"walk", 1.0)
+	animal.play_clip(&"walk", ANIMAL_PROWL, 0.0)
 	var cross := create_tween()
-	cross.tween_property(animal, "position", ANIMAL_PAUSE_AT, ANIMAL_FROM.distance_to(ANIMAL_PAUSE_AT) / 1.0 / cutscene_speed)
+	cross.tween_property(animal, "position", ANIMAL_PAUSE_AT, ANIMAL_FROM.distance_to(ANIMAL_PAUSE_AT) / ANIMAL_PROWL / cutscene_speed)
 	await cross.finished
-	# It stops in the lamp light and looks in; Dylan looks back over his
-	# shoulder at the glass. The look is back forward by 2,5 s, inside the
-	# 2,8 s before the room view returns.
-	animal.visual.play_clip(&"look")
+	# Its silhouette stops with its head in the pane; Dylan looks back
+	# over his shoulder at the glass. The look is back forward by 2,5 s, inside
+	# the 2,8 s before the room view returns.
+	animal.play_clip(&"idle")
 	_dylan().play_scripted(&"look_over_shoulder", &"startled")
 	operation.show_notice("Something is circling the shed.", 3.0 / cutscene_speed)
-	await _wait(1.6)
-	animal.visual.play_clip(&"walk", 1.4)
+	await _wait(0.5)
+	# Then it snaps at the dark ahead of it, and is gone at a run.
+	animal.play_clip(&"attack")
+	await _wait(1.1)
+	animal.play_clip(&"run", ANIMAL_BOLT)
 	var leave := create_tween()
-	leave.tween_property(animal, "position", ANIMAL_TO, ANIMAL_PAUSE_AT.distance_to(ANIMAL_TO) / 1.4 / cutscene_speed)
+	leave.tween_property(animal, "position", ANIMAL_TO, ANIMAL_PAUSE_AT.distance_to(ANIMAL_TO) / ANIMAL_BOLT / cutscene_speed)
 	await _wait(1.2)
 	# Back to the room view; the bars lift and the rear door is the player's.
 	camera.current = true

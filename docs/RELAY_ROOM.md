@@ -23,8 +23,17 @@ do perímetro; `executar-rele.cmd` abre a sala direto.
    embaixo, dentro da composição 16:9 e portanto sob o filtro) descem; o HUD sai de cena: o console colapsa como tubo, a etapa vira `OUTAGE`,
    a luz pisca e apaga, a tela e os LEDs morrem e a lâmpada vermelha de emergência
    pulsa.
-5. Corte por cima do ombro para a janela: um Keleken passa lá fora sob a lâmpada do
-   pátio, para, olha para dentro e segue. Aviso: "Something is circling the shed."
+5. Corte por cima do ombro para a janela: a **silhueta do Cryopteryx** chega andando,
+   para com a cabeça no vidro, dá um bote no escuro à frente e
+   some correndo. Aviso: "Something is circling the shed." Até 13/10/2026 quem
+   passava era um Keleken; a troca, de 14/10/2026, é um teste dos clipes do
+   animal novo (`walk`, `idle`, `attack`, `run`). Ele entra só como imagem, sem
+   corpo, colisão ou IA, com a mesma escala do estudo do CMD: 8,5 unidades de
+   comprimento e cerca de 3,6 de altura em pé (2,7 m relativos ao Dylan de 1,8 m).
+   Um material preto opaco e sem iluminação esconde a textura e os detalhes
+   internos; só o contorno animado aparece. O percurso externo fica 1,65 unidades
+   abaixo do piso da sala e a pausa recua para manter a cabeça maior no vão
+   de 1,45–2,05 m, preservando a câmera e a placa da janela.
 6. De volta à câmera da sala, as barras sobem, o HUD volta e o controle é do jogador,
    com o objetivo "Leave by the rear door". A porta dos fundos destrava; **E** nela
    leva para fora e a cinemática mostra **BEHIND THE RELAY SHED**.
@@ -48,7 +57,7 @@ Uma câmera fixa no canto sudoeste. Desde 13/10/2026, placas próprias cobrem a
 sala iluminada e o apagão; a câmera da janela também tem sua placa. As luzes 3D
 continuam iluminando os personagens e o brilho das placas acompanha o piscar
 do teto e o pulso da emergência. B compara arte/geometria; o vidro da janela
-permanece transparente para mostrar o Keleken animado. Inventário e prompts em
+permanece transparente para mostrar a silhueta animada do Cryopteryx. Inventário e prompts em
 `RELAY_ART_2026-10-13.md`.
 
 Primeira versão tinha uma coluna de conduítes no centro; as capturas mostraram que ela
