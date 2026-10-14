@@ -172,6 +172,9 @@ ida/volta pelo portão e alternância arte/geometria. Capturas em
 
 - Sem áudio e sem ponto de salvamento na trilha: o registro continua
   sendo feito no terminal da guarita, antes do portão.
+- **Desde 14/10/2026 o pátio provisório saiu da trilha**: a porta dos fundos do
+  relé leva ao pátio de serviço (`SERVICE_YARD.md`), e a trilha voltou a três
+  enquadramentos. O que segue sobre `perimeter_4` é histórico.
 - Desde 12/10/2026 (noite) a porta do relé abre para a Fase 3 (`RELAY_ROOM.md`),
   e a saída pelos fundos do galpão leva ao enquadramento provisório `perimeter_4`,
   com limites invisíveis e placa `art_cam04_v01.png` desde 13/10/2026.

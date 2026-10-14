@@ -26,11 +26,13 @@ paira:
 | --- | --- | --- | --- |
 | `trail_pen` | (2,0; −14,9) | `perimeter_2` | dentro da patrulha dos Keleken, entre o cocho e os sacos de ração: recompensa do lado arriscado |
 | `trail_shed` | (−1,5; −24,5) | `perimeter_3` | depois do pinheiro caído, do lado para onde a passagem não leva, junto ao galpão |
-| `rear_yard` | (−4,2; −35,4) | `perimeter_4` | canto oeste do pátio atrás do galpão, do outro lado da porta dos fundos |
+| `rear_yard` | (−10,6; −56,5) | `service_yard_arm` | **desde 14/10/2026 no pátio de serviço** (`ServiceYard.HEALTH_PACKS`), no braço, no território de um animal |
 
 São três, o número da proposta do mapa do Episódio 1 (três packs de 25). O do
-pátio fica onde o pátio de serviço vai existir; muda de lugar quando esse
-ambiente for construído.
+pátio mudou para o pátio de serviço quando esse ambiente foi construído
+(`SERVICE_YARD.md`), com o mesmo id, para que um registro que já o pegou continue
+com ele pego. `check_health_packs.gd` cobre os dois da trilha; o probe
+`patio-servico` posiciona o terceiro.
 
 ## Peças
 

@@ -28,7 +28,8 @@ do perímetro; `executar-rele.cmd` abre a sala direto.
 6. De volta à câmera da sala, as barras sobem, o HUD volta e o controle é do jogador,
    com o objetivo "Leave by the rear door". A porta dos fundos destrava; **E** nela
    leva para fora e a cinemática mostra **BEHIND THE RELAY SHED**.
-7. Na trilha, atrás do galpão: etapa `REAR_YARD`, fim do conteúdo autorado por ora.
+7. No pátio de serviço, atrás do galpão (`SERVICE_YARD.md`, desde 14/10/2026): etapa
+   `REAR_YARD`, fim do conteúdo autorado por ora.
    A porta dos fundos leva de volta à sala, que continua sem energia.
 
 O texto do log é **provisório** e mantém indefinida a causa do desaparecimento,
@@ -54,7 +55,11 @@ permanece transparente para mostrar o Keleken animado. Inventário e prompts em
 Primeira versão tinha uma coluna de conduítes no centro; as capturas mostraram que ela
 escondia a porta dos fundos e o caminho até ela, e foi trocada pelo transformador.
 
-## Atrás do galpão (provisório)
+## Atrás do galpão (provisório — histórico)
+
+Substituído em 14/10/2026 pelo pátio de serviço, cena própria
+(`environments/service_yard.tscn`, `SERVICE_YARD.md`). A cinemática da porta dos
+fundos mostra **SERVICE YARD**. O texto abaixo descreve o pátio provisório.
 
 `perimeter.gd` ganhou o enquadramento `perimeter_4` (com placa desde 13/10/2026),
 a porta dos fundos na parede traseira do galpão e limites invisíveis do pátio

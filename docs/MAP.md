@@ -19,7 +19,7 @@ quatro novos) e **final na sala do relé**.
 | 2 | GUARDHOUSE | pronto | sala segura A: save, loja, baú |
 | 3 | PERIMETER TRAIL | pronto | combate aberto, dois Keleken |
 | 4 | RELAY ROOM | pronto | log, apagão e, no fim, o uplink |
-| 5 | SERVICE YARD | a construir (hoje é o pátio provisório `perimeter_4`) | hub com quatro saídas |
+| 5 | SERVICE YARD | geometria básica desde 14/10/2026 (`SERVICE_YARD.md`) | hub com quatro saídas, área de combate e fuga |
 | 6 | CREW QUARTERS | a construir | sala segura B, cofre |
 | 7 | KENNEL BLOCK | a construir | corredor apertado, fusível, atalho para o pátio da guarita |
 | 8 | GENERATOR HOUSE | a construir | anel apertado, religar a energia |
