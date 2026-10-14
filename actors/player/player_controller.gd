@@ -123,17 +123,13 @@ func use_med_kit(from_case: bool = false) -> bool:
 	combat_message.emit("Med kit used · +%d vitality" % int(vitality - previous_vitality))
 	return true
 
+## The escape is always a backstep: straight away from where Dylan faces,
+## whatever the stick is doing and in either control scheme, and committed in
+## world space, so a camera cut does not redirect it.
 func start_dodge() -> bool:
 	if not can_use_weapon() or dodge_cooldown_left > 0.0 or get_tree().paused:
 		return false
-	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	if ControlScheme.is_tank():
-		dodge_direction = facing() * -input.y + facing().cross(Vector3.UP) * input.x
-	else:
-		dodge_direction = movement_reference.direction_for(input, camera, not input.is_zero_approx())
-	if dodge_direction.is_zero_approx():
-		dodge_direction = -facing()
-	dodge_direction = dodge_direction.normalized()
+	dodge_direction = -facing()
 	dodge_left = config.dodge_duration
 	dodge_cooldown_left = config.dodge_cooldown
 	invulnerability_left = config.dodge_invulnerability

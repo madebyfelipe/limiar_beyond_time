@@ -23,8 +23,11 @@ In tank mode, the existing auto-target and manual turn/tilt controls remain.
 | Med kit | H | Right-stick press | R3 |
 | Cycle targets | Wheel / assigned target key | LB / RB | L1 / R1 |
 
-Dodge follows the movement input, or backsteps when neutral. Its direction is
-committed in world space, so a camera cut does not redirect it. It cancels aim and reload;
+**Since 2026-10-13 (issue #7) the dodge is always a backstep**: straight away
+from where Dylan is facing, whatever the stick or the keys are doing, in camera
+and tank controls alike, aiming or not. Its direction is committed in world
+space, so a camera cut does not redirect it. Before that it followed the
+movement input and only backstepped when neutral. It cancels aim and reload;
 release and press aim again to raise the gun. Collision remains on the character
 body, with a short invulnerability window and recovery cooldown. Medical kits
 restore up to 50 vitality and consume stock only when healing is possible.
@@ -50,10 +53,11 @@ from a public GitHub mirror (SHA-256 `08f94a5b…3059a`) was replaced.
 | `dodge_right` | `dodge_right.fbx` | Dodging Right (*Dodging To The Right In Place*) | 0.10–1.10 s |
 | `dodge_left` | same, mirrored by the build tool | — | 0.10–1.10 s |
 
-The clip follows the escape relative to Dylan's facing (the larger of the
-forward and sideways components), and the model is turned so the capture's own
-travel lines up with the committed world-space direction. A neutral dodge is a
-backstep and therefore uses the hop. The build tool removes horizontal hip
+The escape always plays `dodge_back`, the hop, with the model turned so the
+capture's own travel lines up with the committed world-space direction. The
+roll and the two sidesteps (`dodge_forward`, `dodge_left`, `dodge_right`) stay
+in the clip library, unused: they are kept in case a directional escape comes
+back, and removing them means rebuilding the library from the FBX sources. The build tool removes horizontal hip
 travel; physics owns travel and the animation samples the current dodge time,
 so each window is compressed into the escape. Since 2026-10-12 the escape lasts
 0.55 s instead of 0.32 s, at 4.07 m/s instead of 7, keeping the same 2.24 m:
@@ -84,5 +88,15 @@ Adobe/Mixamo asset terms apply; the captures are not relicensed as project code.
 The regression suite covers enemy perception/occlusion, pursuit, attack damage,
 death, dodge invulnerability/collision, kit stock, save/door persistence, gamepad
 target cycling and stick rearming. `check_dodge_presentation.gd` checks full-body
-one-shot playback, four escape directions, return to locomotion and cursor reset
+one-shot playback, the backward escape, return to locomotion and cursor reset
 on pause. Its graphical run saves images under `.local/dodge-*.png`.
+
+Issue #7, 2026-10-13: `check_dodge_presentation.gd` now drives twenty escapes
+(four directions held and none, two facings, camera and tank controls) and one
+while aiming, and requires each to be the backward hop travelling within 12° of
+straight back for more than a metre. `check_enemy_combat.gd` holds the stick
+west while facing west and requires Dylan to go east into the trail bank. Both
+were run against the old stick-following code and failed (28 and 1 failures).
+Twelve related probes passed afterwards, headless: `esquiva`, `combate-inimigo`,
+`combate`, `gamepad`, `unidades`, `transicoes`, `locomocao`, `controles-tanque`,
+`dylan-portas`, `shotgun`, `operacao-cenarios`, `rele`.

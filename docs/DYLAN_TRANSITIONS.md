@@ -31,7 +31,7 @@ afunda no chão (pose em pé a 0,005 em vez de 0,5). Por segurança,
 
 | Clipe | Arquivo | Captura Mixamo | Janela | Uso |
 | --- | --- | --- | --- | --- |
-| `dodge_back` | `dodge_back_v2.fbx` | Backward Jump (*Jumping While Walking Backwards*) | 0,15–1,35 s | Esquiva para trás e esquiva neutra; substitui o *Dodging Back* |
+| `dodge_back` | `dodge_back_v2.fbx` | Backward Jump (*Jumping While Walking Backwards*) | 0,15–1,35 s | A esquiva, que desde a issue #7 é sempre para trás; substitui o *Dodging Back* |
 | `run_stop` | `run_stop.fbx` | Run To Stop (*Fast Stop From Full Run*) | inteira | Ao parar depois de correr (até 0,25 s após o último quadro em `run`) |
 | `hit` | `hit_front.fbx` | Standing React Large From Front | 0–0,9 s | Ao levar dano |
 | `hit_aim` | `hit_pistol.fbx` | Hit Reaction (*While Holding A Pistol*) | 0,7–1,8 s | Ao levar dano com a arma levantada |

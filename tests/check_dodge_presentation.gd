@@ -30,36 +30,63 @@ func run() -> void:
 	await tick(8)
 	var player: PlayerController = scene.player
 	var visual: Node3D = player.visual.get_node("DylanVisual")
-	var dodges: Array[String] = ["dodge_forward", "dodge_back", "dodge_left", "dodge_right"]
-	for name: String in dodges:
-		check(visual.animator.has_animation(name), "Mixamo dodge missing: " + name)
-		var clip: Animation = visual.animator.get_animation(name)
-		check(clip.loop_mode == Animation.LOOP_NONE and clip.get_track_count() > 30, "Dodge is not a full-body one-shot: " + name)
-	var used := {}
+	check(visual.animator.has_animation("dodge_back"), "Mixamo backward hop missing")
+	var hop: Animation = visual.animator.get_animation("dodge_back")
+	check(hop.loop_mode == Animation.LOOP_NONE and hop.get_track_count() > 30, "The backward hop is not a full-body one-shot")
 	PlayerWeapon.magazine = 2
 	check(player.weapon.reload(), "Could not start reload before dodge")
 	check(player.start_dodge() and not player.weapon.is_reloading(), "Dodge did not cancel reload")
 	await tick(60)
 	check(PlayerWeapon.magazine == 2, "Cancelled reload still added ammunition")
-	for action: String in ["move_right", "move_left", "move_up", "move_down"]:
-		player.reset_to_start()
-		Input.action_press(action)
-		check(player.start_dodge(), "Could not start dodge")
-		await tick(8)
-		check(visual.animator.current_animation in dodges, "Locomotion interrupted dodge")
-		used[visual.animator.current_animation] = true
-		check(player.position.is_finite(), "Invalid dodge transform")
-		await capture(action)
-		Input.action_release(action)
-		await tick(60)
-		check(visual.animator.current_animation not in dodges, "Dodge did not return to locomotion")
-		check(absf(angle_difference(visual.model.rotation.y, PI)) < 0.01, "Dodge left the model turned sideways")
-	check(used.size() == 4, "Four escapes did not use four captures: %s" % [used.keys()])
+	# Whatever the stick says, and with none, in either scheme and whichever way
+	# Dylan faces: the escape is the backward hop, straight away from his front.
+	var original_mode: ControlScheme.Mode = ControlScheme.mode
+	for mode: ControlScheme.Mode in [ControlScheme.Mode.CAMERA_RELATIVE, ControlScheme.Mode.TANK]:
+		ControlScheme.set_mode(mode)
+		for action: String in ["move_right", "move_left", "move_up", "move_down", ""]:
+			for yaw: float in [0.0, 2.2]:
+				player.reset_combat()
+				player.reset_to_start()
+				player.visual.rotation.y = yaw
+				var back: Vector3 = -player.facing()
+				var from: Vector3 = player.position
+				if not action.is_empty():
+					Input.action_press(action)
+				check(player.start_dodge(), "Could not start dodge")
+				check(player.dodge_direction.is_equal_approx(back), "Dodge with %s held is not committed backwards" % action)
+				await tick(8)
+				check(visual.animator.current_animation == "dodge_back", "Dodge with %s held is not the backward hop: %s" % [action, visual.animator.current_animation])
+				check(absf(angle_difference(player.visual.rotation.y, yaw)) < 0.01, "The stick turned Dylan during the escape")
+				if mode == ControlScheme.Mode.CAMERA_RELATIVE and yaw == 0.0:
+					await capture(action if not action.is_empty() else "neutral")
+				# 0,55 s of escape at 60 Hz, with the stick still held.
+				await tick(24)
+				if not action.is_empty():
+					Input.action_release(action)
+				var travel: Vector3 = player.position - from
+				travel.y = 0.0
+				check(travel.length() > 1.0 and travel.normalized().dot(back) > 0.98, "Dodge with %s held went %s, not backwards %s" % [action, travel, back])
+				await tick(50)
+				check(visual.animator.current_animation != "dodge_back", "Dodge did not return to locomotion")
+				check(absf(angle_difference(visual.model.rotation.y, PI)) < 0.01, "Dodge left the model turned sideways")
+	ControlScheme.set_mode(original_mode)
+	# Aiming: the body faces the aim, and the escape backs away from it.
+	player.reset_combat()
 	player.reset_to_start()
-	check(player.start_dodge(), "Could not start neutral dodge")
-	await tick(4)
-	check(visual.animator.current_animation == "dodge_back", "Neutral dodge is not the backward hop")
-	await tick(60)
+	# A reset asks for the trigger to be let go once before it raises again.
+	await tick(2)
+	Input.action_press("aim")
+	await tick(8)
+	check(player.weapon.aiming, "Could not raise the gun before the dodge")
+	var aimed_back: Vector3 = -player.facing()
+	var aimed_from: Vector3 = player.position
+	check(player.start_dodge() and player.dodge_direction.is_equal_approx(aimed_back), "Dodge while aiming is not backwards from the aim")
+	await tick(32)
+	Input.action_release("aim")
+	var aimed_travel: Vector3 = player.position - aimed_from
+	aimed_travel.y = 0.0
+	check(not player.weapon.aiming and aimed_travel.length() > 1.0 and aimed_travel.normalized().dot(aimed_back) > 0.98, "Dodge while aiming did not back away and lower the gun: %s" % aimed_travel)
+	await tick(50)
 	AimSettings.modern = AimSettings.Modern.CURSOR
 	scene.restart()
 	GamepadControls.shared.gamepad_active = false

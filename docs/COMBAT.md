@@ -46,8 +46,9 @@ sentido do disparo e deixa manchas no chão em volta; a morte toca `death`
 ficam no nível, até 40, e somem no reinício (`BloodEffects`).
 
 **Q / △ / Y** inicia uma esquiva de 0,55 s a 4,07 m/s (os mesmos 2,24 m), com
-0,41 s de invulnerabilidade e intervalo de 1,05 s. A direção segue o movimento no esquema
-câmera e os eixos do corpo no tanque; sem direção, Dylan recua. A colisão limita
+0,41 s de invulnerabilidade e intervalo de 1,05 s. Desde 13/10/2026 (issue #7) a
+esquiva é **sempre para trás**, oposta à direção em que Dylan está virado, nos
+dois esquemas e com ou sem mira; o direcional não a redireciona. A colisão limita
 o deslocamento. A esquiva interrompe a mira e impede disparos durante o movimento.
 
 Dylan começa com 100 HP. Ao ser atingido, há reação de 0,18 s e imunidade de

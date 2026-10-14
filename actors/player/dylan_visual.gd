@@ -35,7 +35,9 @@ const STOP_PROFILES := {
 const NATIVE_TURN := 0.887
 ## Below this cosine the body is travelling backwards rather than forwards.
 const BACKWARD_COSINE := -0.4
-const DODGE_CLIPS: Array[StringName] = [&"dodge_forward", &"dodge_back", &"dodge_left", &"dodge_right"]
+## The escape is always the backward hop. The roll and the two sidesteps stay
+## in the clip library, unused, from when the escape followed the stick.
+const DODGE_CLIP := &"dodge_back"
 ## Standing this long without input breaks the idle with a look around.
 const IDLE_LOOK_AFTER := 8.0
 ## A one-shot (a stop, a flinch, a look around) gives way to locomotion as
@@ -98,7 +100,6 @@ var shotgun: Node3D
 var shotgun_muzzle: Node3D
 var _hand: int = -1
 var _support_hand: int = -1
-var _dodge_clip: StringName = &"dodge_right"
 ## The transition or reaction playing over locomotion, if any.
 var _one_shot: StringName = &""
 var _idle_time: float = 0.0
@@ -166,17 +167,15 @@ func _process(delta: float) -> void:
 	if interaction_active:
 		return
 	if player.dodge_left > 0.0:
-		# One capture per escape relative to the body: roll forward, hop back,
-		# sidestep left or right. Each is then aligned with the committed
-		# world-space direction; rotating the visual never changes the collision
-		# body or travel vector.
-		if not DODGE_CLIPS.has(locomotion):
-			_dodge_clip = _dodge_clip_for(player.dodge_direction, player.facing())
-			locomotion = _dodge_clip
+		# The hop is aligned with the committed world-space direction: the
+		# capture faces +Z and travels -Z. Rotating the visual never changes
+		# the collision body or travel vector.
+		if locomotion != DODGE_CLIP:
+			locomotion = DODGE_CLIP
 			animator.play(locomotion, 0.04)
-		model.global_rotation.y = _dodge_heading(_dodge_clip, player.dodge_direction)
+		model.global_rotation.y = atan2(-player.dodge_direction.x, -player.dodge_direction.z)
 		animator.speed_scale = 1.0
-		animator.seek(CLIPS.get_animation(_dodge_clip).length * (1.0 - player.dodge_left / player.config.dodge_duration), true)
+		animator.seek(CLIPS.get_animation(DODGE_CLIP).length * (1.0 - player.dodge_left / player.config.dodge_duration), true)
 		return
 	model.rotation.y = lerp_angle(model.rotation.y, PI, minf(1.0, delta * 18.0))
 	var motion := Vector2(player.get_real_velocity().x, player.get_real_velocity().z)
@@ -237,25 +236,6 @@ func _on_damaged(_amount: float) -> void:
 	var clip: StringName = &"hit_aim" if _aiming() and animator.has_animation(&"hit_aim") else &"hit"
 	if animator.has_animation(clip):
 		_play_one_shot(clip, 0.05)
-
-func _dodge_clip_for(direction: Vector3, forward: Vector3) -> StringName:
-	var along: float = forward.dot(direction)
-	var side: float = forward.cross(Vector3.UP).dot(direction)
-	if absf(along) >= absf(side):
-		return &"dodge_forward" if along > 0.0 else &"dodge_back"
-	return &"dodge_right" if side > 0.0 else &"dodge_left"
-
-## Model yaw that points the capture's own travel at the escape. The captures
-## face +Z: the roll travels +Z, the hop -Z, the right sidestep -X, the left +X.
-func _dodge_heading(clip: StringName, direction: Vector3) -> float:
-	match clip:
-		&"dodge_forward":
-			return atan2(direction.x, direction.z)
-		&"dodge_back":
-			return atan2(-direction.x, -direction.z)
-		&"dodge_right":
-			return atan2(-direction.z, direction.x) + PI
-	return atan2(-direction.z, direction.x)
 
 ## Whether the gun in hand is held in both hands (the shotgun).
 func _two_handed() -> bool:

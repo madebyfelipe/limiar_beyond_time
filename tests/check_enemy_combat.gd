@@ -141,15 +141,18 @@ func run() -> void:
 	enemy.combat_enabled = false
 	check(player.start_dodge(), "Dodge cooldown did not recover")
 	await tick(30)
-	# Camera controls use the camera reference for evasion. Collision still
-	# stops the burst at a trail bank rather than teleporting through it.
+	# The escape is a backstep in camera controls too, whatever is held: facing
+	# west with the stick pushed west, Dylan goes east. Collision still stops
+	# the burst at the trail bank rather than teleporting through it.
 	ControlScheme.set_mode(ControlScheme.Mode.CAMERA_RELATIVE)
 	player.reset_combat()
 	player.reset_to(Transform3D(Basis.IDENTITY, Vector3(2.2, 0.06, -6)))
-	Input.action_press("move_right")
+	player.visual.rotation.y = PI / 2.0
+	Input.action_press("move_left")
 	check(player.start_dodge(), "Camera-relative dodge did not start")
-	Input.action_release("move_right")
 	await tick(36)
+	Input.action_release("move_left")
+	check(player.position.x > 2.3, "Dodge followed the stick instead of backing away: x %.2f" % player.position.x)
 	check(player.position.x < 2.5, "Dodge passed through the trail boundary")
 	check(player.dodge_left == 0.0, "Camera-relative dodge did not end")
 	ControlScheme.set_mode(ControlScheme.Mode.TANK)
