@@ -37,6 +37,7 @@ const PROBES: Array[Dictionary] = [
 	{"name": "contato-pes", "script": "res://tests/check_foot_contact.gd", "args": HEADLESS_FIXED, "summary": "FOOT contact"},
 	{"name": "keleken-animacao", "script": "res://tests/check_keleken_animation.gd", "args": HEADLESS_FIXED, "summary": "KELEKEN animation bones=24 clips=9 failures=0"},
 	{"name": "keleken-wander", "script": "res://tests/check_keleken_wander.gd", "args": HEADLESS_FIXED, "summary": "KELEKEN wander failures=0"},
+	{"name": "cryopteryx-animacao", "script": "res://tests/check_cryopteryx_animation.gd", "args": HEADLESS_FIXED, "summary": "CRYOPTERYX animation bones=26 clips=6 triangles=6000 failures=0"},
 	{"name": "salvamento", "script": "res://tests/check_save_persistence.gd", "args": HEADLESS_FIXED, "summary": "SAVE persistence"},
 	{"name": "terminal-ui", "script": "res://tests/check_terminal_ui.gd", "args": HEADLESS_FIXED, "summary": "TERMINAL_UI failures=0"},
 	{"name": "terminal-ui-grafico", "script": "res://tests/check_terminal_ui.gd", "args": GRAPHICAL_FIXED, "graphical": true, "summary": "TERMINAL_UI failures=0"},

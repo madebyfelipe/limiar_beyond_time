@@ -1,0 +1,102 @@
+{
+  "length_m": 3.203,
+  "height_m": 1.513,
+  "hip_height_m": 1.013,
+  "forward_godot": "-Z",
+  "fps": 30,
+  "bones": [
+    "root",
+    "pelvis",
+    "spine",
+    "chest",
+    "neck_01",
+    "neck_02",
+    "head",
+    "tail_01",
+    "tail_02",
+    "tail_03",
+    "tail_04",
+    "tail_05",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "thigh.L",
+    "shin.L",
+    "tarsus.L",
+    "toes.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.R",
+    "shin.R",
+    "tarsus.R",
+    "toes.R"
+  ],
+  "triangles": 6000,
+  "origin": "Idle, walk, run, attack, jump and death retargeted in tools/rig_cryopteryx.py from Quaternius' Velociraptor (CC0 1.0, assets/models/keleken/source/donor/LICENSE.txt). Baked IK.",
+  "original_sha256": "2d71f62374fda23bd9dd5eb040fa71febc6396f06f8667adeae5783c04e4f859",
+  "base_sha256": "d86cb52de0a8ccb1beb9f79533940444a36f6a6341c26f6a2618f572e266268d",
+  "clips": {
+    "idle": {
+      "frames": 75,
+      "loop": true,
+      "donor_length": 2.5
+    },
+    "walk": {
+      "frames": 38,
+      "loop": true,
+      "donor_length": 1.25,
+      "contact": {
+        "L": [
+          0.9474,
+          0.4737
+        ],
+        "R": [
+          0.4737,
+          0.0
+        ]
+      },
+      "speed": 1.236,
+      "stride_fit": [
+        -0.0715,
+        1.0
+      ]
+    },
+    "run": {
+      "frames": 16,
+      "loop": true,
+      "donor_length": 0.5417,
+      "contact": {
+        "L": [
+          0.0,
+          0.3125
+        ],
+        "R": [
+          0.5625,
+          0.6875
+        ]
+      },
+      "speed": 3.315,
+      "stride_fit": [
+        0.1715,
+        0.8
+      ]
+    },
+    "attack": {
+      "frames": 25,
+      "loop": false,
+      "donor_length": 0.8333,
+      "strike": 0.48
+    },
+    "jump": {
+      "frames": 34,
+      "loop": false,
+      "donor_length": 1.125
+    },
+    "death": {
+      "frames": 39,
+      "loop": false,
+      "donor_length": 1.2917
+    }
+  }
+}

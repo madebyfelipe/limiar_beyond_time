@@ -92,3 +92,10 @@ Caminho da conversão, sem Blender: `tools/glb_to_obj.py` leu o GLB, aplicou a t
 - Orientação: a captura olha para +Z; `dylan_visual.gd` gira 180° em Y, porque a frente de gameplay é -Z.
 - `dylan_clips.res` é gerado por `tools/build_dylan_animations.gd` a partir dos quatro FBX e é o único consumido em execução. Regerar após trocar qualquer captura.
 - Aprovação: validado pelas 29 regressões da suíte e por inspeção das capturas em `.local`. `keleken/model_base.glb` segue sem uso.
+
+## Cryopteryx — 13/10/2026
+
+- Original do usuário `model-rigged.glb` (Tripo 2.0, 39.226.348 bytes, SHA-256 `2d71f62374fda23bd9dd5eb040fa71febc6396f06f8667adeae5783c04e4f859`): 990.804 triângulos e um rig automático de 33 ossos. Fica fora do Git, em `.local/cryopteryx/`. Conta de origem, licença e aprovação não verificadas.
+- `cryopteryx/model_base.glb`: a mesma pose e textura em 6.000 triângulos, sem esqueleto, gerada por `tools/reduce_cryopteryx.py`.
+- `cryopteryx/cryopteryx_animated.glb`: rig novo de 26 ossos, simétrico, com seis clipes (idle, walk, run, attack, jump, death) retargetados do Velociraptor CC0 da Quaternius; `tools/rig_cryopteryx.py`. Fonte editável em `cryopteryx/source/cryopteryx_rig.blend`.
+- Metros, frente −Z, cima +Y, 3,20 m de comprimento na cópia de estudo. Sem ator nem IA: só a cena `environments/cryopteryx_animation_study.tscn`. Detalhes e limites em `docs/CRYOPTERYX_ANIMATION.md`.
