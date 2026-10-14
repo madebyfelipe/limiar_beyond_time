@@ -243,6 +243,10 @@ func run() -> void:
 	check(not scene.art_available and not scene.background.visible,"A plate is showing over geometry that has none")
 	check(player.position.distance_to(scene.REAR_ARRIVAL) < 0.2 and scene.director.current_shot == scene.shots[0],"The actor does not start at the rear door in the middle framing: %v" % player.position)
 	check(Phase.chain().size() == 3 and Phase.find(&"relay").entry_scene != YARD,"The yard was put in the phase chain")
+	# The way back in: the shed's rear door, at its approach, into the relay room.
+	check(scene.rear_door != null and scene.rear_door.target_scene == "res://environments/relay_room.tscn" and scene.rear_door.entry_id == &"relay_rear_in","The rear door does not lead back into the relay room")
+	check(scene.rear_door.approach.is_equal_approx(scene.DOOR_APPROACHES[&"relay_rear"]),"The rear door's prompt is not at its approach")
+	check(scene.health_packs.size() == 1 and scene.HEALTH_PACKS.has(&"rear_yard"),"The rear yard's pack did not come over with its id")
 
 	# --- It holds, and all of it can be walked ---
 	var walkable: Dictionary = flood(arrival,ACTOR_RADIUS)
@@ -314,6 +318,15 @@ func run() -> void:
 	check(sees(Vector3(-8,0,-49),Vector3(-8,0,-44.5)),"The west barrier blocks an animal's eye")
 	check(sees(Vector3(10.7,0,-46),Vector3(10.7,0,-42)),"The quarters barrier blocks an animal's eye")
 	check(sees(Vector3(-8.75,0,-57),Vector3(-8.75,0,-51.5)),"The arm's pallets block an animal's eye")
+
+	# The pack: where a body fits, on the lanes, in the arm's frame and in view.
+	var pack_at: Vector3 = scene.HEALTH_PACKS[&"rear_yard"]
+	check(fits(Vector2(pack_at.x,pack_at.z),ACTOR_RADIUS) and gap(walkable,Vector2(pack_at.x,pack_at.z),0.3) < 0.2,"The yard's pack is where nobody can stand")
+	var arm_camera: Camera3D = scene.shots[3].camera
+	var floating: Vector3 = pack_at+Vector3(0,HealthPack.HOVER,0)
+	var on_screen: Vector2 = arm_camera.unproject_position(floating)/Vector2(1920,1080)
+	check(Rect2(0.06,0.06,0.88,0.88).has_point(on_screen),"The yard's pack is at %s of the arm's frame" % on_screen)
+	check(not hidden(arm_camera.global_position,floating,occluders()),"Something in the arm hides the yard's pack")
 
 	# --- Nothing is on the actor as he steps out ---
 	for id: StringName in scene.BREACHES:
@@ -400,6 +413,7 @@ func run() -> void:
 	scene.restart()
 	await tick(6)
 	check(player.position.distance_to(scene.REAR_ARRIVAL) < 0.3 and scene.director.current_shot == scene.shots[0],"Restart did not return the actor to the rear door")
+	check(scene.rear_door.can_interact() and scene.rear_door.prompt_text().contains("Enter"),"No prompt at the rear door")
 	check(MissionState.stage == MissionState.Stage.ROAD,"The yard moved the objective")
 
 	# --- And with the animals in, for trying the space against them ---

@@ -2,8 +2,9 @@ extends Control
 ## Environment 5 — the service yard behind the relay shed, the hub the site plan
 ## hangs four doors on. Basic geometry: one authored spatial source owns
 ## collision and four fixed framings own the camera, as on the trail. No plate
-## is authored yet and no door travels: the yard is not in the phase chain, and
-## the relay's rear door still leads to the provisional patch of the trail.
+## is authored yet. The relay's rear door is the way in and out; the other four
+## doors are only drawn, as the rooms behind them are not built. The yard is
+## reached at REAR_YARD and is not a phase of its own until something closes it.
 const SOURCE := preload("res://environments/service_yard_source.tscn")
 const DEFINITIONS := [preload("res://resources/service_yard/shot_1.tres"),preload("res://resources/service_yard/shot_2.tres"),preload("res://resources/service_yard/shot_3.tres"),preload("res://resources/service_yard/shot_4.tres")]
 ## Plate hook: dropping these files in turns art mode on, one framing at a time.
@@ -17,8 +18,9 @@ const ZONE_CENTERS := [Vector3(0,2,-41.25),Vector3(-8.125,2,-41.125),Vector3(8.1
 const ZONE_SIZES := [Vector3(9.5,6,20.5),Vector3(9.75,6,20.25),Vector3(9.75,6,20.5),Vector3(8,6,12.25)]
 ## Out of the shed's rear door, a pace into the yard, facing north.
 const REAR_ARRIVAL := Vector3(2.4,0.06,-33.2)
+const RELAY_ROOM := "res://environments/relay_room.tscn"
 ## Where the actor stands to use each door, by the id the site plan gives it.
-## None of them travels yet.
+## Only the relay's rear door travels.
 const DOOR_APPROACHES := {
 	&"relay_rear": Vector3(2.4,0,-32.9),
 	&"kennel_north": Vector3(-9.3,0,-32.9),
@@ -43,6 +45,13 @@ const PACKS: Array[Dictionary] = [
 	{"id": &"west", "bounds": Rect2(-11.5,-50.0,7.5,6.8), "homes": [Vector3(-9.6,0.06,-48.6),Vector3(-5.4,0.06,-44.8)]},
 	{"id": &"arm", "bounds": Rect2(-11.5,-60.5,5.7,5.5), "homes": [Vector3(-8.75,0.06,-58.0)]},
 ]
+## Floating health packs, by PickupStore id. `rear_yard` kept its id when the
+## provisional patch behind the shed gave way to this yard, so a record that
+## took it still has it taken. It lies in the arm, past the pallets, on the
+## ground one animal keeps: the pack is worth the risk of going for it.
+const HEALTH_PACKS := {
+	&"rear_yard": Vector3(-10.6,0.06,-56.5),
+}
 @onready var world: Node3D = $Frame/Composition/Actors/WorldViewport/World
 @onready var background: TextureRect = $Frame/Composition/Background
 @onready var player: PlayerController = $Frame/Composition/Actors/WorldViewport/World/Player
@@ -59,6 +68,8 @@ var presentation: PresentationController
 ## True once at least one framing has a plate of its own.
 var art_available: bool = false
 var operation: LevelOperation
+var rear_door: DoorInteraction
+var health_packs: Array[HealthPack] = []
 var kelekens: Array[KelekenActor] = []
 var keleken_wanders: Array[KelekenWander] = []
 
@@ -144,6 +155,24 @@ func _ready() -> void:
 	operation.frame = $Frame/Composition
 	operation.restart_requested.connect(restart)
 	add_child(operation)
+	rear_door = DoorInteraction.new()
+	rear_door.name = "RelayRearDoor"
+	rear_door.player = player
+	rear_door.approach = DOOR_APPROACHES[&"relay_rear"]
+	rear_door.radius = 0.6
+	rear_door.facing = PI
+	rear_door.entry_id = &"relay_rear_in"
+	rear_door.target_scene = RELAY_ROOM
+	rear_door.destination_name = "Relay Room"
+	add_child(rear_door)
+	for id: StringName in HEALTH_PACKS:
+		var pack: HealthPack = preload("res://actors/pickups/health_pack.tscn").instantiate()
+		pack.name = "HealthPack_" + String(id)
+		pack.pack_id = id
+		pack.player = player
+		pack.position = HEALTH_PACKS[id]
+		world.add_child(pack)
+		health_packs.append(pack)
 	if populate:
 		_populate()
 	_update_label()
@@ -164,10 +193,22 @@ func _populate() -> void:
 			kelekens.append(animal)
 			keleken_wanders.append(wander)
 
+## Out of the relay's rear door, the only way in so far.
+func arrive_from_door() -> void:
+	player.reset_to(Transform3D(Basis.IDENTITY,REAR_ARRIVAL))
+	player.visual.rotation.y = 0.0
+	director.reset_to(shots[0])
+	operation.mark_safe()
+	if MissionState.reach(MissionState.Stage.REAR_YARD):
+		operation.show_notice("Objective: %s" % MissionState.objective(),3.0)
+	_update_label()
+
 ## Esc → Reiniciar, and R: the actor back at the rear door, the animals back on
-## their homes. The objective and the stored record are left alone.
+## their homes, the packs taken since the last save back where they lay. The
+## objective and the stored record are left alone.
 func restart() -> void:
 	player.reset_to_start()
+	PickupStore.rewind(HEALTH_PACKS.keys())
 	for wander: KelekenWander in keleken_wanders:
 		wander.reset()
 	director.reset_to(shots[0])
@@ -198,5 +239,5 @@ func _update_label() -> void:
 	var shot_name: String = String(presentation.current_shot.definition.shot_id) if presentation.current_shot else ""
 	var movement: String = "arrows turn and move" if ControlScheme.is_tank() else "WASD/arrows move"
 	instructions.text = "SERVICE YARD · %s · %s
-%s · Shift run · Q dodge · H med kit · F4 filter · T controls (%s) · F3 diagnostics · R restart · Esc pause
+%s · Shift run · Q dodge · H med kit · E door · F4 filter · T controls (%s) · F3 diagnostics · R restart · Esc pause
 %s" % [shot_name,"CANDIDATE ART — alignment under review" if presentation.art_mode else "3D GEOMETRY — no plate authored yet",movement,ControlScheme.label(),"%d animals" % kelekens.size() if populate else "no animals (run with -- --dinos)"]

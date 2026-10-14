@@ -1,10 +1,11 @@
 extends SceneTree
 ## Phase 3 end to end: the relay shed door, the room's geometry, the terminal's
 ## boot and log, the letterboxed outage cutscene with the animal at the window,
-## control handed back and the player's walk out of the rear door, the provisional yard behind the shed and the way back
-## in. Real Input for what the player drives; the cutscene runs faster.
+## control handed back and the player's walk out of the rear door into the
+## service yard behind the shed, and the way back in. Real Input for what the player drives; the cutscene runs faster.
 const TRAIL := "res://environments/perimeter.tscn"
 const ROOM := "res://environments/relay_room.tscn"
+const YARD := "res://environments/service_yard.tscn"
 ## The console and the cutscene run at this multiple of their authored pace.
 const SPEED := 6.0
 var failures: int = 0
@@ -235,33 +236,25 @@ func run() -> void:
 		await tick()
 	check(root.has_node("DoorTransition"),"E at the rear door did not take Dylan out")
 	if root.has_node("DoorTransition"):
-		check(root.get_node("DoorTransition").region_title.text == "BEHIND THE RELAY SHED","The exit cinematic named the wrong place")
+		check(root.get_node("DoorTransition").region_title.text == "SERVICE YARD","The exit cinematic named the wrong place")
 		await root.get_node("DoorTransition").finished
 		await tick(4)
-	check(current_scene.scene_file_path == TRAIL,"The rear door did not lead outside: %s" % current_scene.scene_file_path)
+	check(current_scene.scene_file_path == YARD,"The rear door did not lead to the service yard: %s" % current_scene.scene_file_path)
 	scene = current_scene
 	player = scene.player
-	check(MissionState.stage == MissionState.Stage.REAR_YARD,"Leaving did not reach the rear yard objective")
+	check(MissionState.stage == MissionState.Stage.REAR_YARD,"Leaving did not reach the service yard objective")
 	check(player.global_position.distance_to(scene.REAR_ARRIVAL) < 0.15,"Arrival is not behind the shed: %v" % player.global_position)
-	check(scene.director.current_shot == scene.shots[3],"The rear yard is not in its own framing")
-	check(scene.background.visible and scene.background.texture == scene.shots[3].definition.background,"The rear yard has no matching painted plate")
+	check(scene.director.current_shot == scene.shots[0],"The yard did not open on the view of the rear door")
 	check(player.control_enabled,"Control did not come back outside")
-	await capture("rear-yard")
+	await capture("service-yard")
 
-	# --- The provisional yard is closed on every side ---
-	scene.keleken.combat_enabled = false
-	for pair: Array in [[Vector3.LEFT,"west"],[Vector3.RIGHT,"east"],[Vector3.FORWARD,"north"]]:
-		await walk_to(Vector3(0.6,0,-36.5))
-		var stop: Vector3 = await push(pair[0],300)
-		check(absf(stop.x) < 6.5 and stop.z > -41.0 and stop.z < -31.9,"The rear yard let the player out to the %s: %v" % [pair[1],stop])
-		check(scene.director.current_shot == scene.shots[3],"Walking the yard left its framing")
-	# Back south, the shed wall holds and no gap leads round it to the trail.
-	await walk_to(Vector3(5.2,0,-33.0))
+	# --- The shed wall holds behind him; the yard's own probe walks the rest ---
+	await walk_to(Vector3(5.2,0,-33.4))
 	var round_east: Vector3 = await push(Vector3.BACK,200)
 	check(round_east.z < -32.0,"A gap east of the shed leads back to the trail: %v" % round_east)
 
 	# --- And back in through the rear door, into the dark room ---
-	await walk_to(scene.REAR_APPROACH)
+	await walk_to(scene.DOOR_APPROACHES[&"relay_rear"])
 	check(scene.rear_door.can_interact(),"No prompt at the shed's rear door")
 	await travel(ROOM,"RELAY ROOM")
 	check(player.global_position.distance_to(scene.REAR_ARRIVAL) < 0.15,"Coming back in did not land at the rear door: %v" % player.global_position)

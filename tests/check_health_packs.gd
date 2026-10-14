@@ -2,9 +2,10 @@ extends SceneTree
 ## Floating health packs (issue #3):
 ## - PickupStore: taken ids travel inside the supplies snapshot, a tampered list
 ##   is not trusted, a new game starts with every pack back
-## - on the perimeter trail: three packs, clear of every collider, inside the
+## - on the perimeter trail: two packs, clear of every collider, inside the
 ##   frame of the camera that covers each and with nothing between it and them,
-##   hovering and turning
+##   hovering and turning (the third, `rear_yard`, is the service yard's, and its
+##   own probe places it)
 ## - walking into one with full vitality leaves it there and says so once;
 ##   hurt, it heals 25 on the spot, is gone and stays gone; a dead player takes
 ##   nothing
@@ -120,11 +121,11 @@ func check_store() -> void:
 func check_placement() -> void:
 	MissionState.restore(MissionState.Stage.PERIMETER)
 	await open_level()
-	check(level.health_packs.size() == 3 and level.HEALTH_PACKS.size() == 3, "The trail does not hold three health packs")
+	check(level.health_packs.size() == 2 and level.HEALTH_PACKS.size() == 2, "The trail does not hold two health packs")
 	var space: PhysicsDirectSpaceState3D = level.world.get_world_3d().direct_space_state
 	var body := SphereShape3D.new()
 	body.radius = 0.3
-	var covering := {&"trail_pen": 1, &"trail_shed": 2, &"rear_yard": 3}
+	var covering := {&"trail_pen": 1, &"trail_shed": 2}
 	var ids := {}
 	for item: HealthPack in level.health_packs:
 		var id: StringName = item.pack_id
@@ -202,12 +203,15 @@ func check_pickup() -> void:
 	check(messages == ["Health pack · +10 vitality"], "A partial heal was not announced by what it gave: %s" % [messages])
 	var reached: Vector3 = player.position - target
 	check(Vector2(reached.x, reached.z).length() <= pack(&"trail_pen").reach + 0.1, "The pen pack was taken from %.2f m away" % Vector2(reached.x, reached.z).length())
-	# The dead take nothing.
-	await stand_on(&"rear_yard")
+	# The dead take nothing. Both packs are taken by now and none is on record,
+	# so a restart lays the pen's back down.
+	level.restart()
+	await tick(3)
+	await stand_on(&"trail_pen")
 	messages.clear()
 	player.health.apply(1000.0)
 	await tick(20)
-	check(player.is_dead() and pack(&"rear_yard").visible and not PickupStore.is_collected(&"rear_yard") and messages.is_empty(), "A dead player used a pack: %s" % [messages])
+	check(player.is_dead() and pack(&"trail_pen").visible and not PickupStore.is_collected(&"trail_pen") and messages.is_empty(), "A dead player used a pack: %s" % [messages])
 	await close_level()
 
 func check_records() -> void:
@@ -229,7 +233,6 @@ func check_records() -> void:
 	await tick(3)
 	check(pack(&"trail_pen").visible and not PickupStore.is_collected(&"trail_pen"), "Restart did not give back the pack taken after the save")
 	check(not pack(&"trail_shed").visible and PickupStore.is_collected(&"trail_shed"), "Restart gave back a pack the save had recorded")
-	check(pack(&"rear_yard").visible, "Restart hid a pack nobody took")
 	# Through a door and back: the state rides the supplies snapshot. (The
 	# restart also healed Dylan, and a pack is no use to a healthy man.)
 	check(player.vitality == 100.0, "Restart did not restore vitality")
@@ -240,7 +243,7 @@ func check_records() -> void:
 	await close_level()
 	SupplyStock.restore(carried)
 	await open_level()
-	check(not pack(&"trail_pen").visible and not pack(&"trail_shed").visible and pack(&"rear_yard").visible, "The level built again does not show what was taken")
+	check(not pack(&"trail_pen").visible and not pack(&"trail_shed").visible, "The level built again does not show what was taken")
 	# The door did not put the second pack on record: a restart still returns it.
 	level.restart()
 	await tick(3)

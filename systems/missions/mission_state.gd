@@ -27,7 +27,8 @@ enum Stage {
 	RELAY_ROOM,
 	## The log was read and the power went out: leave by the rear door.
 	OUTAGE,
-	## Out behind the shed, where the authored content currently stops.
+	## Out in the service yard behind the shed, where the authored content
+	## currently stops.
 	REAR_YARD,
 }
 
@@ -40,7 +41,7 @@ const OBJECTIVES := {
 	Stage.RELAY: "Relay shed reached. Go inside.",
 	Stage.RELAY_ROOM: "Check the relay terminal for the operator's last log.",
 	Stage.OUTAGE: "The power is out and something is outside. Leave by the rear door.",
-	Stage.REAR_YARD: "Behind the relay shed. The authored content ends here for now.",
+	Stage.REAR_YARD: "Service yard reached. The authored content ends here for now.",
 }
 
 static var stage: Stage = Stage.ROAD

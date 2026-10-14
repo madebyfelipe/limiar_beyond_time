@@ -17,6 +17,7 @@ const EXTERIOR := "res://environments/exterior.tscn"
 const SAVE_ROOM := "res://environments/save_room.tscn"
 const PERIMETER := "res://environments/perimeter.tscn"
 const RELAY := "res://environments/relay_room.tscn"
+const SERVICE_YARD := "res://environments/service_yard.tscn"
 var failures := 0
 var ticks := 0
 var room: Node
@@ -106,9 +107,16 @@ func check_locate() -> void:
 	check(trail.get("room") == &"trail" and trail["point"].y < -7.0 and trail["point"].y > -10.0, "The gate end of the trail is not next to the north gate: %s" % trail)
 	var shed: Dictionary = AreaMap.locate(PERIMETER, Vector3(0, 0, -26.3))
 	check(shed.get("room") == &"trail" and shed["point"].y < -24.0, "The far end of the trail is not at the relay door: %s" % shed)
-	var behind: Dictionary = AreaMap.locate(PERIMETER, Vector3(2.4, 0, -33.2))
+	var behind: Dictionary = AreaMap.locate(SERVICE_YARD, Vector3(2.4, 0, -33.2))
 	var rear_door: Vector2 = AreaMap.DOORS[3]["at"]
 	check(behind.get("room") == &"service_yard" and behind["point"].distance_to(rear_door) < 2.0, "Behind the shed is not the service yard at the rear door: %s" % behind)
+	check(AreaMap.locate(PERIMETER, Vector3(2.4, 0, -33.2)).get("room") == &"trail", "The trail still claims the ground behind the shed")
+	# The yard's other doors, as the level places them, land on the plan's marks.
+	for pair: Array in [[&"quarters_door", Vector3(11.8, 0, -41.9)], [&"generator_front", Vector3(1.3, 0, -50.4)], [&"generator_side", Vector3(-5.6, 0, -55.75)], [&"kennel_north", Vector3(-9.3, 0, -32.1)]]:
+		var spot: Dictionary = AreaMap.locate(SERVICE_YARD, pair[1])
+		check(spot.get("room") == &"service_yard" and spot["point"].distance_to(door(pair[0])["at"]) < 0.5, "The yard's %s is off its mark on the plan: %s" % [pair[0], spot])
+	var arm: Dictionary = AreaMap.locate(SERVICE_YARD, Vector3(-8.75, 0, -60))
+	check(arm.get("room") == &"service_yard" and Rect2(-9, -52, 5, 8).has_point(arm["point"]), "The yard's arm is not on the plan's arm: %s" % arm)
 	var relay: Dictionary = AreaMap.locate(RELAY, Vector3(1.8, 0, 1.35))
 	check(relay.get("room") == &"relay" and relay["point"].y > -27.5 and relay["point"].y < -25.0, "The relay room's front door is not on its south side: %s" % relay)
 	check(AreaMap.locate("res://environments/firing_range.tscn", Vector3.ZERO).is_empty(), "A scene off the plan was located on it")

@@ -205,12 +205,13 @@ func run() -> void:
 	check(player.position.distance_to(scene.GATE_ARRIVAL) < 0.2,"Arrival is not at the gate: %v" % player.position)
 	check(absf(angle_difference(player.visual.rotation.y,0.0)) < 0.2,"Arrival does not face up the trail")
 	check(scene.director.current_shot == scene.shots[0],"Arrival selected the wrong framing")
-	check(scene.shots.size() == 4 and scene.colliders.get_child_count() >= 18,"Spatial source or framings incomplete")
+	check(scene.shots.size() == 3 and scene.colliders.get_child_count() >= 18,"Spatial source or framings incomplete")
 	for label: String in ["Terrain","TrailBank","RockShoulder","GateLeaf","FallenPine","RelayShed"]:
 		check(scene.colliders.get_node_or_null(label) != null,"The trail lost the collider of "+label)
 	check(scene.art_available and scene.presentation.art_mode,"Perimeter did not start with its authored plates")
-	# All four current framings now have their own geometry-derived plate.
-	for index: int in range(4):
+	# The three framings have their own geometry-derived plate. The fourth, the
+	# provisional patch behind the shed, left with it for the service yard.
+	for index: int in range(3):
 		check(scene.shots[index].definition.background != null,"Missing authored plate: "+String(scene.shots[index].definition.shot_id))
 	check(scene.shots[1].definition.background.resource_path.ends_with("perimeter_cam02.png"),"The pen reused its old geometry's plate")
 	# Up the trail is up the screen in the pen view and at the shed alike, so

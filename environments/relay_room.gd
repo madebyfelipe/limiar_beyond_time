@@ -8,6 +8,8 @@ const SOURCE := preload("res://environments/relay_room_source.tscn")
 const SCENE_PATH := "res://environments/relay_room.tscn"
 const KELEKEN := preload("res://actors/keleken/keleken.tscn")
 const PERIMETER := "res://environments/perimeter.tscn"
+## The rear door opens on the service yard, the hub behind the shed.
+const SERVICE_YARD := "res://environments/service_yard.tscn"
 const ART_POWERED := preload("res://assets/backgrounds/dc2_psx/relay_powered.png")
 const ART_OUTAGE := preload("res://assets/backgrounds/dc2_psx/relay_outage.png")
 const ART_WINDOW := preload("res://assets/backgrounds/dc2_psx/relay_window.png")
@@ -108,7 +110,8 @@ func _ready() -> void:
 	bars = CinematicBars.new()
 	$Frame/Composition.add_child(bars)
 	front_door = _door(&"relay_front", FRONT_APPROACH, PI, "Perimeter Trail")
-	rear_door = _door(&"relay_rear", REAR_APPROACH, 0.0, "Behind the Relay Shed")
+	rear_door = _door(&"relay_rear", REAR_APPROACH, 0.0, "Service Yard")
+	rear_door.target_scene = SERVICE_YARD
 	terminal = RelayTerminal.new()
 	terminal.name = "RelayTerminal"
 	terminal.player = player

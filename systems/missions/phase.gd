@@ -30,7 +30,7 @@ static func chain() -> Array[Phase]:
 			_declare(&"perimeter", "Phase 2 — Perimeter", "res://environments/perimeter.tscn",
 				MissionState.Stage.DONE, MissionState.Stage.PERIMETER, MissionState.Stage.RELAY),
 			# Opens on the shed door; closed by the outage that sends Dylan out the
-			# back. REAR_YARD, past it, is the provisional end of the content.
+			# back. REAR_YARD, the service yard past it, is the end of the content.
 			_declare(&"relay", "Phase 3 — Relay", "res://environments/relay_room.tscn",
 				MissionState.Stage.RELAY, MissionState.Stage.RELAY_ROOM, MissionState.Stage.OUTAGE),
 		]

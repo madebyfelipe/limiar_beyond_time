@@ -4,36 +4,20 @@ extends Control
 ## framings own the camera. Authored plates share the geometry's projection;
 ## B switches between art and geometry for inspection.
 const SOURCE := preload("res://environments/perimeter_source.tscn")
-const DEFINITIONS := [preload("res://resources/perimeter/shot_1.tres"),preload("res://resources/perimeter/shot_2.tres"),preload("res://resources/perimeter/shot_3.tres"),preload("res://resources/perimeter/shot_4.tres")]
+const DEFINITIONS := [preload("res://resources/perimeter/shot_1.tres"),preload("res://resources/perimeter/shot_2.tres"),preload("res://resources/perimeter/shot_3.tres")]
 ## Plate hook: dropping these files in turns art mode on, one framing at a time.
-## All four plates follow the revised geometry of 13/10/2026: open pen trail,
-## side props, front door at grade, and the provisional rear yard.
+## The three plates follow the revised geometry of 13/10/2026: open pen trail,
+## side props, front door at grade. Behind the shed is the service yard, a level
+## of its own since 14/10/2026; the provisional patch and its view are gone.
 const ART_DIR := "res://assets/backgrounds/dc2_psx/"
-const ART_FILES := ["perimeter_cam01.png","perimeter_cam02.png","perimeter_cam03.png","perimeter_cam04.png"]
-const ZONE_CENTERS := [Vector3(0,2,-5),Vector3(0,2,-15),Vector3(0,2,-25.5),Vector3(0,2,-36.5)]
-const ZONE_SIZES := [Vector3(14,6,11),Vector3(16,6,10),Vector3(14,6,12),Vector3(13,6,9)]
+const ART_FILES := ["perimeter_cam01.png","perimeter_cam02.png","perimeter_cam03.png"]
+const ZONE_CENTERS := [Vector3(0,2,-5),Vector3(0,2,-15),Vector3(0,2,-25.5)]
+const ZONE_SIZES := [Vector3(14,6,11),Vector3(16,6,10),Vector3(14,6,12)]
 ## The relay shed's front door, at grade: the trail runs flush to the wall at
 ## z = -26,9 and the capsule stops at -26,6, inside the prompt's radius. The
 ## room sends Dylan back out a pace further from the door.
 const RELAY_APPROACH := Vector3(0,0,-26.25)
 const RELAY_ARRIVAL := Vector3(0,0,-25.95)
-## The rear door cut into the shed's back wall, and the yard behind it. The
-## yard is closed by invisible bounds: nothing is authored past them yet.
-const REAR_DOOR_X := 2.4
-const REAR_APPROACH := Vector3(2.4,0,-32.9)
-const REAR_ARRIVAL := Vector3(2.4,0,-33.2)
-const REAR_BOUNDS := [
-	[Vector3(-6.6,1.5,-36.5),Vector3(0.2,3,9.4)],
-	[Vector3(6.6,1.5,-36.5),Vector3(0.2,3,9.4)],
-	[Vector3(0,1.5,-41.1),Vector3(13.4,3,0.2)],
-	[Vector3(-4.95,1.5,-31.95),Vector3(3.3,3,0.2)],
-	[Vector3(4.95,1.5,-31.95),Vector3(3.3,3,0.2)],
-	# The three pines behind the shed are only drawn in the source; their trunks
-	# stop the actor here.
-	[Vector3(-6.5,1.5,-33.5),Vector3(0.5,3,0.5)],
-	[Vector3(0,1.5,-33.5),Vector3(0.5,3,0.5)],
-	[Vector3(6.5,1.5,-33.5),Vector3(0.5,3,0.5)],
-]
 ## The service gate back to the yard, and where the player stands to use it.
 const GATE_APPROACH := Vector3(0,0,-1.1)
 const GATE_ARRIVAL := Vector3(0,0.06,-2.2)
@@ -46,12 +30,11 @@ const KELEKEN_HOMES: Array[Vector3] = [KELEKEN_HOME, Vector3(-1.3,0.06,-17.6)]
 const KELEKEN_BOUNDS := Rect2(-2.3,-19.0,4.6,8.5)
 ## Floating health packs, by PickupStore id, on the floor point each hovers
 ## over. One inside the animals' patrol, between the trough and the feed sacks;
-## one past the fallen pine, on the side its passage does not lead to; one in
-## the west corner of the yard behind the shed, across it from the rear door.
+## one past the fallen pine, on the side its passage does not lead to. The third,
+## `rear_yard`, moved to the service yard with the patch it lay in.
 const HEALTH_PACKS := {
 	&"trail_pen": Vector3(2.0,0.06,-14.9),
 	&"trail_shed": Vector3(-1.5,0.06,-24.5),
-	&"rear_yard": Vector3(-4.2,0.06,-35.4),
 }
 @onready var world: Node3D = $Frame/Composition/Actors/WorldViewport/World
 @onready var background: TextureRect = $Frame/Composition/Background
@@ -66,7 +49,6 @@ var presentation: PresentationController
 var art_available: bool = false
 var gate: DoorInteraction
 var relay_door: PhaseGate
-var rear_door: DoorInteraction
 var operation: LevelOperation
 ## The first animal and its patrol, as before; `kelekens` holds them all.
 var keleken: KelekenActor
@@ -102,7 +84,6 @@ func _ready() -> void:
 		collision.shape = shape
 		body.add_child(collision)
 		colliders.add_child(body)
-	_build_rear_yard()
 	for index: int in range(DEFINITIONS.size()):
 		var definition: ShotDefinition = DEFINITIONS[index].duplicate()
 		var image_path: String = ART_DIR+ART_FILES[index]
@@ -173,16 +154,6 @@ func _ready() -> void:
 	relay_door.open_hint = "Relay shed door"
 	relay_door.locked_hint = "Relay shed door sealed"
 	add_child(relay_door)
-	rear_door = DoorInteraction.new()
-	rear_door.name = "RelayRearDoor"
-	rear_door.player = player
-	rear_door.approach = REAR_APPROACH
-	rear_door.radius = 0.6
-	rear_door.facing = PI
-	rear_door.entry_id = &"relay_rear_in"
-	rear_door.target_scene = "res://environments/relay_room.tscn"
-	rear_door.destination_name = "Relay Room"
-	add_child(rear_door)
 	operation = LevelOperation.new()
 	operation.name = "Operation"
 	operation.player = player
@@ -214,77 +185,43 @@ func _ready() -> void:
 		health_packs.append(pack)
 	_update_label()
 
-## Three ways in: the yard gate, the relay shed's front door coming back out,
-## and its rear door after the outage.
+## Two ways in: the yard gate, and the relay shed's front door coming back out.
 func arrive_from_door() -> void:
-	match DoorInteraction.arrived_from:
-		&"relay_front":
-			player.reset_to(Transform3D(Basis.IDENTITY,RELAY_ARRIVAL))
-			player.visual.rotation.y = PI
-			director.reset_to(shots[2])
-		&"relay_rear":
-			_place_in_rear_yard()
-		_:
-			player.reset_to(Transform3D(Basis.IDENTITY,GATE_ARRIVAL))
-			player.visual.rotation.y = 0.0
-			director.reset_to(shots[0])
+	if DoorInteraction.arrived_from == &"relay_front":
+		_place_at_shed()
+	else:
+		player.reset_to(Transform3D(Basis.IDENTITY,GATE_ARRIVAL))
+		player.visual.rotation.y = 0.0
+		director.reset_to(shots[0])
 	operation.mark_safe()
-	var reached: MissionState.Stage = MissionState.Stage.REAR_YARD if DoorInteraction.arrived_from == &"relay_rear" else MissionState.Stage.PERIMETER
-	if MissionState.reach(reached):
+	if MissionState.reach(MissionState.Stage.PERIMETER):
 		operation.show_notice("Objective: %s" % MissionState.objective(),3.0)
 	_update_label()
 
-func _place_in_rear_yard() -> void:
-	player.reset_to(Transform3D(Basis.IDENTITY,REAR_ARRIVAL))
-	player.visual.rotation.y = 0.0
-	director.reset_to(shots[3])
+func _place_at_shed() -> void:
+	player.reset_to(Transform3D(Basis.IDENTITY,RELAY_ARRIVAL))
+	player.visual.rotation.y = PI
+	director.reset_to(shots[2])
 
 ## Esc → Reiniciar, and R. A fresh attempt of this phase only: the actor, the
 ## camera, the animal and the objective go back to its start, while the phases
-## already closed stay closed and the stored record is left alone. Out behind
-## the shed the relay is already behind the player, so a restart there keeps
-## the yard and the objective. Health packs taken since the last save are back.
+## already closed stay closed and the stored record is left alone. After the
+## outage the relay is already behind the player, so a restart keeps the
+## objective and puts him at the shed door. Health packs taken since the last
+## save are back.
 func restart() -> void:
 	player.reset_to_start()
 	PickupStore.rewind(HEALTH_PACKS.keys())
 	for wander: KelekenWander in keleken_wanders:
 		wander.reset()
 	if MissionState.stage >= MissionState.Stage.OUTAGE:
-		_place_in_rear_yard()
+		_place_at_shed()
 	else:
 		director.reset_to(shots[0])
 		Phase.find(&"perimeter").rewind()
 	operation.mark_safe()
 	operation.hide_notice()
 	_update_label()
-
-## The rear door on the shed's back wall, its threshold, and the bounds of the
-## provisional yard behind it.
-func _build_rear_yard() -> void:
-	var door_material := StandardMaterial3D.new()
-	door_material.albedo_color = Color("5d6a6c")
-	door_material.albedo_texture = preload("res://assets/textures/doors/painted_steel_v01.png")
-	door_material.uv1_triplanar = true
-	door_material.uv1_scale = Vector3.ONE * 0.7
-	for part: Array in [["RelayRearDoor",Vector3(REAR_DOOR_X,1.425,-31.95),Vector3(0.9,2.05,0.1)],["RelayRearSill",Vector3(REAR_DOOR_X,0.02,-32.25),Vector3(1.1,0.04,0.5)]]:
-		var mesh := MeshInstance3D.new()
-		mesh.name = part[0]
-		var box := BoxMesh.new()
-		box.size = part[2]
-		mesh.mesh = box
-		mesh.material_override = door_material
-		mesh.position = part[1]
-		source.add_child(mesh)
-	for index: int in range(REAR_BOUNDS.size()):
-		var body := StaticBody3D.new()
-		body.name = "RearYardBound%d" % index
-		body.position = REAR_BOUNDS[index][0]
-		var shape := BoxShape3D.new()
-		shape.size = REAR_BOUNDS[index][1]
-		var collision := CollisionShape3D.new()
-		collision.shape = shape
-		body.add_child(collision)
-		colliders.add_child(body)
 
 func _physics_process(_delta: float) -> void:
 	if MissionState.stage == MissionState.Stage.PERIMETER and player.global_position.z < RELAY_Z:

@@ -60,12 +60,15 @@ const ROOMS: Array[Dictionary] = [
 	},
 	{
 		"id": &"service_yard", "name": "SERVICE YARD", "layer": 0,
-		# Until the yard has a level of its own it is the fenced patch behind the
-		# relay shed, at the far end of the trail's scene.
-		"scene": "res://environments/perimeter.tscn",
-		"preview": "res://assets/backgrounds/dc2_psx/perimeter_cam04.png",
+		# The level is the plan at 4/3 of its metres, in the trail's coordinates.
+		# Until it has a plate, its preview is the geometry of its first view.
+		"scene": "res://environments/service_yard.tscn",
+		"preview": "res://assets/backgrounds/service_yard/geometry_cam01.png",
 		"shapes": [Rect2(-9, -44, 18, 14), Rect2(-9, -52, 5, 8)],
-		"parts": [{"world": Rect2(-6.5, -41, 13, 9.05), "plan": Rect2(-6.5, -39.05, 13, 9.05)}],
+		"parts": [
+			{"world": Rect2(-12, -50.5, 24, 18.5), "plan": Rect2(-9, -44, 18, 14)},
+			{"world": Rect2(-12, -61, 6.5, 10.5), "plan": Rect2(-9, -52, 5, 8)},
+		],
 		"mark": Vector2(0, -38),
 	},
 	{
