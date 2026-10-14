@@ -302,8 +302,11 @@ func check_menu() -> void:
 	await press(KEY_TAB)
 	check(menu.selected_tab == 3 and menu._inspected.get("id") == &"med_kit", "Recovery did not select the med kit")
 	check(Inventory.snapshot() == before_filter, "Changing tabs changed storage")
+	# The last tab is the site plan (check_area_map.gd); it holds no storage.
 	await press(KEY_TAB)
-	check(menu.selected_tab == 0, "Tab did not wrap to all items")
+	check(menu.selected_tab == InventoryMenu.MAP_TAB and menu.map_page.visible, "Tab did not reach the map")
+	await press(KEY_TAB)
+	check(menu.selected_tab == 0 and not menu.map_page.visible, "Tab did not wrap to all items")
 	# Native mouse hit testing uses the same design coordinates at every scale.
 	menu._click(Vector2(990, 90), false)
 	check(menu.selected_tab == 2, "Clicking the ammo tab did not switch it")

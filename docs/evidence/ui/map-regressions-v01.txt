@@ -1,0 +1,5 @@
+OK    menu-inicial                2.6 s  saída 0 · MAIN_MENU failures=0
+OK    salvamento                  1.7 s  saída 0 · SAVE persistence ticks=136 failures=0
+OK    inventario                  2.1 s  saída 0 · INVENTORY ticks=523 failures=0
+OK    mapa                        1.5 s  saída 0 · AREA_MAP ticks=73 failures=0
+T09 runner executed=4 failed=0

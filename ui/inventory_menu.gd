@@ -50,8 +50,11 @@ var _power_on: Control
 var _power_on_elapsed: float = POWER_ON_DURATION
 var location_texture: Texture2D
 var location_name: String = "FIELD OPERATIONS"
-const TAB_NAMES := ["ALL ITEMS", "WEAPONS", "AMMO", "RECOVERY"]
-const TAB_KINDS := [&"", &"weapon", &"ammo", &"recovery"]
+const TAB_NAMES := ["ALL ITEMS", "WEAPONS", "AMMO", "RECOVERY", "MAP"]
+const TAB_KINDS := [&"", &"weapon", &"ammo", &"recovery", &"map"]
+## The last tab is not a view of the case: it hands the screen to the site plan.
+const MAP_TAB := 4
+var map_page: MapPage
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -107,6 +110,12 @@ func _ready() -> void:
 	canvas.add_child(action_panel)
 	hint = _caption("", Rect2(36, 1032, 1848, 32), 18)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# Over every inventory panel and label, under the power-on reveal.
+	map_page = MapPage.new()
+	map_page.name = "MapPage"
+	map_page.menu = self
+	canvas.add_child(map_page)
+	map_page.hide()
 	_power_on = Control.new()
 	_power_on.name = "PowerOn"
 	_power_on.size = design_size
@@ -135,6 +144,7 @@ func open() -> void:
 	held = {}
 	actions = []
 	selected_tab = 0
+	map_page.hide()
 	status.text = ""
 	cursor = Vector2i(Inventory.entries[0]["cell"]) if not Inventory.entries.is_empty() else Vector2i.ZERO
 	_power_on_elapsed = 0.0
@@ -221,6 +231,9 @@ func _input(event: InputEvent) -> void:
 			close()
 			return
 		_refresh()
+		return
+	if selected_tab == MAP_TAB:
+		map_page.handle(event)
 		return
 	var step := Vector2i.ZERO
 	if event.is_action_pressed(&"ui_left", true): step = Vector2i.LEFT
@@ -431,6 +444,9 @@ func _select_tab(index: int) -> void:
 	if not held.is_empty():
 		return
 	selected_tab = index
+	map_page.visible = index == MAP_TAB
+	if map_page.visible:
+		map_page.enter()
 	actions = []
 	status.text = ""
 	cursor = Vector2i.ZERO
@@ -441,6 +457,9 @@ func _select_tab(index: int) -> void:
 	_refresh()
 
 func _click(point: Vector2, double_click: bool) -> void:
+	if selected_tab == MAP_TAB:
+		map_page.click(point)
+		return
 	for index: int in range(TAB_NAMES.size()):
 		if Console.tab_rect(index, TAB_NAMES.size()).has_point(point):
 			_select_tab(index)

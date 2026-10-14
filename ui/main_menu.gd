@@ -231,6 +231,7 @@ func _new_game() -> void:
 	SaveGame.resume_on_scene_entry = false
 	MissionState.reset()
 	SupplyStock.reset()
+	AreaMap.reset()
 	_launch(GAME_SCENE)
 
 func _load_game() -> void:

@@ -47,6 +47,7 @@ const PROBES: Array[Dictionary] = [
 	{"name": "transicoes", "script": "res://tests/check_dylan_transitions.gd", "args": HEADLESS_FIXED, "summary": "DYLAN_TRANSITIONS failures=0"},
 	{"name": "shotgun", "script": "res://tests/check_shotgun.gd", "args": HEADLESS_FIXED, "summary": "SHOTGUN failures=0"},
 	{"name": "inventario", "script": "res://tests/check_inventory.gd", "args": HEADLESS_FIXED, "summary": "INVENTORY ticks="},
+	{"name": "mapa", "script": "res://tests/check_area_map.gd", "args": HEADLESS_FIXED, "summary": "AREA_MAP ticks="},
 	{"name": "cena-principal", "script": "", "args": ["--headless", "--quit-after", "30"], "summary": ""},
 	{"name": "robustez-10min", "script": "res://tests/check_soak.gd", "args": HEADLESS_FIXED, "summary": "T10 soak minutes=10.0"},
 	# One lap of the route takes most of 45 s; on a loaded machine physics falls

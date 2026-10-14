@@ -104,6 +104,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _physics_process(_delta: float) -> void:
 	if player.is_dead():
 		return
+	# The room under the player goes on the site plan (the MAP tab).
+	var scene := get_tree().current_scene
+	if scene != null:
+		AreaMap.track(scene.scene_file_path, player.global_position)
 	if player.global_position.y < recovery_height:
 		recover()
 	elif player.is_on_floor():

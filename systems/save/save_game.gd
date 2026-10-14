@@ -49,6 +49,8 @@ static func read() -> Dictionary:
 		# Optional extension: existing format-2 saves restore the starter stock.
 		"supplies": file.get_value(SECTION, "supplies", {}),
 		"vitality": float(file.get_value(SECTION, "vitality", 100.0)),
+		# Optional too: a record without it gets its rooms from the stage.
+		"map": file.get_value(SECTION, "map", []),
 	}
 
 ## Records where the player is standing, and how far the objective had got.
@@ -65,6 +67,7 @@ static func write(scene: String, position: Vector3, facing: float, stage: int, v
 		"stage": stage,
 		"supplies": SupplyStock.snapshot(),
 		"vitality": clampf(vitality, 1.0, 100.0),
+		"map": AreaMap.snapshot(),
 	}
 	var file := ConfigFile.new()
 	file.set_value(SECTION, "format", FORMAT)
@@ -91,6 +94,7 @@ static func resume(player: PlayerController, scene: String) -> bool:
 	player.reset_to(Transform3D(Basis.IDENTITY, record["position"] as Vector3))
 	player.visual.rotation.y = float(record["facing"])
 	MissionState.restore(int(record["stage"]))
+	AreaMap.restore(record.get("map", []))
 	SupplyStock.restore(record.get("supplies", {}))
 	player.restore_vitality(float(record.get("vitality", 100.0)))
 	return true
