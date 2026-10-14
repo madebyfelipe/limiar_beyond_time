@@ -1,0 +1,4 @@
+Use case: precise-object-edit.
+Edit ONLY the empty black background of this image. It must be perfectly uniform absolute BLACK: exact RGB (0,0,0), hexadecimal #000000, opacity 100%.
+Replace any almost-black (1,1,1), dark gray, faint grain, barely visible dithering or microscopic variation in the empty region above and behind the gate/perimeter wall with exact solid #000000. This is an opaque solid black matte, not a night sky rendering.
+Preserve EVERY foreground pixel and structural edge: the gate, snow caps, wall, roof, road, steel posts, side window and the foreground pine clipped at right. DO NOT change framing, camera, perspective, object placement, textures, palette or illumination of the existing Dino Crisis 2 / PSX scene. Black boundary follows existing foreground silhouettes exactly. No extra scenery, glow, haze, trees, gradients or artifacts in the black. Same full-bleed 16:9 image.

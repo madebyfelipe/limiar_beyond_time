@@ -1,5 +1,19 @@
 # Relatório de testes — percurso técnico (T09)
 
+## Cena do portão para a região 2 — breu, 13/10/2026
+
+A mudança na vista da guarita foi revertida. Placa nova da passagem:
+`exterior_gate_black_v02.png`, referência da câmera real e direção DC2/PSX.
+Preview gráfico: 585.000 pixels do fundo em RGB 0,0,0, interação do portão
+acessível, placa original da guarita restaurada e shader de breu restrito ao
+portão. `check_perimeter.gd` headless: 2393 ticks, zero falhas, saída 0,
+incluindo ida e volta entre regiões. `git diff --check` passou. Uma asserção
+inicial do preview falhou porque o próprio preview desabilitava o controle;
+repetido após habilitá-lo para a verificação da interação, com sucesso.
+Logs `.local/gate-view-check.log` e `.local/gate-transition-check.log`;
+captura `.local/gate-black-runtime.png`. Sem calibração independente dos
+contornos em pixels ou suíte completa nesta revisão.
+
 ## Todos os espaços autorados — Dino Crisis 2 / PSX, 13/10/2026
 
 Doze placas atuais em `assets/backgrounds/dc2_psx/`, geradas com image_gen
