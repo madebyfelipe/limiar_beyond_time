@@ -281,6 +281,33 @@ func check_menu() -> void:
 	await press(KEY_I)
 	check(menu.visible and paused, "I did not open the case")
 	check(menu.cursor == Vector2i.ZERO, "The cursor did not start on the first item")
+	# Health readout updates while paused, even without an inventory mutation.
+	player.restore_vitality(20.0)
+	await tick(2)
+	check(menu.vitality.text == "DANGER  020", "The open inventory did not show critical health")
+	player.restore_vitality(45.0)
+	await tick(2)
+	check(menu.vitality.text == "CAUTION  045", "The open inventory did not show caution health")
+	player.restore_vitality(100.0)
+	await tick(2)
+	check(menu.vitality.text == "FINE  100", "The open inventory did not show restored health")
+	# Tabs are a view of the same storage; hiding a kind cannot consume it.
+	var before_filter: Array = Inventory.snapshot()
+	await press(KEY_TAB)
+	check(menu.selected_tab == 1 and Inventory.kind(menu._inspected["id"]) == &"weapon", "Tab did not select weapons")
+	await press(KEY_TAB)
+	check(menu.selected_tab == 2 and menu._inspected.is_empty(), "An empty ammo tab still inspects a weapon")
+	await press(KEY_ENTER)
+	check(menu.actions.is_empty(), "A dimmed weapon opened actions in the ammo tab")
+	await press(KEY_TAB)
+	check(menu.selected_tab == 3 and menu._inspected.get("id") == &"med_kit", "Recovery did not select the med kit")
+	check(Inventory.snapshot() == before_filter, "Changing tabs changed storage")
+	await press(KEY_TAB)
+	check(menu.selected_tab == 0, "Tab did not wrap to all items")
+	# Native mouse hit testing uses the same design coordinates at every scale.
+	menu._click(Vector2(990, 90), false)
+	check(menu.selected_tab == 2, "Clicking the ammo tab did not switch it")
+	menu._select_tab(0)
 	# Equip the shotgun from its actions.
 	var shotgun: Dictionary = {}
 	for entry: Dictionary in Inventory.entries:
@@ -291,6 +318,7 @@ func check_menu() -> void:
 	check(menu.actions == PackedStringArray(["EQUIP", "MOVE", "CANCEL"]), "A gun offers %s" % [menu.actions])
 	await press(KEY_ENTER)
 	check(player.weapon.definition.id == &"shotgun", "EQUIP did not put the shotgun in hand")
+	check(menu.loadout.text == "MAIN / SHOTGUN", "Equipping did not update the loadout readout")
 	# Move the pistol: pick it up, turn it, set it down at the bottom right.
 	var pistol: Dictionary = Inventory.entry_at(Vector2i.ZERO)
 	menu.cursor = Vector2i.ZERO
@@ -299,6 +327,8 @@ func check_menu() -> void:
 	check(menu.actions[menu.action_index] == "MOVE", "Down did not reach MOVE")
 	await press(KEY_ENTER)
 	check(menu.held == pistol, "MOVE did not pick the pistol up")
+	await press(KEY_TAB)
+	check(menu.selected_tab == 0 and menu.held == pistol, "A tab switch hid occupied cells during placement")
 	await press(KEY_R)
 	check(menu.held_rotated, "R did not turn the held item")
 	for step: int in range(9):

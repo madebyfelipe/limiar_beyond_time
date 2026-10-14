@@ -1,0 +1,43 @@
+{
+  "tool": "built-in image_gen",
+  "reference": "User supplied close-up of detailed survival-horror inventory icons",
+  "prompts": [
+    {
+      "id": "handgun_ammo",
+      "prompt": "Use case: style-transfer. Asset type: transparent in-game survival horror inventory icon. Match the supplied reference's detailed pre-rendered late-1990s/early-2000s survival-horror item art: worn realistic materials, hand-painted texture detail, crisp readable silhouette, muted colors, strong soft upper-left light and cool rim highlights, three-quarter view with visible front, top and right side. It should look like a small richly textured 3D object, NOT a flat vector symbol, NOT a chunky untextured low-poly object. A single isolated item group centered, completely inside the image, with a small transparent margin. Actual transparent background. No interface, no slot frame, no selection outline, no inventory counts, no watermark, no floor or cast shadow outside the object. Avoid fine readable branding. Subject: one scuffed dark red and cream cardboard box of 9mm handgun ammunition, with two loose brass pistol cartridges beside its lower right edge. Match the first icon in the reference. The box front has simple cream bands and a small '9MM' caliber marking. Show convincing folded cardboard, edge wear and metallic brass highlights. Landscape object group.",
+      "refs": [
+        "C:/Users/Felipe/AppData/Local/Temp/codex-clipboard-f749433d-3aa7-48ee-aa87-3cd460e5e679.png"
+      ]
+    },
+    {
+      "id": "shotgun_shells",
+      "prompt": "Use case: style-transfer. Asset type: transparent in-game survival horror inventory icon. Match the supplied reference's detailed pre-rendered late-1990s/early-2000s survival-horror item art: worn realistic materials, hand-painted texture detail, crisp readable silhouette, muted colors, strong soft upper-left light and cool rim highlights, three-quarter view with visible front, top and right side. It should look like a small richly textured 3D object, NOT a flat vector symbol, NOT a chunky untextured low-poly object. A single isolated item group centered, completely inside the image, with a small transparent margin. Actual transparent background. No interface, no slot frame, no selection outline, no inventory counts, no watermark, no floor or cast shadow outside the object. Avoid fine readable branding. Subject: one worn deep-red and charcoal cardboard box of shotgun shells with two short red plastic shotgun shells with brass bases at its lower right side. Match the second red ammunition icon in the reference. Simple dark label band and small '12 GA' caliber marking; distressed printed cardboard, convincing brass highlights. Landscape object group. Visually distinct from cream-label handgun ammunition.",
+      "refs": [
+        "C:/Users/Felipe/AppData/Local/Temp/codex-clipboard-f749433d-3aa7-48ee-aa87-3cd460e5e679.png"
+      ]
+    },
+    {
+      "id": "med_kit",
+      "prompt": "Use case: style-transfer. Asset type: transparent in-game survival horror inventory icon. Match the supplied reference's detailed pre-rendered late-1990s/early-2000s survival-horror item art: worn realistic materials, hand-painted texture detail, crisp readable silhouette, muted colors, strong soft upper-left light and cool rim highlights, three-quarter view with visible front, top and right side. It should look like a small richly textured 3D object, NOT a flat vector symbol, NOT a chunky untextured low-poly object. A single isolated item group centered, completely inside the image, with a small transparent margin. Actual transparent background. No interface, no slot frame, no selection outline, no inventory counts, no watermark, no floor or cast shadow outside the object. Avoid fine readable branding. Subject: a single compact rectangular military first-aid hard case, dark desaturated green, pale gray lid panel with a large green medical plus symbol. Match the reference's third icon. Three-quarter view, slightly upright enough to fit a portrait inventory slot. Show silver metal latches, beveled corners, scuffed paint and scratches, believable heavy plastic and metal. No loose medicine, no text.",
+      "refs": [
+        "C:/Users/Felipe/AppData/Local/Temp/codex-clipboard-f749433d-3aa7-48ee-aa87-3cd460e5e679.png"
+      ]
+    },
+    {
+      "id": "pistol",
+      "prompt": "Use case: style-transfer. Asset type: transparent in-game survival horror inventory icon. Match the supplied reference's detailed pre-rendered late-1990s/early-2000s survival-horror item art: worn realistic materials, hand-painted texture detail, crisp readable silhouette, muted colors, strong soft upper-left light and cool rim highlights, three-quarter view with visible front, top and right side. It should look like a small richly textured 3D object, NOT a flat vector symbol, NOT a chunky untextured low-poly object. A single isolated item group centered, completely inside the image, with a small transparent margin. Actual transparent background. No interface, no slot frame, no selection outline, no inventory counts, no watermark, no floor or cast shadow outside the object. Avoid fine readable branding. Input roles: image 1 is style reference; image 2 is the existing pistol silhouette to restyle. Subject: one semiautomatic pistol with the same broad slide, dark polymer grip and trigger-guard proportions as image 2, muzzle pointing right and grip down-left. Refine its flat surfaces into worn gunmetal, visible slide serrations, subtle machining and textured dark grip. Mostly side-on with restrained three-quarter depth so it remains instantly readable in a horizontal inventory slot. Entire gun visible. No cartridges or accessories.",
+      "refs": [
+        "C:/Users/Felipe/AppData/Local/Temp/codex-clipboard-f749433d-3aa7-48ee-aa87-3cd460e5e679.png",
+        "C:/Desenvolvimento/limar_beyond_time/assets/ui/inventory/pistol.png"
+      ]
+    },
+    {
+      "id": "shotgun",
+      "prompt": "Use case: style-transfer. Asset type: transparent in-game survival horror inventory icon. Match the supplied reference's detailed pre-rendered late-1990s/early-2000s survival-horror item art: worn realistic materials, hand-painted texture detail, crisp readable silhouette, muted colors, strong soft upper-left light and cool rim highlights, three-quarter view with visible front, top and right side. It should look like a small richly textured 3D object, NOT a flat vector symbol, NOT a chunky untextured low-poly object. A single isolated item group centered, completely inside the image, with a small transparent margin. Actual transparent background. No interface, no slot frame, no selection outline, no inventory counts, no watermark, no floor or cast shadow outside the object. Avoid fine readable branding. Input roles: image 1 is style reference; image 2 is the existing shotgun silhouette to restyle. Subject: one long wood-stock shotgun matching the recognizable silhouette in image 2, walnut buttstock on left, metal receiver middle, long dark barrel pointing right and short wooden fore-end under it. Entire gun horizontal and fully visible, landscape composition. Refine into worn realistic walnut grain, scratched blued steel, subtle screws and aged metal highlights. Mostly side-on with restrained three-quarter depth, matching the highly detailed rendered item art of image 1. No ammunition, no scope or extra attachments.",
+      "refs": [
+        "C:/Users/Felipe/AppData/Local/Temp/codex-clipboard-f749433d-3aa7-48ee-aa87-3cd460e5e679.png",
+        "C:/Desenvolvimento/limar_beyond_time/assets/ui/inventory/shotgun.png"
+      ]
+    }
+  ]
+}

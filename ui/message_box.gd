@@ -8,7 +8,7 @@ extends CanvasLayer
 ## the whole page at once and then turns it; left/right pick an answer and
 ## cancel picks the first one, which is always the safe "No".
 ##
-## Deliberately plain: the visual pass belongs to the UI owner.
+## A fitted charcoal strip: live text, subtle rules and explicit answer focus.
 ##   await MessageBox.say(self, ["You obtained %s." % MessageBox.item("PISTOL")])
 ##   var yes: bool = await MessageBox.say(self, ["Open it?"], ["No", "Yes"]) == 1
 
@@ -25,6 +25,9 @@ var choice: int = 0
 var band: ColorRect
 var text: RichTextLabel
 var answers: RichTextLabel
+var screen: RetroScreen
+var hint: Label
+var page_label: Label
 var _typed: float = 0.0
 var _was_paused: bool = false
 
@@ -54,16 +57,37 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_was_paused = get_tree().paused
 	get_tree().paused = true
+	screen = RetroScreen.new()
+	screen.design_size = Vector2(1280, 720)
+	add_child(screen)
+	screen.build(null, false)
 	band = ColorRect.new()
-	band.color = Color(0.0, 0.0, 0.0, 0.72)
-	band.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	band.offset_top = -190.0
-	band.offset_bottom = -24.0
+	band.color = Color(0.025, 0.035, 0.025, 0.93)
+	band.position = Vector2(0, 548)
+	band.size = Vector2(1280, 156)
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(band)
-	text = _rich(Rect2(48, 18, 0, 100))
-	answers = _rich(Rect2(48, 122, 0, 40))
+	screen.canvas.add_child(band)
+	var rule := ColorRect.new()
+	rule.position = Vector2(48, 0)
+	rule.size = Vector2(1184, 1)
+	rule.color = Color(0.7, 0.77, 0.65, 0.35)
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	band.add_child(rule)
+	var accent := ColorRect.new()
+	accent.position = Vector2(48, 22)
+	accent.size = Vector2(3, 24)
+	accent.color = Color("9fc494")
+	accent.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	band.add_child(accent)
+	text = _rich(Rect2(68, 19, 0, 82))
+	answers = _rich(Rect2(68, 102, 0, 38))
 	answers.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint = screen.label_at("", Rect2(900, 665, 328, 24), 12)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hint.add_theme_color_override("font_color", Color("899586"))
+	page_label = screen.label_at("", Rect2(50, 670, 120, 22), 11)
+	page_label.add_theme_color_override("font_color", Color("899586"))
+	GamepadControls.shared.changed.connect(_refresh_answers)
 	_show_page()
 
 func _rich(box: Rect2) -> RichTextLabel:
@@ -77,8 +101,11 @@ func _rich(box: Rect2) -> RichTextLabel:
 	label.offset_top = box.position.y
 	label.offset_bottom = box.position.y + box.size.y
 	label.add_theme_font_override("normal_font", RetroScreen.font())
-	label.add_theme_font_size_override("normal_font_size", 30)
-	label.add_theme_color_override("default_color", Color.WHITE)
+	label.add_theme_font_size_override("normal_font_size", 24)
+	label.add_theme_color_override("default_color", Color("e3e5d8"))
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	label.add_theme_constant_override("line_separation", 8)
 	band.add_child(label)
 	return label
 
@@ -95,8 +122,12 @@ func _refresh_answers() -> void:
 	answers.visible = _last_page() and not options.is_empty() and _page_done()
 	var parts: PackedStringArray = []
 	for index: int in range(options.size()):
-		parts.append(item(options[index]) if index == choice else options[index])
-	answers.text = "      ".join(parts)
+		parts.append("[bgcolor=#304235]  %s  [/bgcolor]" % item("› " + options[index]) if index == choice else "[color=#879284]  %s  [/color]" % options[index])
+	answers.text = "    ".join(parts)
+	var pad := GamepadControls.shared.gamepad_active
+	var accept := ("✕" if GamepadControls.shared.playstation else "A") if pad else "ENTER"
+	hint.text = "%s  %s" % [accept, "Confirm" if answers.visible else ("Continue" if _page_done() else "Reveal")]
+	page_label.text = "%02d / %02d" % [page + 1, pages.size()] if pages.size() > 1 else ""
 
 func _page_done() -> bool:
 	return text.visible_characters < 0 or text.visible_characters >= text.get_total_character_count()

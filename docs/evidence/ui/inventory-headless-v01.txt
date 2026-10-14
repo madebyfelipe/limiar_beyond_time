@@ -1,0 +1,55 @@
+OK    menu-inicial                4.6 s  saída 0 · MAIN_MENU failures=0
+SKIP  menu-inicial-grafico     gráfico (--headless-only)
+OK    unidades                    1.6 s  saída 0 · T09 units failures=0
+OK    cenas                       7.5 s  saída 0 · T09 scenes=28 failures=0
+OK    locomocao                   1.0 s  saída 0 · T03 walk=1.79999995231628 diagonal=1.79999983310699 run=3.79999995231628 stopped=(-4.597671, -0.000501, 0.0) failures=0
+OK    cameras                     3.0 s  saída 0 · T04 traversals=20 per direction failures=0 total_changes=41
+OK    referencia                  1.5 s  saída 0 · T05 failures=0
+OK    calibracao-estudos          1.4 s  saída 0 · T06 mode=acceptance failures=0
+OK    calibracao-ferramentas      1.0 s  saída 0 · T06 mode=tooling failures=0
+OK    percurso                    4.1 s  saída 0 · T07 failures=0
+OK    operacao                    8.5 s  saída 0 · T08 failures=0
+OK    env1-estrada                1.9 s  saída 0 · ENV1 road experiment ticks=2076 failures=0; calibration acceptance remains a separate gate
+OK    env1-continuidade           2.0 s  saída 0 · ENV1 Dylan/near-end cut ticks=1829 distance=50.2830891742242 failures=0
+OK    sala-geometria              2.7 s  saída 0 · SAVE_ROOM ticks=2415 distance_m=38.7736670869926 failures=0
+OK    exterior-geometria          5.2 s  saída 0 · EXTERIOR ticks=4100 distance_m=97.8559507836762 colliders=59 failures=0
+OK    perimetro                   6.2 s  saída 0 · PERIMETER ticks=2393 cuts=[&"perimeter_2", &"perimeter_3", &"perimeter_1"] failures=0
+OK    rele                        8.4 s  saída 0 · RELAY_ROOM ticks=3508 failures=0
+OK    dylan-portas                5.4 s  saída 0 · DYLAN doors round_trips=1 animated_legs=true ticks=1192 failures=0
+OK    cinematica-passagem         1.3 s  saída 0 · PASSAGE_CINEMATIC failures=0
+OK    controles-tanque            3.6 s  saída 0 · TANK controls ticks=363 failures=0
+OK    gamepad                     2.8 s  saída 0 · GAMEPAD failures=0
+SKIP  gamepad-grafico          gráfico (--headless-only)
+OK    configuracoes               2.0 s  saída 0 · SETTINGS failures=0
+SKIP  configuracoes-grafico    gráfico (--headless-only)
+OK    contato-pes                 2.5 s  saída 0 · FOOT contact walk=0.04 m/s (body 1.80) run=0.19 m/s (body 3.80) failures=0
+OK    keleken-animacao            1.8 s  saída 0 · KELEKEN animation bones=24 clips=9 failures=0
+OK    keleken-wander              9.5 s  saída 0 · KELEKEN wander failures=0
+OK    salvamento                  3.2 s  saída 0 · SAVE persistence ticks=136 failures=0
+OK    terminal-ui                 3.4 s  saída 0 · TERMINAL_UI failures=0
+SKIP  terminal-ui-grafico      gráfico (--headless-only)
+OK    operacao-cenarios           3.7 s  saída 0 · OPERATION levels ticks=172 failures=0
+OK    combate                     3.7 s  saída 0 · COMBAT ticks=1500 failures=0
+OK    combate-inimigo             4.2 s  saída 0 · ENEMY_COMBAT failures=0
+OK    esquiva                     2.2 s  saída 0 · DODGE_PRESENTATION failures=0
+OK    transicoes                  2.4 s  saída 0 · DYLAN_TRANSITIONS failures=0
+OK    shotgun                     3.1 s  saída 0 · SHOTGUN failures=0
+OK    inventario                  4.7 s  saída 0 · INVENTORY ticks=496 failures=0
+OK    cena-principal              1.5 s  saída 0
+OK    robustez-10min             35.7 s  saída 0 · T10 soak minutes=10.0 game_s=608.2 laps=21 completions=17 recoveries=4 restarts=21 cuts=76 distance_m=1595.6 failures=0
+OK    benchmark-funcional        76.1 s  saída 0 · gate=NÃO MEDIDO (headless não renderiza) · execução funcional OK (erros 0; conclusões 2)
+SKIP  composicao               gráfico (--headless-only)
+SKIP  oclusao                  gráfico (--headless-only)
+SKIP  distancia-30             gráfico (--headless-only)
+SKIP  distancia-60             gráfico (--headless-only)
+SKIP  distancia-144            gráfico (--headless-only)
+SKIP  renderizacao             gráfico (--headless-only)
+SKIP  percurso-grafico         gráfico (--headless-only)
+SKIP  operacao-grafica         gráfico (--headless-only)
+SKIP  sala-grafica             gráfico (--headless-only)
+SKIP  exterior-grafico         gráfico (--headless-only)
+SKIP  perimetro-grafico        gráfico (--headless-only)
+SKIP  rele-grafico             gráfico (--headless-only)
+SKIP  dylan-portas-grafico     gráfico (--headless-only)
+SKIP  filtro-retro             gráfico (--headless-only)
+T09 runner executed=36 failed=0
