@@ -6,12 +6,17 @@ extends Node3D
 const MODEL: PackedScene = preload("res://assets/models/cryopteryx/cryopteryx_animated.glb")
 ## Nose to tail tip of the exported model, in metres.
 const SOURCE_LENGTH := 3.2
+## About 3.6 world units tall in idle: 2.7 m relative to Dylan (2.4 = 1.8 m).
+## The imported rest pose has its tail raised higher than the standing head.
+const DEFAULT_LENGTH := 8.5
 ## Planted-foot speed of each cycle at SOURCE_LENGTH, from the build
 ## (animation_manifest.json, after the stride fit).
 const NATIVE_SPEED := {&"walk": 1.236, &"run": 3.315}
 const LOOPING: Array[StringName] = [&"idle", &"walk", &"run"]
 ## The animal's size is provisional: this scales the whole model.
-@export_range(1.5, 6.0) var target_length: float = 3.2
+@export_range(1.5, 10.0) var target_length: float = DEFAULT_LENGTH
+## A flat, opaque outline for the window reveal, independent of scene lights.
+@export var silhouette: bool = false
 var model: Node3D
 var skeleton: Skeleton3D
 var animator: AnimationPlayer
@@ -22,6 +27,12 @@ func _ready() -> void:
 	model.name = "Model"
 	model.scale = Vector3.ONE * (target_length / SOURCE_LENGTH)
 	add_child(model)
+	if silhouette:
+		var ink := StandardMaterial3D.new()
+		ink.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		ink.albedo_color = Color.BLACK
+		for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+			mesh.material_override = ink
 	skeleton = model.find_child("Skeleton3D", true, false) as Skeleton3D
 	animator = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	# Each instance owns loop flags; never mutate the imported shared library.

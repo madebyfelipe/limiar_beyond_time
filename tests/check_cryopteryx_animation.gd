@@ -49,6 +49,8 @@ func planted(manifest: Dictionary, clip: StringName, side: String, phase: float,
 func run() -> void:
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MANIFEST))
 	var visual := CryopteryxVisual.new()
+	# Mesh/rig measurements below are in the exported asset's metres.
+	visual.target_length = CryopteryxVisual.SOURCE_LENGTH
 	root.add_child(visual)
 	var skeleton := visual.skeleton
 	var bones := skeleton.get_bone_count()
@@ -228,11 +230,24 @@ func run() -> void:
 	# toes stand still in the world.
 	var study: Node3D = load("res://environments/cryopteryx_animation_study.tscn").instantiate()
 	root.add_child(study)
+	check(not study.travel and study.references.visible, "The study must open with the size comparison")
+	check(study.visual.target_length == 8.5, "The study Cryopteryx lost its relative size")
+	check(is_equal_approx(study.references.get_node("Keleken").target_height / 2.4, 2.4 / 1.8), "The Keleken is not 2.4 m relative to 1.8 m Dylan")
+	# Compare the standing pose, not the source rest pose's raised tail tip.
+	set_pose(study.visual, &"idle", 0.5)
+	var study_mesh: MeshInstance3D = study.visual.skeleton.get_node("CryopteryxMesh")
+	var cryo_height := 0.0
+	for vertex in arrays[Mesh.ARRAY_VERTEX].size():
+		cryo_height = maxf(cryo_height, deform(study_mesh, study.visual.skeleton, arrays, vertex).y * study.visual.target_length / CryopteryxVisual.SOURCE_LENGTH)
+	check(cryo_height > 3.2 and cryo_height < 3.2 * 1.15, "Cryopteryx must be slightly taller than Keleken")
+	check(study.references.get_node("PlayerReference/Visual/DylanVisual").target_height == 2.4, "The player reference changed scale")
+	study.set_travel(true)
+	var scale_factor: float = study.visual.target_length / CryopteryxVisual.SOURCE_LENGTH
 	for clip: StringName in [&"walk", &"run"]:
 		study.select_clip(clip)
 		for frame in range(30):
 			await process_frame
-		check(is_equal_approx(study.speed, float(CryopteryxVisual.NATIVE_SPEED[clip])), "The lane does not move at the speed of " + str(clip))
+		check(is_equal_approx(study.speed, float(CryopteryxVisual.NATIVE_SPEED[clip]) * scale_factor), "The lane does not move at the scaled speed of " + str(clip))
 		var previous: Dictionary = {}
 		var worst := 0.0
 		var samples := 0
@@ -252,7 +267,7 @@ func run() -> void:
 						samples += 1
 				previous[side] = {"position": position, "contact": contact}
 		check(samples > 10, "No runtime foot contact samples for " + str(clip))
-		check(worst < maxf(.22, .1 * float(CryopteryxVisual.NATIVE_SPEED[clip])), "Runtime toe drift %s %.3f m/s" % [clip, worst])
+		check(worst / scale_factor < maxf(.22, .1 * float(CryopteryxVisual.NATIVE_SPEED[clip])), "Runtime toe drift %s %.3f m/s" % [clip, worst])
 		print("CRYOPTERYX_RUNTIME %s drift=%.4f samples=%d" % [clip, worst, samples])
 	study.select_clip(&"jump")
 	for frame in range(120):

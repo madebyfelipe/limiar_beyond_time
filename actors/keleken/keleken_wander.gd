@@ -39,8 +39,9 @@ func _pick_target() -> void:
 		if Vector2(point.x - actor.position.x, point.z - actor.position.z).length() < 1.2:
 			continue
 		var query := PhysicsShapeQueryParameters3D.new()
-		query.shape = (actor.get_node("Collision") as CollisionShape3D).shape
-		query.transform = Transform3D(Basis.IDENTITY, point + Vector3(0, .7, .2))
+		var collision := actor.get_node("Collision") as CollisionShape3D
+		query.shape = collision.shape
+		query.transform = Transform3D(Basis.IDENTITY, point) * collision.transform
 		query.collision_mask = 1
 		query.exclude = [actor.get_rid()]
 		if actor.get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty():

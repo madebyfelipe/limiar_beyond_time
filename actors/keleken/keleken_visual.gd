@@ -4,12 +4,14 @@ extends Node3D
 ## CC0 raptor, the rest authored (tools/rig_keleken.py). Physics drives world
 ## translation.
 const SOURCE_HEIGHT := 2.4
+## Dylan stays at 2.4 world units, representing 1.8 m: 2.4 * 2.4 / 1.8.
+const DEFAULT_HEIGHT := 3.2
 ## Planted-foot speed of each cycle at SOURCE_HEIGHT, from the build
 ## (animation_manifest.json, after the stride fit): the 3,4 m/s chase plays
 ## the run at about 1x and the 1,5 m/s patrol the walk at 1,75x.
 const NATIVE_SPEED := {&"walk": 0.857, &"run": 3.316}
 const LOOPING: Array[StringName] = [&"idle", &"walk", &"run", &"look"]
-@export_range(1.0, 4.0) var target_height: float = 2.4
+@export_range(1.0, 4.0) var target_height: float = DEFAULT_HEIGHT
 @onready var model: Node3D = $Model
 @onready var skeleton: Skeleton3D = $Model/Keleken/Skeleton3D
 @onready var animator: AnimationPlayer = $Model/AnimationPlayer

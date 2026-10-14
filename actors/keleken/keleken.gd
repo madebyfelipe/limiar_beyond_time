@@ -29,6 +29,12 @@ var _death_tween: Tween
 var blood: BloodEffects
 
 func _ready() -> void:
+	var size_factor := visual.target_height / KelekenVisual.SOURCE_HEIGHT
+	var body_collision := $Collision as CollisionShape3D
+	body_collision.shape = body_collision.shape.duplicate()
+	body_collision.shape.radius *= size_factor
+	body_collision.shape.height *= size_factor
+	body_collision.position *= size_factor
 	blood = BloodEffects.new()
 	blood.name = "KelekenBlood"
 	# The actor is still being added to its parent; the stains join it next frame.
@@ -41,11 +47,11 @@ func _ready() -> void:
 	hurtbox.health = health
 	hurtbox.body = self
 	hurtbox.targetable = combat_enabled
-	hurtbox.position = Vector3(0, 1.2, 0)
+	hurtbox.position = Vector3(0, visual.target_height / 2.0, 0)
 	var shape := CollisionShape3D.new()
 	var capsule := CapsuleShape3D.new()
-	capsule.radius = 0.5
-	capsule.height = 2.4
+	capsule.radius = 0.5 * size_factor
+	capsule.height = visual.target_height
 	shape.shape = capsule
 	hurtbox.add_child(shape)
 	add_child(hurtbox)

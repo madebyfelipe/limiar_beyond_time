@@ -2,12 +2,30 @@
 
 Feito em 13/10/2026 a partir do modelo entregue pelo usuário
 (`model-rigged.glb`, gerado no Tripo). Abra **`executar-cryopteryx.cmd`** para
-ver: teclas 1–6 ou botões escolhem o clipe, ←/→ giram a câmera, "Move across
-the floor" liga o deslocamento e Esc sai. O poste amarelo tem 1,8 m, a altura
-do Dylan.
+ver: teclas 1–6 ou botões escolhem o clipe, ←/→ giram a câmera e Esc sai.
+A cena abre com o Cryopteryx de **aproximadamente 2,7 m de altura**, ao lado do
+Keleken de **2,4 m** e do player/Dylan de **1,8 m**. A câmera
+ortográfica permite comparar as escalas sem distorção de perspectiva.
+"Move across the floor (solo)" oculta as referências e liga o deslocamento;
+desmarcar restaura a comparação. A velocidade acompanha a escala maior.
+
+Proporção revisada em 14/10/2026: **Dylan permanece intacto**, com suas 2,4
+unidades de altura. Tomando-o como 1,8 m, o fator é 2,4 / 1,8 = 4/3 unidades
+por metro de referência. Só os animais crescem: Keleken passa a 3,2 unidades
+de altura e Cryopteryx a cerca de 3,6 em `idle` (8,5 unidades de comprimento),
+ficando aproximadamente 12% mais alto que o Keleken. A pose de repouso do GLB
+ergue a cauda acima da cabeça, por isso a proporção foi conferida na pose em pé
+animada. As legendas mostram as medidas
+relativas a Dylan, não os valores brutos de coordenadas.
 
 É uma cena de estudo: não há ator, colisão, IA nem dano. Anatomia, escala e
 comportamento do animal continuam provisórios, como pede o `PLAN.md`.
+
+**Primeiro uso no jogo, 14/10/2026:** é o Cryopteryx que passa pela janela na
+cutscene da sala do relé, no lugar do Keleken, na mesma escala do estudo. Entra só
+como imagem (`CryopteryxVisual`), tocando `walk`, `idle`, `attack` e `run`.
+Na janela aparece apenas como silhueta preta opaca, sem textura ou iluminação
+na superfície. Sequência e enquadramento em `RELAY_ROOM.md`.
 
 ## O que chegou
 
@@ -82,8 +100,10 @@ Como no Keleken, as pernas têm IK de dois segmentos até o jarrete, o tarso
 acompanha o pé e os controles (`CTRL_foot`, `CTRL_knee`, `CTRL_toes`) ficam só
 no `.blend`: o GLB leva os 26 ossos de deformação com os clipes assados a 30 fps.
 
-Medidas da cópia de estudo: **3,20 m** de comprimento, 1,51 m de altura, quadril
-a 1,01 m, frente −Z. `CryopteryxVisual.target_length` reescala o modelo.
+Medidas do GLB de origem: **3,20 m** de comprimento, 1,51 m de altura, quadril
+a 1,01 m, frente −Z. `CryopteryxVisual.target_length` reescala o modelo para
+**8,5 unidades de comprimento** por padrão (cerca de 3,6 de altura em `idle`,
+equivalentes a 2,7 m na proporção de Dylan), sem alterar o GLB.
 
 ## Clipes
 

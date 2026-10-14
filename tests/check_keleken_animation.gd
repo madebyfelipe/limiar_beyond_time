@@ -32,6 +32,8 @@ func planted(manifest: Dictionary, clip: StringName, side: String, phase: float,
 	return span > 2.0 * margin and into > margin and into < span - margin
 func run() -> void:
 	var actor: KelekenActor = load("res://actors/keleken/keleken.tscn").instantiate()
+	# Asset-space rig measurements; the study below exercises the enlarged animal.
+	actor.get_node("Visual").target_height = KelekenVisual.SOURCE_HEIGHT
 	root.add_child(actor)
 	actor.set_physics_process(false)
 	var visual := actor.visual

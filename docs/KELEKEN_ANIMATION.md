@@ -4,6 +4,14 @@ Pesquisa, implementação e revisão em 12/10/2026. A pesquisa original está pr
 
 ## Implementado e como ver
 
+**Proporção revisada, 14/10/2026:** Dylan mantém suas 2,4 unidades de altura e
+serve de referência para 1,8 m. Pela regra de três, o Keleken de 2,4 m passa a
+**3,2 unidades**, sem alterar o jogador nem o GLB original. Corpo e área de dano
+acompanham a escala; a patrulha consulta o deslocamento real do colisor ao
+escolher destinos. O comparativo em `executar-cryopteryx.cmd` mostra os dois
+ao lado do Cryopteryx, de aproximadamente 2,7 m de altura relativa em pé.
+As medidas de 2,4 do ativo e as análises históricas abaixo são da escala-fonte.
+
 Abra `executar-exterior.cmd`: há um Keleken na estrada, próximo ao ponto inicial. A patrulha usa X −1,55…1,55 / Z 15,5…21,0; R/Reiniciar o reposiciona. O controlador evita destinos ocupados e respeita os colisores. A camada 2 impede o inimigo de acionar as zonas de câmera do jogador. Após o pedido de completar combate, ele também percebe, persegue e ataca Dylan, e pode morrer por tiros. Regras e testes em [COMBAT.md](COMBAT.md). O estudo isolado abaixo permanece sem IA de combate.
 
 Para escolher todos os clipes e girar a câmera, abra `executar-keleken.cmd`. Teclas 1–7 ou botões selecionam o clipe, ←/→ giram a câmera, a opção “Mover sobre o piso” liga o deslocamento físico e Esc sai.
