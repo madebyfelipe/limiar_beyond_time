@@ -2,6 +2,8 @@
 
 **Menu inicial:** execute `executar-menu.cmd` ou abra a cena principal no Godot. Logo separado com transparência, cenário noturno e neve animada; NEW GAME inicia no exterior, LOAD GAME retoma o save do terminal, OPTIONS abre as configurações e EXTRAS reúne os estudos. Arte e prompts em [assets/ui/main_menu](assets/ui/main_menu).
 
+**Mapas editáveis:** crie mapas seus e edite cópias das fases no editor do Godot, sem código. `criar-mapa nome` gera um mapa a partir do modelo, `editar-mapas nome` abre o editor, `executar-mapa nome` joga (ou **F6** no mapa) e `converter-fase exterior` copia uma fase pronta para `maps/`. Geometria em CSG com colisão, câmeras fixas como `MapShot`, zonas de corte como `MapZone`, `PlayerStart` e marcadores `Keleken*`. Guia em [docs/MAPS.md](docs/MAPS.md).
+
 **Configurações:** **Esc / Options → Configurações** reúne modo de tela (janela, tela cheia e exclusiva), resolução da janela, VSync, limitador de FPS, volume, teclado/mouse e gamepad. As opções de jogabilidade e apresentação agora têm **setas clicáveis** e aceitam **←/→** ou direcional/analógico para alterar nos dois sentidos. As telas de controles permitem remapear duas entradas por ação, trocar binds em conflito, limpar e restaurar padrões. Sensibilidade/inversão do mouse e zona morta/inversão do gamepad são ajustáveis. Alterações ficam guardadas entre sessões. Guia em [docs/SETTINGS.md](docs/SETTINGS.md).
 
 **Fase 2 — trilha do perímetro:** depois de salvar no terminal da guarita, o portão norte do pátio abre e leva à trilha onde o Keleken vive agora. `executar-perimetro.cmd` entra direto. Três câmeras fixas, corredor com cercado, pinheiro caído e o galpão do relé, cuja porta leva à Fase 3. As três vistas da trilha e o pátio norte têm fundos nevados gerados sobre a geometria; B compara arte/geometria. Estrutura de fase, portão e cenário em [docs/PERIMETER.md](docs/PERIMETER.md).
@@ -34,7 +36,7 @@ Protótipo 2.5D para Windows: ator 3D sobre fundos pré-renderizados e câmeras 
 
 Repositório: [madebyfelipe/limiar_beyond_time](https://github.com/madebyfelipe/limiar_beyond_time). O Git inclui código, cenas, recursos, documentação, modelos, texturas e fundos. Engine local, cache de importação, logs/capturas de teste e builds geradas ficam nas pastas ignoradas.
 
-Em outra máquina, clone o repositório e abra `project.godot` com Godot 4.7.2 Standard. Para usar os atalhos `.cmd`, coloque a distribuição Windows da engine em `.tools/godot-4.7.2/`, incluindo `Godot_v4.7.2-stable_win64_console.exe`. O editor reimporta os assets ao abrir. F6 na cena `environments/env1_continuity_probe.tscn` executa Dylan com os renders originais; F5 executa o percurso técnico.
+Em outra máquina, clone o repositório e abra `project.godot` com Godot 4.7.2 Standard. Para usar os atalhos `.cmd`, coloque a distribuição Windows da engine em `.tools/godot-4.7.2/`, incluindo `Godot_v4.7.2-stable_win64_console.exe`. No Linux, cada atalho tem um `.sh` com o mesmo nome (`./executar-menu.sh`, `./executar-testes.sh`…). Eles usam `.tools/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64`, ou o executável indicado em `GODOT_EXE`. O editor reimporta os assets ao abrir. F6 na cena `environments/env1_continuity_probe.tscn` executa Dylan com os renders originais; F5 executa o percurso técnico.
 
 ## Jogar o percurso
 
