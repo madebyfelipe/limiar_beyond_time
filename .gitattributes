@@ -17,6 +17,7 @@
 *.py text eol=lf
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
+*.sh text eol=lf
 *.glb binary
 *.blend binary
 *.png binary
